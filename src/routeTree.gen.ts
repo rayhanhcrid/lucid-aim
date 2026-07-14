@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as JournalRouteImport } from './routes/journal'
 import { Route as HabitsRouteImport } from './routes/habits'
@@ -18,6 +19,11 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/habits': typeof HabitsRoute
   '/journal': typeof JournalRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/habits': typeof HabitsRoute
   '/journal': typeof JournalRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/habits': typeof HabitsRoute
   '/journal': typeof JournalRoute
   '/profile': typeof ProfileRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/journal'
     | '/profile'
+    | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/journal'
     | '/profile'
+    | '/sitemap.xml'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/habits'
     | '/journal'
     | '/profile'
+    | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,10 +144,18 @@ export interface RootRouteChildren {
   HabitsRoute: typeof HabitsRoute
   JournalRoute: typeof JournalRoute
   ProfileRoute: typeof ProfileRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   HabitsRoute: HabitsRoute,
   JournalRoute: JournalRoute,
   ProfileRoute: ProfileRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
