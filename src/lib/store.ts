@@ -293,7 +293,9 @@ export function longestStreak(dates: string[]): number {
   return best;
 }
 
+import { useEffect, useState } from "react";
 export function useHydrated() {
-  // consumers can wait for hydration via zustand persist
-  return typeof window !== "undefined";
+  const [h, setH] = useState(false);
+  useEffect(() => setH(true), []);
+  return h;
 }
