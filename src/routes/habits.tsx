@@ -1,0 +1,264 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { Check, Plus, Trash2, Flame } from "lucide-react";
+import { AppShell } from "@/components/AppShell";
+import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+
+export const Route = createFileRoute("/habits")({
+  head: () => ({
+    meta: [
+      { title: "Habits · Aura" },
+      { name: "description", content: "Your daily rituals — quiet, consistent, compounding." },
+    ],
+  }),
+  component: HabitsPage,
+});
+
+const emojis = ["🧘", "💧", "📖", "💻", "🏋️", "🚶", "✍️", "🥗", "🌅", "🌙"];
+const categories = ["Mind", "Body", "Focus", "Craft", "Money", "Love"];
+
+function HabitsPage() {
+  const hydrated = useHydrated();
+  const habits = useStore((s) => s.habits);
+  const completions = useStore((s) => s.completions);
+  const toggle = useStore((s) => s.toggleHabit);
+  const remove = useStore((s) => s.removeHabit);
+  const add = useStore((s) => s.addHabit);
+
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    emoji: "🧘",
+    category: "Mind",
+    priority: "med" as const,
+    duration: "",
+  });
+
+  const today = todayKey();
+
+  return (
+    <AppShell>
+      <header className="animate-rise mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+            The stack
+          </p>
+          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Daily rituals</h1>
+        </div>
+        <button
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-canvas transition-transform active:scale-95"
+        >
+          <Plus className="size-4" strokeWidth={2.5} /> New
+        </button>
+      </header>
+
+      <div className="animate-rise space-y-2.5">
+        {habits.map((h) => {
+          const dates = completions[h.id] || [];
+          const done = hydrated && dates.includes(today);
+          const streak = hydrated ? currentStreak(dates) : 0;
+          const best = hydrated ? longestStreak(dates) : 0;
+          return (
+            <div key={h.id} className="rounded-[20px] bg-surface p-4 hairline">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => toggle(h.id, today)}
+                  className={[
+                    "grid size-7 shrink-0 place-items-center rounded-full transition-all",
+                    done
+                      ? "bg-foreground text-canvas"
+                      : "ring-2 ring-white/15 hover:ring-white/30",
+                  ].join(" ")}
+                  aria-label={done ? "Mark undone" : "Complete"}
+                >
+                  {done && <Check className="size-4" strokeWidth={3} />}
+                </button>
+                <span className="text-lg" aria-hidden>
+                  {h.emoji}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={[
+                      "truncate text-[15px] font-medium",
+                      done ? "text-muted-foreground line-through" : "text-foreground",
+                    ].join(" ")}
+                  >
+                    {h.name}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {h.category}
+                    {h.duration && ` · ${h.duration}`} · {h.priority}
+                  </p>
+                </div>
+                <button
+                  onClick={() => remove(h.id)}
+                  className="rounded-lg p-1.5 text-muted-foreground opacity-0 transition hover:bg-white/[0.04] hover:text-foreground group-hover:opacity-100 md:opacity-60"
+                  aria-label="Delete habit"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between gap-4">
+                <MiniHeatmap dates={dates} />
+                <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <Flame className="size-3" /> {streak}d
+                  </span>
+                  <span>Best {best}d</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 backdrop-blur-md md:items-center"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-[28px] bg-surface p-6 hairline"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+              A new ritual
+            </p>
+            <h2 className="font-serif text-2xl">Design the habit</h2>
+
+            <div className="mt-5 space-y-4">
+              <Field label="Name">
+                <input
+                  autoFocus
+                  className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
+                  placeholder="Morning meditation"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </Field>
+
+              <Field label="Emoji">
+                <div className="flex flex-wrap gap-1.5">
+                  {emojis.map((e) => (
+                    <button
+                      key={e}
+                      onClick={() => setForm({ ...form, emoji: e })}
+                      className={[
+                        "grid size-9 place-items-center rounded-xl text-base transition",
+                        form.emoji === e
+                          ? "bg-foreground text-canvas"
+                          : "bg-white/[0.03] hover:bg-white/[0.06]",
+                      ].join(" ")}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Category">
+                  <select
+                    className="w-full bg-transparent text-[15px] outline-none"
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  >
+                    {categories.map((c) => (
+                      <option key={c} value={c} className="bg-canvas">
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Duration">
+                  <input
+                    className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
+                    placeholder="10 min"
+                    value={form.duration}
+                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Priority">
+                <div className="flex gap-1.5">
+                  {(["low", "med", "high"] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setForm({ ...form, priority: p })}
+                      className={[
+                        "flex-1 rounded-xl px-3 py-2 text-xs uppercase tracking-widest transition",
+                        form.priority === p
+                          ? "bg-foreground text-canvas"
+                          : "bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06]",
+                      ].join(" ")}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (!form.name.trim()) return;
+                  add(form);
+                  setForm({ name: "", emoji: "🧘", category: "Mind", priority: "med", duration: "" });
+                  setOpen(false);
+                }}
+                className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-canvas"
+              >
+                Add ritual
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AppShell>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block rounded-2xl bg-white/[0.03] px-4 py-3">
+      <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function MiniHeatmap({ dates }: { dates: string[] }) {
+  const days: { key: string; done: boolean }[] = [];
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const k = todayKey(d);
+    days.push({ key: k, done: dates.includes(k) });
+  }
+  return (
+    <div className="flex flex-1 gap-[3px]">
+      {days.map((d) => (
+        <div
+          key={d.key}
+          className={[
+            "h-4 flex-1 rounded-[3px]",
+            d.done ? "bg-foreground/80" : "bg-white/[0.05]",
+          ].join(" ")}
+          title={d.key}
+        />
+      ))}
+    </div>
+  );
+}
