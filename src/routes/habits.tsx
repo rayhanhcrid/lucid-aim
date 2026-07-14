@@ -26,13 +26,13 @@ function HabitsPage() {
   const add = useStore((s) => s.addHabit);
 
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    emoji: "🧘",
-    category: "Mind",
-    priority: "med" as const,
-    duration: "",
-  });
+  const [form, setForm] = useState<{
+    name: string;
+    emoji: string;
+    category: string;
+    priority: "low" | "med" | "high";
+    duration: string;
+  }>({ name: "", emoji: "🧘", category: "Mind", priority: "med", duration: "" });
 
   const today = todayKey();
 
