@@ -14,6 +14,7 @@ import { Route as HabitsRouteImport } from './routes/habits'
 import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AchievementsRouteImport } from './routes/achievements'
 import { Route as IndexRouteImport } from './routes/index'
 
 const JournalRoute = JournalRouteImport.update({
@@ -41,6 +42,11 @@ const AnalyticsRoute = AnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AchievementsRoute = AchievementsRouteImport.update({
+  id: '/achievements',
+  path: '/achievements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +55,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/analytics': typeof AnalyticsRoute
   '/calendar': typeof CalendarRoute
   '/goals': typeof GoalsRoute
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/analytics': typeof AnalyticsRoute
   '/calendar': typeof CalendarRoute
   '/goals': typeof GoalsRoute
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/achievements': typeof AchievementsRoute
   '/analytics': typeof AnalyticsRoute
   '/calendar': typeof CalendarRoute
   '/goals': typeof GoalsRoute
@@ -76,16 +85,25 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/achievements'
     | '/analytics'
     | '/calendar'
     | '/goals'
     | '/habits'
     | '/journal'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/analytics' | '/calendar' | '/goals' | '/habits' | '/journal'
+  to:
+    | '/'
+    | '/achievements'
+    | '/analytics'
+    | '/calendar'
+    | '/goals'
+    | '/habits'
+    | '/journal'
   id:
     | '__root__'
     | '/'
+    | '/achievements'
     | '/analytics'
     | '/calendar'
     | '/goals'
@@ -95,6 +113,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AchievementsRoute: typeof AchievementsRoute
   AnalyticsRoute: typeof AnalyticsRoute
   CalendarRoute: typeof CalendarRoute
   GoalsRoute: typeof GoalsRoute
@@ -139,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/achievements': {
+      id: '/achievements'
+      path: '/achievements'
+      fullPath: '/achievements'
+      preLoaderRoute: typeof AchievementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -151,6 +177,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AchievementsRoute: AchievementsRoute,
   AnalyticsRoute: AnalyticsRoute,
   CalendarRoute: CalendarRoute,
   GoalsRoute: GoalsRoute,
