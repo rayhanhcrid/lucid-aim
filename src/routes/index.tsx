@@ -210,7 +210,7 @@ function Index() {
                         : "bg-gradient-to-br from-white/[0.07] to-white/[0.02] text-gold",
                     ].join(" ")}
                   >
-                    <HabitIcon name={h.emoji} className="size-4.5" strokeWidth={1.75} />
+                    <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
                   </span>
                   <div className="min-w-0">
                     <p
