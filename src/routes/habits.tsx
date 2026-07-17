@@ -75,7 +75,7 @@ function HabitsPage() {
                   {done && <Check className="size-4" strokeWidth={3} />}
                 </button>
                 <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] text-gold">
-                  <HabitIcon name={h.emoji} className="size-4.5" strokeWidth={1.75} />
+                  <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p
