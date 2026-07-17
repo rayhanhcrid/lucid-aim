@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { HabitIcon } from "@/components/HabitIcon";
 import { todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "Calendar · Aura" },
-      { name: "description", content: "Rituals, milestones, and reflections in one calm view." },
+      { title: "Kalender · Aura" },
+      { name: "description", content: "Ritual, tonggak, dan refleksi dalam satu pandangan yang tenang." },
     ],
   }),
   component: CalendarPage,
@@ -18,6 +19,7 @@ function CalendarPage() {
   const hydrated = useHydrated();
   const habits = useStore((s) => s.habits);
   const completions = useStore((s) => s.completions);
+  const toggleHabit = useStore((s) => s.toggleHabit);
   const goals = useStore((s) => s.goals);
   const journal = useStore((s) => s.journal);
 
@@ -30,7 +32,7 @@ function CalendarPage() {
   const first = new Date(cursor.y, cursor.m, 1);
   const startDay = first.getDay();
   const daysInMonth = new Date(cursor.y, cursor.m + 1, 0).getDate();
-  const monthLabel = first.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const monthLabel = first.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
 
   const cells: (null | { key: string; day: number; ratio: number; hasGoal: boolean; hasJournal: boolean })[] = [];
   for (let i = 0; i < startDay; i++) cells.push(null);
@@ -51,15 +53,19 @@ function CalendarPage() {
     goals: goals.filter((g) => g.deadline === selected),
     journal: journal.find((j) => j.date === selected),
   };
+  const selectedDone = selectedItems.habits.filter((x) => x.done).length;
+  const selectedTotal = selectedItems.habits.length || 1;
+  const selectedPct = Math.round((selectedDone / selectedTotal) * 100);
+  const isFuture = selected > todayKey();
 
   return (
     <AppShell>
       <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          The month
+        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Bulan ini
         </p>
         <div className="flex items-center justify-between">
-          <h1 className="font-serif text-4xl leading-tight md:text-5xl">{monthLabel}</h1>
+          <h1 className="font-serif text-4xl leading-tight capitalize md:text-5xl">{monthLabel}</h1>
           <div className="flex items-center gap-1">
             <button
               onClick={() =>
@@ -87,9 +93,9 @@ function CalendarPage() {
         </div>
       </header>
 
-      <div className="animate-rise mb-6 rounded-[24px] bg-surface p-4 hairline md:p-6">
+      <div className="animate-rise card-cinema mb-6 p-4 md:p-6">
         <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
-          {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+          {["M", "S", "S", "R", "K", "J", "S"].map((d, i) => (
             <div key={i}>{d}</div>
           ))}
         </div>
@@ -104,8 +110,8 @@ function CalendarPage() {
                 className={[
                   "relative aspect-square rounded-xl p-1.5 text-left transition",
                   selected === c.key
-                    ? "bg-foreground text-canvas"
-                    : "hover:bg-white/[0.04]",
+                    ? "bg-gradient-to-br from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] text-canvas shadow-[0_8px_20px_-6px_oklch(0.82_0.12_75/0.5)]"
+                    : "hover:bg-white/[0.05]",
                 ].join(" ")}
               >
                 <span className="text-[13px]">{c.day}</span>
@@ -114,14 +120,14 @@ function CalendarPage() {
                     <div
                       className={[
                         "h-full rounded-full",
-                        selected === c.key ? "bg-canvas" : "bg-foreground/80",
+                        selected === c.key ? "bg-canvas" : "bg-gold/80",
                       ].join(" ")}
                       style={{ width: `${c.ratio * 100}%` }}
                     />
                   </div>
                 )}
                 <div className="absolute right-1.5 top-1.5 flex gap-0.5">
-                  {c.hasGoal && <span className="size-1 rounded-full bg-amber-400/70" />}
+                  {c.hasGoal && <span className="size-1 rounded-full bg-gold" />}
                   {c.hasJournal && <span className="size-1 rounded-full bg-emerald-400/70" />}
                 </div>
               </button>
@@ -130,42 +136,88 @@ function CalendarPage() {
         </div>
       </div>
 
-      <div className="animate-rise rounded-[24px] bg-surface p-5 hairline">
-        <p className="mb-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          {new Date(selected).toLocaleDateString(undefined, {
+      <div className="animate-rise card-cinema p-5">
+        <p className="mb-1 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          {new Date(selected).toLocaleDateString("id-ID", {
             weekday: "long",
             month: "long",
             day: "numeric",
           })}
         </p>
-        <h3 className="font-serif text-2xl">The day at a glance</h3>
-        <div className="mt-4 space-y-2">
+        <h3 className="font-serif text-2xl">Sekilas hari ini</h3>
+
+        {/* Progress bar with percentage */}
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
+            <span>Progres kebiasaan</span>
+            <span className="tabular-nums text-foreground">
+              {hydrated ? `${selectedDone}/${selectedItems.habits.length} · ${selectedPct}%` : "—"}
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] transition-all duration-700"
+              style={{ width: `${hydrated ? selectedPct : 0}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-5 space-y-2">
           {selectedItems.goals.map((g) => (
             <div
               key={g.id}
-              className="flex items-center gap-2 rounded-xl bg-amber-500/5 px-3 py-2 text-sm"
+              className="flex items-center gap-2 rounded-xl bg-gold/[0.06] px-3 py-2 text-sm hairline-gold"
             >
-              <span className="size-1.5 rounded-full bg-amber-400" />
-              Deadline · {g.title}
+              <span className="size-1.5 rounded-full bg-gold" />
+              Tenggat · {g.title}
             </div>
           ))}
+
+          <p className="pt-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+            Ceklis kebiasaan
+          </p>
           {selectedItems.habits.map(({ h, done }) => (
-            <div
+            <button
               key={h.id}
-              className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm"
+              disabled={isFuture}
+              onClick={() => toggleHabit(h.id, selected)}
+              className={[
+                "flex w-full items-center gap-3 rounded-xl bg-white/[0.02] px-3 py-2.5 text-left text-sm transition hairline",
+                isFuture ? "opacity-50" : "hover:bg-white/[0.05]",
+              ].join(" ")}
             >
-              <span aria-hidden>{h.emoji}</span>
               <span
-                className={done ? "text-muted-foreground line-through" : "text-foreground"}
+                className={[
+                  "grid size-5 shrink-0 place-items-center rounded-md transition",
+                  done
+                    ? "bg-gold text-canvas"
+                    : "ring-1 ring-white/20",
+                ].join(" ")}
+              >
+                {done && <Check className="size-3" strokeWidth={3} />}
+              </span>
+              <span className="grid size-7 place-items-center rounded-lg bg-white/[0.03] text-gold">
+                <HabitIcon name={h.emoji} className="size-3.5" strokeWidth={1.75} />
+              </span>
+              <span
+                className={[
+                  "flex-1",
+                  done ? "text-muted-foreground line-through" : "text-foreground",
+                ].join(" ")}
               >
                 {h.name}
               </span>
-            </div>
+              {h.duration && (
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  {h.duration}
+                </span>
+              )}
+            </button>
           ))}
           {selectedItems.journal && (
-            <div className="rounded-xl bg-emerald-500/5 px-3 py-3 text-sm">
+            <div className="mt-3 rounded-xl bg-emerald-500/[0.06] px-3 py-3 text-sm hairline">
               <p className="mb-1 text-[10px] uppercase tracking-widest text-emerald-400/80">
-                Journal
+                Jurnal
               </p>
               <p className="text-foreground/90">{selectedItems.journal.reflection}</p>
             </div>

@@ -6,8 +6,8 @@ import { todayKey, useHydrated, useStore } from "@/lib/store";
 export const Route = createFileRoute("/journal")({
   head: () => ({
     meta: [
-      { title: "Journal · Aura" },
-      { name: "description", content: "A private page for the day — mood, wins, and what tomorrow asks of you." },
+      { title: "Jurnal · Aura" },
+      { name: "description", content: "Halaman pribadi untuk hari ini — mood, syukur, dan apa yang esok minta darimu." },
     ],
   }),
   component: JournalPage,
@@ -34,12 +34,12 @@ function JournalPage() {
   return (
     <AppShell>
       <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          The page
+        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Halaman hari ini
         </p>
-        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Today's journal</h1>
+        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Jurnal hari ini</h1>
         <p className="mt-2 text-muted-foreground">
-          {new Date().toLocaleDateString(undefined, {
+          {new Date().toLocaleDateString("id-ID", {
             weekday: "long",
             month: "long",
             day: "numeric",
@@ -50,17 +50,17 @@ function JournalPage() {
       <div className="animate-rise space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <Scale label="Mood" value={form.mood} onChange={(v) => setForm({ ...form, mood: v })} />
-          <Scale label="Energy" value={form.energy} onChange={(v) => setForm({ ...form, energy: v })} />
+          <Scale label="Energi" value={form.energy} onChange={(v) => setForm({ ...form, energy: v })} />
         </div>
 
-        <JournalField label="Gratitude" placeholder="What am I grateful for today?" value={form.gratitude} onChange={(v) => setForm({ ...form, gratitude: v })} />
-        <JournalField label="Reflection" placeholder="Today I noticed…" value={form.reflection} onChange={(v) => setForm({ ...form, reflection: v })} />
-        <JournalField label="Today's win" placeholder="One small victory." value={form.winToday} onChange={(v) => setForm({ ...form, winToday: v })} />
-        <JournalField label="Tomorrow's focus" placeholder="The single thing that matters most." value={form.tomorrowFocus} onChange={(v) => setForm({ ...form, tomorrowFocus: v })} />
+        <JournalField label="Syukur" placeholder="Hal apa yang aku syukuri hari ini?" value={form.gratitude} onChange={(v) => setForm({ ...form, gratitude: v })} />
+        <JournalField label="Refleksi" placeholder="Hari ini aku menyadari…" value={form.reflection} onChange={(v) => setForm({ ...form, reflection: v })} />
+        <JournalField label="Kemenangan hari ini" placeholder="Satu kemenangan kecil." value={form.winToday} onChange={(v) => setForm({ ...form, winToday: v })} />
+        <JournalField label="Fokus untuk esok" placeholder="Satu hal terpenting untuk esok." value={form.tomorrowFocus} onChange={(v) => setForm({ ...form, tomorrowFocus: v })} />
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {saved ? "Saved · thank you for showing up" : "Your page is private, on this device."}
+            {saved ? "Tersimpan · terima kasih sudah hadir" : "Halaman ini pribadi, hanya di perangkatmu."}
           </span>
           <button
             onClick={() => {
@@ -68,16 +68,16 @@ function JournalPage() {
               setSaved(true);
               setTimeout(() => setSaved(false), 2400);
             }}
-            className="rounded-full bg-foreground px-5 py-2 text-sm font-medium text-canvas active:scale-95"
+            className="rounded-full bg-gradient-to-br from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] px-5 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.82_0.12_75/0.5)] active:scale-95"
           >
-            Save entry
+            Simpan
           </button>
         </div>
 
         {hydrated && journal.length > 0 && (
           <div className="mt-10">
-            <p className="mb-3 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-              Previous entries
+            <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+              Catatan sebelumnya
             </p>
             <div className="space-y-2">
               {[...journal]
@@ -85,9 +85,9 @@ function JournalPage() {
                 .sort((a, b) => (a.date < b.date ? 1 : -1))
                 .slice(0, 10)
                 .map((j) => (
-                  <div key={j.id} className="rounded-2xl bg-surface p-4 hairline">
+                  <div key={j.id} className="rounded-2xl card-cinema p-4">
                     <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">
-                      {new Date(j.date).toLocaleDateString(undefined, {
+                      {new Date(j.date).toLocaleDateString("id-ID", {
                         weekday: "short",
                         month: "short",
                         day: "numeric",
@@ -118,7 +118,7 @@ function JournalField({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="block rounded-2xl bg-surface p-4 hairline">
+    <label className="block rounded-2xl card-cinema p-4">
       <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </span>
@@ -127,7 +127,7 @@ function JournalField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full resize-none bg-transparent font-serif text-lg leading-snug outline-none placeholder:text-muted-foreground/60"
+        className="w-full resize-none bg-transparent font-serif text-xl italic leading-snug outline-none placeholder:not-italic placeholder:font-sans placeholder:text-base placeholder:text-muted-foreground/50"
       />
     </label>
   );
@@ -143,7 +143,7 @@ function Scale({
   onChange: (v: 1 | 2 | 3 | 4 | 5) => void;
 }) {
   return (
-    <div className="rounded-2xl bg-surface p-4 hairline">
+    <div className="rounded-2xl card-cinema p-4">
       <span className="mb-3 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         {label}
       </span>
@@ -154,7 +154,7 @@ function Scale({
             onClick={() => onChange(n)}
             className={[
               "h-8 flex-1 rounded-lg transition",
-              n <= value ? "bg-foreground" : "bg-white/[0.06] hover:bg-white/[0.1]",
+              n <= value ? "bg-gradient-to-t from-[oklch(0.55_0.15_35)] to-[oklch(0.82_0.12_75)]" : "bg-white/[0.06] hover:bg-white/[0.1]",
             ].join(" ")}
             aria-label={`${label} ${n}`}
           />

@@ -5,8 +5,8 @@ import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "Analytics · Aura" },
-      { name: "description", content: "Quiet numbers of a well-lived month." },
+      { title: "Analitik · Aura" },
+      { name: "description", content: "Angka-angka tenang dari bulan yang dihidupi dengan baik." },
     ],
   }),
   component: AnalyticsPage,
@@ -38,7 +38,7 @@ function AnalyticsPage() {
     return { wd, avg };
   });
   const bestDow = [...dow].sort((a, b) => b.avg - a.avg)[0];
-  const dowLabel = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const dowLabel = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
   const weeks: { key: string; ratio: number }[][] = [];
   const startDate = new Date();
@@ -60,28 +60,28 @@ function AnalyticsPage() {
   return (
     <AppShell>
       <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          The numbers
+        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Angka-angka
         </p>
-        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Analytics</h1>
+        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Analitik</h1>
       </header>
 
       <div className="animate-rise mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Current streak" value={`${streak}d`} />
-        <Stat label="Longest streak" value={`${best}d`} />
-        <Stat label="Habits done" value={String(totalDone)} />
-        <Stat label="30d average" value={`${Math.round(avg * 100)}%`} />
+        <Stat label="Runtutan kini" value={`${streak}h`} />
+        <Stat label="Rekor runtutan" value={`${best}h`} />
+        <Stat label="Kebiasaan tuntas" value={String(totalDone)} />
+        <Stat label="Rata-rata 30h" value={`${Math.round(avg * 100)}%`} />
       </div>
 
-      <section className="animate-rise mb-6 rounded-[24px] bg-surface p-5 hairline md:p-6">
-        <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          30-day rhythm
+      <section className="animate-rise card-cinema mb-6 p-5 md:p-6">
+        <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Ritme 30 hari
         </p>
         <div className="flex h-32 items-end gap-1">
           {trend.map((t) => (
             <div
               key={t.day}
-              className="flex-1 rounded-t-md bg-foreground"
+              className="flex-1 rounded-t-md bg-gradient-to-t from-[oklch(0.55_0.15_35)] to-[oklch(0.82_0.12_75)]"
               style={{ height: `${Math.max(4, t.ratio * 100)}%`, opacity: 0.35 + t.ratio * 0.65 }}
               title={`${t.day} · ${Math.round(t.ratio * 100)}%`}
             />
@@ -89,9 +89,9 @@ function AnalyticsPage() {
         </div>
       </section>
 
-      <section className="animate-rise mb-6 rounded-[24px] bg-surface p-5 hairline md:p-6">
-        <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-          Consistency map
+      <section className="animate-rise card-cinema mb-6 p-5 md:p-6">
+        <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Peta konsistensi
         </p>
         <div className="flex gap-1 overflow-x-auto">
           {weeks.map((col, i) => (
@@ -100,7 +100,7 @@ function AnalyticsPage() {
                 <div
                   key={d.key}
                   className="size-3 rounded-[3px]"
-                  style={{ backgroundColor: `rgba(245, 245, 244, ${0.05 + d.ratio * 0.85})` }}
+                  style={{ backgroundColor: `oklch(0.82 0.12 75 / ${0.06 + d.ratio * 0.85})` }}
                   title={`${d.key} · ${Math.round(d.ratio * 100)}%`}
                 />
               ))}
@@ -109,14 +109,14 @@ function AnalyticsPage() {
         </div>
       </section>
 
-      <section className="animate-rise rounded-[24px] bg-surface p-5 hairline md:p-6">
-        <p className="mb-4 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+      <section className="animate-rise card-cinema p-5 md:p-6">
+        <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           Insight
         </p>
-        <p className="font-serif text-2xl leading-snug text-balance">
-          You perform best on{" "}
-          <span className="text-foreground">{dowLabel[bestDow.wd]}s</span>. Protect that
-          window — it's where the compound happens.
+        <p className="font-serif text-2xl italic leading-snug text-balance">
+          Kamu paling produktif di hari{" "}
+          <span className="text-gold not-italic">{dowLabel[bestDow.wd]}</span>. Jaga jendela itu —
+          di sanalah bunga majemuknya tumbuh.
         </p>
       </section>
     </AppShell>
@@ -125,9 +125,9 @@ function AnalyticsPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[20px] bg-surface p-5 hairline">
+    <div className="card-cinema p-5">
       <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-      <p className="mt-2 font-serif text-3xl">{value}</p>
+      <p className="mt-2 font-serif text-3xl tabular-nums">{value}</p>
     </div>
   );
 }

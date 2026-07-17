@@ -7,8 +7,8 @@ import { useStore } from "@/lib/store";
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Profile · Aura" },
-      { name: "description", content: "Shape the identity and vision your days serve." },
+      { title: "Profil · Aura" },
+      { name: "description", content: "Bentuk identitas dan visi yang hari-harimu layani." },
     ],
   }),
   component: ProfilePage,
@@ -27,18 +27,21 @@ function ProfilePage() {
   const setVisionYear = useStore((s) => s.setVisionYear);
   const todaysFocus = useStore((s) => s.todaysFocus);
   const setTodaysFocus = useStore((s) => s.setTodaysFocus);
+  const todaysSchedule = useStore((s) => s.todaysSchedule);
+  const addScheduleItem = useStore((s) => s.addScheduleItem);
+  const removeScheduleItem = useStore((s) => s.removeScheduleItem);
 
   return (
     <AppShell>
       <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">You</p>
-        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Profile</h1>
+        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Kamu</p>
+        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Profil</h1>
       </header>
 
       <div className="animate-rise space-y-4">
-        <label className="block rounded-2xl bg-surface p-4 hairline">
+        <label className="block rounded-2xl card-cinema p-4">
           <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Your name
+            Namamu
           </span>
           <input
             value={name}
@@ -47,9 +50,9 @@ function ProfilePage() {
           />
         </label>
 
-        <label className="block rounded-2xl bg-surface p-4 hairline">
+        <label className="block rounded-2xl card-cinema p-4">
           <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Vision year
+            Tahun visi
           </span>
           <input
             value={visionYear}
@@ -58,11 +61,13 @@ function ProfilePage() {
           />
         </label>
 
-        <TagList title="Who I'm becoming" items={becoming} onAdd={addBecoming} onRemove={removeBecoming} placeholder="Add an identity" />
+        <TagList title="Diri yang aku tuju" items={becoming} onAdd={addBecoming} onRemove={removeBecoming} placeholder="Tambah identitas" />
 
-        <TagList title={`${visionYear} vision`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Add a vision item" />
+        <TagList title={`Visi ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Tambah item visi" />
 
         <FocusList items={todaysFocus} onChange={setTodaysFocus} />
+
+        <ScheduleList items={todaysSchedule} onAdd={addScheduleItem} onRemove={removeScheduleItem} />
       </div>
     </AppShell>
   );
@@ -83,13 +88,13 @@ function TagList({
 }) {
   const [v, setV] = useState("");
   return (
-    <div className="rounded-2xl bg-surface p-5 hairline">
+    <div className="rounded-2xl card-cinema p-5">
       <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       <ul className="mb-3 flex flex-wrap gap-1.5">
         {items.map((i) => (
           <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5 text-sm">
             {i.label}
-            <button onClick={() => onRemove(i.id)} className="text-muted-foreground hover:text-foreground" aria-label={`Remove ${i.label}`}>
+            <button onClick={() => onRemove(i.id)} className="text-muted-foreground hover:text-foreground" aria-label={`Hapus ${i.label}`}>
               <X className="size-3" />
             </button>
           </li>
@@ -119,14 +124,14 @@ function TagList({
 function FocusList({ items, onChange }: { items: string[]; onChange: (list: string[]) => void }) {
   const [v, setV] = useState("");
   return (
-    <div className="rounded-2xl bg-surface p-5 hairline">
-      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Today's focus</p>
+    <div className="rounded-2xl card-cinema p-5">
+      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Fokus hari ini</p>
       <ul className="mb-3 space-y-2">
         {items.map((f, i) => (
           <li key={i} className="flex items-center gap-3 text-sm">
-            <span className="size-1.5 rounded-full bg-foreground/40" />
+            <span className="size-1.5 rounded-full bg-gold" />
             <span className="flex-1">{f}</span>
-            <button onClick={() => onChange(items.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground" aria-label="Remove">
+            <button onClick={() => onChange(items.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground" aria-label="Hapus">
               <X className="size-3" />
             </button>
           </li>
@@ -145,9 +150,63 @@ function FocusList({ items, onChange }: { items: string[]; onChange: (list: stri
         <input
           value={v}
           onChange={(e) => setV(e.target.value)}
-          placeholder="Add a focus for today"
+          placeholder="Tambah fokus untuk hari ini"
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
+      </form>
+    </div>
+  );
+}
+
+function ScheduleList({
+  items,
+  onAdd,
+  onRemove,
+}: {
+  items: { id: string; time: string; label: string }[];
+  onAdd: (time: string, label: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [time, setTime] = useState("08:00");
+  const [label, setLabel] = useState("");
+  return (
+    <div className="rounded-2xl card-cinema p-5">
+      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Jadwal hari ini</p>
+      <ul className="mb-3 space-y-1.5">
+        {items.map((s) => (
+          <li key={s.id} className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 text-sm">
+            <span className="w-12 font-serif text-base tabular-nums text-gold">{s.time}</span>
+            <span className="flex-1">{s.label}</span>
+            <button onClick={() => onRemove(s.id)} className="text-muted-foreground hover:text-foreground" aria-label="Hapus">
+              <X className="size-3" />
+            </button>
+          </li>
+        ))}
+      </ul>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!label.trim()) return;
+          onAdd(time, label.trim());
+          setLabel("");
+        }}
+        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
+      >
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          className="w-20 bg-transparent text-sm tabular-nums outline-none"
+        />
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Tambah agenda"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
+        <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
+          <Plus className="size-4" />
+        </button>
       </form>
     </div>
   );

@@ -2,20 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Check, Plus, Trash2, Flame } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { HabitIcon, ICON_KEYS } from "@/components/HabitIcon";
 import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/habits")({
   head: () => ({
     meta: [
-      { title: "Habits · Aura" },
-      { name: "description", content: "Your daily rituals — quiet, consistent, compounding." },
+      { title: "Kebiasaan · Aura" },
+      { name: "description", content: "Ritual harianmu — tenang, konsisten, dan berbunga perlahan." },
     ],
   }),
   component: HabitsPage,
 });
 
-const emojis = ["🧘", "💧", "📖", "💻", "🏋️", "🚶", "✍️", "🥗", "🌅", "🌙"];
-const categories = ["Mind", "Body", "Focus", "Craft", "Money", "Love"];
+const categories = ["Pikiran", "Tubuh", "Fokus", "Karya", "Uang", "Cinta"];
 
 function HabitsPage() {
   const hydrated = useHydrated();
@@ -32,7 +32,7 @@ function HabitsPage() {
     category: string;
     priority: "low" | "med" | "high";
     duration: string;
-  }>({ name: "", emoji: "🧘", category: "Mind", priority: "med", duration: "" });
+  }>({ name: "", emoji: "meditation", category: "Pikiran", priority: "med", duration: "" });
 
   const today = todayKey();
 
@@ -40,16 +40,16 @@ function HabitsPage() {
     <AppShell>
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
-          <p className="mb-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-            The stack
+          <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            Susunan hari
           </p>
-          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Daily rituals</h1>
+          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Ritual harian</h1>
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-medium text-canvas transition-transform active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] px-4 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.82_0.12_75/0.5)] transition-transform active:scale-95"
         >
-          <Plus className="size-4" strokeWidth={2.5} /> New
+          <Plus className="size-4" strokeWidth={2.5} /> Baru
         </button>
       </header>
 
@@ -60,22 +60,22 @@ function HabitsPage() {
           const streak = hydrated ? currentStreak(dates) : 0;
           const best = hydrated ? longestStreak(dates) : 0;
           return (
-            <div key={h.id} className="rounded-[20px] bg-surface p-4 hairline">
+            <div key={h.id} className="card-cinema p-4">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => toggle(h.id, today)}
                   className={[
                     "grid size-7 shrink-0 place-items-center rounded-full transition-all",
                     done
-                      ? "bg-foreground text-canvas"
-                      : "ring-2 ring-white/15 hover:ring-white/30",
+                      ? "bg-gold text-canvas"
+                      : "ring-2 ring-white/15 hover:ring-gold/60",
                   ].join(" ")}
-                  aria-label={done ? "Mark undone" : "Complete"}
+                  aria-label={done ? "Batalkan" : "Selesaikan"}
                 >
                   {done && <Check className="size-4" strokeWidth={3} />}
                 </button>
-                <span className="text-lg" aria-hidden>
-                  {h.emoji}
+                <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] text-gold">
+                  <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p
@@ -94,7 +94,7 @@ function HabitsPage() {
                 <button
                   onClick={() => remove(h.id)}
                   className="rounded-lg p-1.5 text-muted-foreground opacity-0 transition hover:bg-white/[0.04] hover:text-foreground group-hover:opacity-100 md:opacity-60"
-                  aria-label="Delete habit"
+                  aria-label="Hapus kebiasaan"
                 >
                   <Trash2 className="size-3.5" />
                 </button>
@@ -104,9 +104,9 @@ function HabitsPage() {
                 <MiniHeatmap dates={dates} />
                 <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
                   <span className="inline-flex items-center gap-1">
-                    <Flame className="size-3" /> {streak}d
+                    <Flame className="size-3 text-gold" /> {streak}h
                   </span>
-                  <span>Best {best}d</span>
+                  <span>Rekor {best}h</span>
                 </div>
               </div>
             </div>
@@ -120,46 +120,47 @@ function HabitsPage() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-[28px] bg-surface p-6 hairline"
+            className="w-full max-w-md rounded-[28px] card-cinema p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="mb-1 text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-              A new ritual
+            <p className="mb-1 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+              Ritual baru
             </p>
-            <h2 className="font-serif text-2xl">Design the habit</h2>
+            <h2 className="font-serif text-2xl">Rancang kebiasaanmu</h2>
 
             <div className="mt-5 space-y-4">
-              <Field label="Name">
+              <Field label="Nama">
                 <input
                   autoFocus
                   className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
-                  placeholder="Morning meditation"
+                  placeholder="Meditasi pagi"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </Field>
 
-              <Field label="Emoji">
-                <div className="flex flex-wrap gap-1.5">
-                  {emojis.map((e) => (
+              <Field label="Ikon">
+                <div className="grid grid-cols-8 gap-1.5">
+                  {ICON_KEYS.map((k) => (
                     <button
-                      key={e}
-                      onClick={() => setForm({ ...form, emoji: e })}
+                      key={k}
+                      onClick={() => setForm({ ...form, emoji: k })}
                       className={[
-                        "grid size-9 place-items-center rounded-xl text-base transition",
-                        form.emoji === e
-                          ? "bg-foreground text-canvas"
-                          : "bg-white/[0.03] hover:bg-white/[0.06]",
+                        "grid size-9 place-items-center rounded-xl transition",
+                        form.emoji === k
+                          ? "bg-gold text-canvas"
+                          : "bg-white/[0.03] text-foreground/80 hover:bg-white/[0.08] hover:text-gold",
                       ].join(" ")}
+                      aria-label={k}
                     >
-                      {e}
+                      <HabitIcon name={k} className="size-4" strokeWidth={1.75} />
                     </button>
                   ))}
                 </div>
               </Field>
 
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Category">
+                <Field label="Kategori">
                   <select
                     className="w-full bg-transparent text-[15px] outline-none"
                     value={form.category}
@@ -172,17 +173,17 @@ function HabitsPage() {
                     ))}
                   </select>
                 </Field>
-                <Field label="Duration">
+                <Field label="Durasi">
                   <input
                     className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
-                    placeholder="10 min"
+                    placeholder="10 mnt"
                     value={form.duration}
                     onChange={(e) => setForm({ ...form, duration: e.target.value })}
                   />
                 </Field>
               </div>
 
-              <Field label="Priority">
+              <Field label="Prioritas">
                 <div className="flex gap-1.5">
                   {(["low", "med", "high"] as const).map((p) => (
                     <button
@@ -191,11 +192,11 @@ function HabitsPage() {
                       className={[
                         "flex-1 rounded-xl px-3 py-2 text-xs uppercase tracking-widest transition",
                         form.priority === p
-                          ? "bg-foreground text-canvas"
+                          ? "bg-gold text-canvas"
                           : "bg-white/[0.03] text-muted-foreground hover:bg-white/[0.06]",
                       ].join(" ")}
                     >
-                      {p}
+                      {p === "low" ? "rendah" : p === "med" ? "sedang" : "tinggi"}
                     </button>
                   ))}
                 </div>
@@ -207,18 +208,18 @@ function HabitsPage() {
                 onClick={() => setOpen(false)}
                 className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
-                Cancel
+                Batal
               </button>
               <button
                 onClick={() => {
                   if (!form.name.trim()) return;
                   add(form);
-                  setForm({ name: "", emoji: "🧘", category: "Mind", priority: "med", duration: "" });
+                  setForm({ name: "", emoji: "meditation", category: "Pikiran", priority: "med", duration: "" });
                   setOpen(false);
                 }}
-                className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-canvas"
+                className="rounded-full bg-gradient-to-br from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] px-4 py-2 text-sm font-medium text-canvas"
               >
-                Add ritual
+                Tambah ritual
               </button>
             </div>
           </div>
@@ -254,7 +255,7 @@ function MiniHeatmap({ dates }: { dates: string[] }) {
           key={d.key}
           className={[
             "h-4 flex-1 rounded-[3px]",
-            d.done ? "bg-foreground/80" : "bg-white/[0.05]",
+            d.done ? "bg-gold/80" : "bg-white/[0.05]",
           ].join(" ")}
           title={d.key}
         />
