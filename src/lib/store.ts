@@ -42,6 +42,7 @@ type State = {
   vision: VisionItem[];
   visionYear: string;
   todaysFocus: string[];
+  todaysSchedule: { id: string; time: string; label: string }[];
   habits: Habit[];
   completions: Record<string, string[]>; // habitId -> [yyyy-mm-dd]
   goals: Goal[];
@@ -49,6 +50,9 @@ type State = {
 
   setName: (n: string) => void;
   setTodaysFocus: (items: string[]) => void;
+  addScheduleItem: (time: string, label: string) => void;
+  removeScheduleItem: (id: string) => void;
+  setSchedule: (items: { id: string; time: string; label: string }[]) => void;
   addBecoming: (label: string) => void;
   removeBecoming: (id: string) => void;
   addVision: (label: string) => void;
@@ -78,32 +82,44 @@ export const todayKey = (d: Date = new Date()) => {
 
 const seed: Pick<
   State,
-  "name" | "becoming" | "vision" | "visionYear" | "todaysFocus" | "habits" | "completions" | "goals" | "journal"
+  "name" | "becoming" | "vision" | "visionYear" | "todaysFocus" | "todaysSchedule" | "habits" | "completions" | "goals" | "journal"
 > = {
   name: "Syams",
   visionYear: "2026",
   becoming: [
     { id: uid(), label: "Investor" },
-    { id: uid(), label: "Content Creator" },
-    { id: uid(), label: "Entrepreneur" },
-    { id: uid(), label: "Lifelong Learner" },
-    { id: uid(), label: "Healthy Partner" },
+    { id: uid(), label: "Kreator Konten" },
+    { id: uid(), label: "Wirausahawan" },
+    { id: uid(), label: "Pembelajar Sepanjang Hayat" },
+    { id: uid(), label: "Pasangan yang Sehat" },
   ],
   vision: [
-    { id: uid(), label: "Graduate with honors" },
-    { id: uid(), label: "Save 500M" },
-    { id: uid(), label: "100K followers" },
-    { id: uid(), label: "Ship the company" },
-    { id: uid(), label: "Travel to Japan" },
+    { id: uid(), label: "Lulus dengan cumlaude" },
+    { id: uid(), label: "Menabung 500 juta" },
+    { id: uid(), label: "100rb pengikut" },
+    { id: uid(), label: "Meluncurkan perusahaan" },
+    { id: uid(), label: "Berlibur ke Jepang" },
   ],
-  todaysFocus: ["Finish skripsi chapter", "Upload one video", "Gym session", "Read 20 pages"],
+  todaysFocus: [
+    "Selesaikan satu bab skripsi",
+    "Upload satu video",
+    "Sesi gym",
+    "Baca 20 halaman",
+  ],
+  todaysSchedule: [
+    { id: uid(), time: "06:00", label: "Meditasi & jurnal pagi" },
+    { id: uid(), time: "09:00", label: "Deep work — skripsi" },
+    { id: uid(), time: "13:00", label: "Editing video" },
+    { id: uid(), time: "17:30", label: "Latihan di gym" },
+    { id: uid(), time: "21:00", label: "Baca & refleksi" },
+  ],
   habits: [
-    { id: "h1", name: "Morning meditation", emoji: "🧘", category: "Mind", priority: "high", duration: "10 min", createdAt: new Date().toISOString() },
-    { id: "h2", name: "Deep work session", emoji: "💻", category: "Focus", priority: "high", duration: "90 min", createdAt: new Date().toISOString() },
-    { id: "h3", name: "Hydration target", emoji: "💧", category: "Body", priority: "med", duration: "2L", createdAt: new Date().toISOString() },
-    { id: "h4", name: "Read 20 pages", emoji: "📖", category: "Mind", priority: "med", duration: "30 min", createdAt: new Date().toISOString() },
-    { id: "h5", name: "Evening walk", emoji: "🚶", category: "Body", priority: "low", duration: "20 min", createdAt: new Date().toISOString() },
-    { id: "h6", name: "Journal reflection", emoji: "✍️", category: "Mind", priority: "med", duration: "15 min", createdAt: new Date().toISOString() },
+    { id: "h1", name: "Meditasi pagi",        emoji: "meditation", category: "Pikiran", priority: "high", duration: "10 mnt", createdAt: new Date().toISOString() },
+    { id: "h2", name: "Sesi deep work",       emoji: "work",       category: "Fokus",   priority: "high", duration: "90 mnt", createdAt: new Date().toISOString() },
+    { id: "h3", name: "Target hidrasi",       emoji: "water",      category: "Tubuh",   priority: "med",  duration: "2L",     createdAt: new Date().toISOString() },
+    { id: "h4", name: "Baca 20 halaman",      emoji: "book",       category: "Pikiran", priority: "med",  duration: "30 mnt", createdAt: new Date().toISOString() },
+    { id: "h5", name: "Jalan sore",           emoji: "walk",       category: "Tubuh",   priority: "low",  duration: "20 mnt", createdAt: new Date().toISOString() },
+    { id: "h6", name: "Refleksi jurnal",      emoji: "journal",    category: "Pikiran", priority: "med",  duration: "15 mnt", createdAt: new Date().toISOString() },
   ],
   completions: (() => {
     // seed some past completions for a nicer initial dashboard
@@ -128,41 +144,41 @@ const seed: Pick<
   goals: [
     {
       id: "g1",
-      title: "Graduate with honors",
-      description: "Finish thesis, defend, and walk the stage.",
+      title: "Lulus dengan cumlaude",
+      description: "Selesaikan skripsi, sidang, dan wisuda dengan tenang.",
       horizon: "yearly",
       deadline: "2026-07-01",
       progress: 62,
       milestones: [
-        { id: uid(), title: "Finish chapter 1–3", done: true },
-        { id: uid(), title: "Complete chapter 4", done: true },
-        { id: uid(), title: "Chapter 5 & conclusion", done: false },
-        { id: uid(), title: "Thesis defense", done: false },
+        { id: uid(), title: "Selesai bab 1–3", done: true },
+        { id: uid(), title: "Selesai bab 4", done: true },
+        { id: uid(), title: "Bab 5 & kesimpulan", done: false },
+        { id: uid(), title: "Sidang skripsi", done: false },
       ],
       createdAt: new Date().toISOString(),
     },
     {
       id: "g2",
-      title: "Ship the studio launch",
+      title: "Luncurkan studio",
       horizon: "quarterly",
       deadline: "2026-03-31",
       progress: 28,
       milestones: [
-        { id: uid(), title: "Brand identity", done: true },
+        { id: uid(), title: "Identitas brand", done: true },
         { id: uid(), title: "Website live", done: false },
-        { id: uid(), title: "First 3 clients", done: false },
+        { id: uid(), title: "3 klien pertama", done: false },
       ],
       createdAt: new Date().toISOString(),
     },
     {
       id: "g3",
-      title: "Read 24 books",
+      title: "Baca 24 buku",
       horizon: "yearly",
       deadline: "2026-12-31",
       progress: 45,
       milestones: [
-        { id: uid(), title: "Q1 · 6 books", done: true },
-        { id: uid(), title: "Q2 · 6 books", done: false },
+        { id: uid(), title: "Q1 · 6 buku", done: true },
+        { id: uid(), title: "Q2 · 6 buku", done: false },
       ],
       createdAt: new Date().toISOString(),
     },
@@ -176,6 +192,11 @@ export const useStore = create<State>()(
       ...seed,
       setName: (name) => set({ name }),
       setTodaysFocus: (todaysFocus) => set({ todaysFocus }),
+      addScheduleItem: (time, label) =>
+        set((s) => ({ todaysSchedule: [...s.todaysSchedule, { id: uid(), time, label }].sort((a, b) => a.time.localeCompare(b.time)) })),
+      removeScheduleItem: (id) =>
+        set((s) => ({ todaysSchedule: s.todaysSchedule.filter((i) => i.id !== id) })),
+      setSchedule: (todaysSchedule) => set({ todaysSchedule }),
       addBecoming: (label) =>
         set((s) => ({ becoming: [...s.becoming, { id: uid(), label }] })),
       removeBecoming: (id) =>
