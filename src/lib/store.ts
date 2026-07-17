@@ -281,7 +281,20 @@ export const useStore = create<State>()(
           return { journal: [...s.journal, { ...entry, id: entry.id || uid() }] };
         }),
     }),
-    { name: "aura-life-os" },
+    {
+      name: "aura-life-os",
+      version: 2,
+      migrate: (persisted: any, _version) => {
+        if (!persisted) return persisted;
+        if (!persisted.todaysSchedule) persisted.todaysSchedule = seed.todaysSchedule;
+        return persisted;
+      },
+      merge: (persisted: any, current) => ({
+        ...current,
+        ...(persisted || {}),
+        todaysSchedule: (persisted && persisted.todaysSchedule) || current.todaysSchedule,
+      }),
+    },
   ),
 );
 
