@@ -118,59 +118,64 @@ function Index() {
       </section>
 
       {/* Today's schedule */}
-      {todaysSchedule.length > 0 && (
+      <ScheduleSection
+        date={today}
+        items={todaysSchedule}
+        nextIdx={nextScheduleIdx}
+        nowHHmm={nowHHmm}
+        hydrated={hydrated}
+        onAdd={(t, l) => addScheduleItem(today, t, l)}
+        onRemove={(id) => removeScheduleItem(today, id)}
+      />
+
+      {/* Weekly goals */}
+      {weeklyGoals.length > 0 && (
         <section className="animate-rise mb-10">
           <div className="mb-4 flex items-end justify-between">
             <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              <Clock className="size-3" />
-              Jadwal hari ini
+              <Target className="size-3" />
+              Tujuan minggu ini
             </p>
-            <Link
-              to="/profile"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              Atur <ArrowUpRight className="size-3" />
-            </Link>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-serif text-base text-foreground tabular-nums">{weeklyPct}%</span>
+              <span>rata-rata</span>
+            </div>
           </div>
-          <ol className="relative space-y-2 pl-4">
-            <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/30 via-black/10 to-transparent" />
-            {todaysSchedule.map((s, i) => {
-              const isNext = hydrated && i === nextScheduleIdx;
-              const passed = hydrated && s.time < nowHHmm;
+          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
+              style={{ width: `${hydrated ? weeklyPct : 0}%` }}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+            {weeklyGoals.map((g, i) => {
+              const done = g.milestones.filter((m) => m.done).length;
               return (
-                <li key={s.id} className="relative flex items-center gap-3">
-                  <span
-                    className={[
-                      "absolute -left-[13px] grid size-3 place-items-center rounded-full",
-                      isNext
-                        ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_195/0.55)]"
-                        : passed
-                          ? "bg-black/20"
-                          : "bg-black/40",
-                    ].join(" ")}
-                  />
-                  <div
-                    className={[
-                      "flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
-                      isNext
-                        ? "bg-gradient-to-r from-[oklch(0.94_0.03_195)] to-[oklch(0.985_0.005_200)] hairline-gold animate-pulse-glow"
-                        : passed
-                          ? "bg-surface/40 text-muted-foreground hairline"
-                          : "bg-surface/60 hairline",
-                    ].join(" ")}
-                  >
-                    <span className="w-12 font-serif text-base tabular-nums">{s.time}</span>
-                    <span className={passed ? "line-through" : ""}>{s.label}</span>
-                    {isNext && (
-                      <span className="ml-auto text-[10px] uppercase tracking-widest text-gold">
-                        berikutnya
-                      </span>
-                    )}
+                <Link
+                  key={g.id}
+                  to="/goals"
+                  className="card-cinema group animate-float-y block p-4 transition hover:-translate-y-0.5"
+                  style={{ animationDelay: `${i * 0.28}s` }}
+                >
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <p className="font-serif text-lg leading-tight">{g.title}</p>
+                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                      {g.progress}%
+                    </span>
                   </div>
-                </li>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-black/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                      style={{ width: `${hydrated ? g.progress : 0}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    {done} / {g.milestones.length} tonggak
+                  </p>
+                </Link>
               );
             })}
-          </ol>
+          </div>
         </section>
       )}
 
