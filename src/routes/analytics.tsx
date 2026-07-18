@@ -81,7 +81,7 @@ function AnalyticsPage() {
           {trend.map((t) => (
             <div
               key={t.day}
-              className="flex-1 rounded-t-md bg-gradient-to-t from-[oklch(0.55_0.15_35)] to-[oklch(0.82_0.12_75)]"
+              className="flex-1 rounded-t-md bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)]"
               style={{ height: `${Math.max(4, t.ratio * 100)}%`, opacity: 0.35 + t.ratio * 0.65 }}
               title={`${t.day} · ${Math.round(t.ratio * 100)}%`}
             />
@@ -100,7 +100,7 @@ function AnalyticsPage() {
                 <div
                   key={d.key}
                   className="size-3 rounded-[3px]"
-                  style={{ backgroundColor: `oklch(0.82 0.12 75 / ${0.06 + d.ratio * 0.85})` }}
+                  style={{ backgroundColor: `oklch(0.62_0.11_195 / ${0.06 + d.ratio * 0.85})` }}
                   title={`${d.key} · ${Math.round(d.ratio * 100)}%`}
                 />
               ))}

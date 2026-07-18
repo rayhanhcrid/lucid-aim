@@ -124,7 +124,7 @@ function Index() {
             </Link>
           </div>
           <ol className="relative space-y-2 pl-4">
-            <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/30 via-white/10 to-transparent" />
+            <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/30 via-black/10 to-transparent" />
             {todaysSchedule.map((s, i) => {
               const isNext = hydrated && i === nextScheduleIdx;
               const passed = hydrated && s.time < nowHHmm;
@@ -134,17 +134,17 @@ function Index() {
                     className={[
                       "absolute -left-[13px] grid size-3 place-items-center rounded-full",
                       isNext
-                        ? "bg-gold shadow-[0_0_12px_2px_oklch(0.82_0.12_75/0.55)]"
+                        ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_195/0.55)]"
                         : passed
-                          ? "bg-white/20"
-                          : "bg-white/40",
+                          ? "bg-black/20"
+                          : "bg-black/40",
                     ].join(" ")}
                   />
                   <div
                     className={[
                       "flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
                       isNext
-                        ? "bg-gradient-to-r from-[oklch(0.28_0.06_60)] to-[oklch(0.19_0.02_60)] hairline-gold animate-pulse-glow"
+                        ? "bg-gradient-to-r from-[oklch(0.94_0.03_195)] to-[oklch(0.985_0.005_200)] hairline-gold animate-pulse-glow"
                         : passed
                           ? "bg-surface/40 text-muted-foreground hairline"
                           : "bg-surface/60 hairline",
@@ -206,8 +206,8 @@ function Index() {
                     className={[
                       "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
                       done
-                        ? "bg-white/[0.04] text-muted-foreground"
-                        : "bg-gradient-to-br from-white/[0.07] to-white/[0.02] text-gold",
+                        ? "bg-black/[0.04] text-muted-foreground"
+                        : "bg-gradient-to-br from-black/[0.07] to-black/[0.02] text-gold",
                     ].join(" ")}
                   >
                     <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
@@ -232,7 +232,7 @@ function Index() {
                     "grid size-6 shrink-0 place-items-center rounded-full transition-all",
                     done
                       ? "bg-gold text-canvas scale-100"
-                      : "ring-2 ring-white/15 group-hover:ring-gold/60",
+                      : "ring-2 ring-black/15 group-hover:ring-gold/60",
                   ].join(" ")}
                 >
                   {done && <Check className="size-3.5" strokeWidth={3} />}
@@ -260,7 +260,7 @@ function VisionCard({
       className={[
         "rounded-[28px] p-6 transition hover:translate-y-[-2px]",
         dashed
-          ? "border border-dashed border-gold/25 bg-gradient-to-br from-[oklch(0.22_0.04_55)]/40 to-transparent"
+          ? "border border-dashed border-gold/25 bg-gradient-to-br from-[oklch(0.96_0.02_195)]/40 to-transparent"
           : "card-cinema",
       ].join(" ")}
     >

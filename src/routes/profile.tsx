@@ -92,7 +92,7 @@ function TagList({
       <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       <ul className="mb-3 flex flex-wrap gap-1.5">
         {items.map((i) => (
-          <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5 text-sm">
+          <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-black/[0.05] px-3 py-1.5 text-sm">
             {i.label}
             <button onClick={() => onRemove(i.id)} className="text-muted-foreground hover:text-foreground" aria-label={`Hapus ${i.label}`}>
               <X className="size-3" />
@@ -107,7 +107,7 @@ function TagList({
           onAdd(v.trim());
           setV("");
         }}
-        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
       >
         <Plus className="size-4 text-muted-foreground" />
         <input
@@ -144,7 +144,7 @@ function FocusList({ items, onChange }: { items: string[]; onChange: (list: stri
           onChange([...items, v.trim()]);
           setV("");
         }}
-        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
       >
         <Plus className="size-4 text-muted-foreground" />
         <input
@@ -174,7 +174,7 @@ function ScheduleList({
       <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Jadwal hari ini</p>
       <ul className="mb-3 space-y-1.5">
         {items.map((s) => (
-          <li key={s.id} className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 text-sm">
+          <li key={s.id} className="flex items-center gap-3 rounded-xl bg-black/[0.03] px-3 py-2 text-sm">
             <span className="w-12 font-serif text-base tabular-nums text-gold">{s.time}</span>
             <span className="flex-1">{s.label}</span>
             <button onClick={() => onRemove(s.id)} className="text-muted-foreground hover:text-foreground" aria-label="Hapus">
@@ -190,7 +190,7 @@ function ScheduleList({
           onAdd(time, label.trim());
           setLabel("");
         }}
-        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
       >
         <input
           type="time"

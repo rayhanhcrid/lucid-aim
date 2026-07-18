@@ -68,7 +68,7 @@ function JournalPage() {
               setSaved(true);
               setTimeout(() => setSaved(false), 2400);
             }}
-            className="rounded-full bg-gradient-to-br from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] px-5 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.82_0.12_75/0.5)] active:scale-95"
+            className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-5 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
           >
             Simpan
           </button>
@@ -154,7 +154,7 @@ function Scale({
             onClick={() => onChange(n)}
             className={[
               "h-8 flex-1 rounded-lg transition",
-              n <= value ? "bg-gradient-to-t from-[oklch(0.55_0.15_35)] to-[oklch(0.82_0.12_75)]" : "bg-white/[0.06] hover:bg-white/[0.1]",
+              n <= value ? "bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)]" : "bg-black/[0.06] hover:bg-black/[0.1]",
             ].join(" ")}
             aria-label={`${label} ${n}`}
           />
