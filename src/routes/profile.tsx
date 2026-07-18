@@ -27,9 +27,6 @@ function ProfilePage() {
   const setVisionYear = useStore((s) => s.setVisionYear);
   const todaysFocus = useStore((s) => s.todaysFocus);
   const setTodaysFocus = useStore((s) => s.setTodaysFocus);
-  const todaysSchedule = useStore((s) => s.todaysSchedule);
-  const addScheduleItem = useStore((s) => s.addScheduleItem);
-  const removeScheduleItem = useStore((s) => s.removeScheduleItem);
 
   return (
     <AppShell>
@@ -66,8 +63,9 @@ function ProfilePage() {
         <TagList title={`Visi ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Tambah item visi" />
 
         <FocusList items={todaysFocus} onChange={setTodaysFocus} />
-
-        <ScheduleList items={todaysSchedule} onAdd={addScheduleItem} onRemove={removeScheduleItem} />
+        <p className="rounded-2xl bg-black/[0.03] px-4 py-3 text-xs text-muted-foreground hairline">
+          Jadwal untuk esok kini diatur langsung di halaman <span className="text-foreground">Jurnal</span>, dan bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
+        </p>
       </div>
     </AppShell>
   );
