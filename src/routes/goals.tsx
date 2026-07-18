@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Check, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useHydrated, useStore } from "@/lib/store";
+import { useUIStore } from "@/lib/ui-store";
 
 export const Route = createFileRoute("/goals")({
   head: () => ({
@@ -41,6 +42,12 @@ function GoalsPage() {
     deadline: string;
     milestones: string;
   }>({ title: "", description: "", horizon: "quarterly", deadline: "", milestones: "" });
+
+  const setDialogOpen = useUIStore((s) => s.setDialogOpen);
+  useEffect(() => {
+    setDialogOpen(open);
+    return () => setDialogOpen(false);
+  }, [open, setDialogOpen]);
 
   const filtered = filter === "all" ? goals : goals.filter((g) => g.horizon === filter);
 

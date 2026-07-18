@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, Plus, Trash2, Flame } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { HabitIcon, ICON_KEYS } from "@/components/HabitIcon";
 import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+import { useUIStore } from "@/lib/ui-store";
 
 export const Route = createFileRoute("/habits")({
   head: () => ({
@@ -33,6 +34,12 @@ function HabitsPage() {
     priority: "low" | "med" | "high";
     duration: string;
   }>({ name: "", emoji: "meditation", category: "Pikiran", priority: "med", duration: "" });
+
+  const setDialogOpen = useUIStore((s) => s.setDialogOpen);
+  useEffect(() => {
+    setDialogOpen(open);
+    return () => setDialogOpen(false);
+  }, [open, setDialogOpen]);
 
   const today = todayKey();
 

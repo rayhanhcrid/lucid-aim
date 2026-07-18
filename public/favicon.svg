@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="g" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#161513"/>
+      <stop offset="55%" stop-color="#2b3a3c"/>
+      <stop offset="100%" stop-color="#3f9a92"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="url(#g)"/>
+  <text
+    x="32"
+    y="34"
+    text-anchor="middle"
+    dominant-baseline="central"
+    font-family="Fraunces, 'Times New Roman', Georgia, serif"
+    font-size="34"
+    font-weight="600"
+    fill="#fbfbf9"
+  >R</text>
+</svg>
