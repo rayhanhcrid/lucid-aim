@@ -84,7 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-24px)] max-w-[420px] -translate-x-1/2 items-center justify-around rounded-full bg-surface/70 px-2 py-2 shadow-[0_16px_48px_-12px_oklch(0_0_0/0.7)] backdrop-blur-2xl hairline md:hidden">
+      <nav className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-24px)] max-w-[420px] -translate-x-1/2 items-center justify-around rounded-full bg-white/90 px-2 py-2 shadow-[0_18px_50px_-14px_oklch(0.35_0.08_220/0.35)] backdrop-blur-2xl hairline md:hidden">
         {primary.slice(0, 2).map(({ to, label, icon: Icon }) => (
           <NavPill key={to} to={to} label={label} Icon={Icon} active={isActive(to)} />
         ))}
