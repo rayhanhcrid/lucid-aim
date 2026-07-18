@@ -27,9 +27,6 @@ function ProfilePage() {
   const setVisionYear = useStore((s) => s.setVisionYear);
   const todaysFocus = useStore((s) => s.todaysFocus);
   const setTodaysFocus = useStore((s) => s.setTodaysFocus);
-  const todaysSchedule = useStore((s) => s.todaysSchedule);
-  const addScheduleItem = useStore((s) => s.addScheduleItem);
-  const removeScheduleItem = useStore((s) => s.removeScheduleItem);
 
   return (
     <AppShell>
@@ -66,8 +63,9 @@ function ProfilePage() {
         <TagList title={`Visi ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Tambah item visi" />
 
         <FocusList items={todaysFocus} onChange={setTodaysFocus} />
-
-        <ScheduleList items={todaysSchedule} onAdd={addScheduleItem} onRemove={removeScheduleItem} />
+        <p className="rounded-2xl bg-black/[0.03] px-4 py-3 text-xs text-muted-foreground hairline">
+          Jadwal untuk esok kini diatur langsung di halaman <span className="text-foreground">Jurnal</span>, dan bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
+        </p>
       </div>
     </AppShell>
   );
@@ -92,7 +90,7 @@ function TagList({
       <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       <ul className="mb-3 flex flex-wrap gap-1.5">
         {items.map((i) => (
-          <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3 py-1.5 text-sm">
+          <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-black/[0.05] px-3 py-1.5 text-sm">
             {i.label}
             <button onClick={() => onRemove(i.id)} className="text-muted-foreground hover:text-foreground" aria-label={`Hapus ${i.label}`}>
               <X className="size-3" />
@@ -107,7 +105,7 @@ function TagList({
           onAdd(v.trim());
           setV("");
         }}
-        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
       >
         <Plus className="size-4 text-muted-foreground" />
         <input
@@ -144,7 +142,7 @@ function FocusList({ items, onChange }: { items: string[]; onChange: (list: stri
           onChange([...items, v.trim()]);
           setV("");
         }}
-        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
       >
         <Plus className="size-4 text-muted-foreground" />
         <input
@@ -158,56 +156,3 @@ function FocusList({ items, onChange }: { items: string[]; onChange: (list: stri
   );
 }
 
-function ScheduleList({
-  items,
-  onAdd,
-  onRemove,
-}: {
-  items: { id: string; time: string; label: string }[];
-  onAdd: (time: string, label: string) => void;
-  onRemove: (id: string) => void;
-}) {
-  const [time, setTime] = useState("08:00");
-  const [label, setLabel] = useState("");
-  return (
-    <div className="rounded-2xl card-cinema p-5">
-      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Jadwal hari ini</p>
-      <ul className="mb-3 space-y-1.5">
-        {items.map((s) => (
-          <li key={s.id} className="flex items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2 text-sm">
-            <span className="w-12 font-serif text-base tabular-nums text-gold">{s.time}</span>
-            <span className="flex-1">{s.label}</span>
-            <button onClick={() => onRemove(s.id)} className="text-muted-foreground hover:text-foreground" aria-label="Hapus">
-              <X className="size-3" />
-            </button>
-          </li>
-        ))}
-      </ul>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!label.trim()) return;
-          onAdd(time, label.trim());
-          setLabel("");
-        }}
-        className="flex items-center gap-2 rounded-full bg-white/[0.03] px-3 py-2"
-      >
-        <input
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          className="w-20 bg-transparent text-sm tabular-nums outline-none"
-        />
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="Tambah agenda"
-          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-        />
-        <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
-          <Plus className="size-4" />
-        </button>
-      </form>
-    </div>
-  );
-}

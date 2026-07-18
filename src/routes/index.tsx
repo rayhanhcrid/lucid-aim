@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowUpRight, Flame, Clock, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Check, ArrowUpRight, Flame, Clock, Sparkles, Plus, X, Target } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
@@ -26,12 +27,20 @@ function Index() {
   const completions = useStore((s) => s.completions);
   const toggleHabit = useStore((s) => s.toggleHabit);
   const todaysFocus = useStore((s) => s.todaysFocus);
-  const todaysSchedule = useStore((s) => s.todaysSchedule);
+  const schedules = useStore((s) => s.schedules);
+  const addScheduleItem = useStore((s) => s.addScheduleItem);
+  const removeScheduleItem = useStore((s) => s.removeScheduleItem);
+  const goals = useStore((s) => s.goals);
   const becoming = useStore((s) => s.becoming);
   const vision = useStore((s) => s.vision);
   const visionYear = useStore((s) => s.visionYear);
 
   const today = todayKey();
+  const todaysSchedule = schedules[today] || [];
+  const weeklyGoals = goals.filter((g) => g.horizon === "weekly");
+  const weeklyPct = weeklyGoals.length
+    ? Math.round(weeklyGoals.reduce((s, g) => s + g.progress, 0) / weeklyGoals.length)
+    : 0;
   const doneToday = habits.filter((h) => (completions[h.id] || []).includes(today)).length;
   const total = habits.length || 1;
   const pct = Math.round((doneToday / total) * 100);
@@ -109,59 +118,64 @@ function Index() {
       </section>
 
       {/* Today's schedule */}
-      {todaysSchedule.length > 0 && (
+      <ScheduleSection
+        date={today}
+        items={todaysSchedule}
+        nextIdx={nextScheduleIdx}
+        nowHHmm={nowHHmm}
+        hydrated={hydrated}
+        onAdd={(t, l) => addScheduleItem(today, t, l)}
+        onRemove={(id) => removeScheduleItem(today, id)}
+      />
+
+      {/* Weekly goals */}
+      {weeklyGoals.length > 0 && (
         <section className="animate-rise mb-10">
           <div className="mb-4 flex items-end justify-between">
             <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              <Clock className="size-3" />
-              Jadwal hari ini
+              <Target className="size-3" />
+              Tujuan minggu ini
             </p>
-            <Link
-              to="/profile"
-              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              Atur <ArrowUpRight className="size-3" />
-            </Link>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-serif text-base text-foreground tabular-nums">{weeklyPct}%</span>
+              <span>rata-rata</span>
+            </div>
           </div>
-          <ol className="relative space-y-2 pl-4">
-            <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/30 via-white/10 to-transparent" />
-            {todaysSchedule.map((s, i) => {
-              const isNext = hydrated && i === nextScheduleIdx;
-              const passed = hydrated && s.time < nowHHmm;
+          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
+              style={{ width: `${hydrated ? weeklyPct : 0}%` }}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
+            {weeklyGoals.map((g, i) => {
+              const done = g.milestones.filter((m) => m.done).length;
               return (
-                <li key={s.id} className="relative flex items-center gap-3">
-                  <span
-                    className={[
-                      "absolute -left-[13px] grid size-3 place-items-center rounded-full",
-                      isNext
-                        ? "bg-gold shadow-[0_0_12px_2px_oklch(0.82_0.12_75/0.55)]"
-                        : passed
-                          ? "bg-white/20"
-                          : "bg-white/40",
-                    ].join(" ")}
-                  />
-                  <div
-                    className={[
-                      "flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
-                      isNext
-                        ? "bg-gradient-to-r from-[oklch(0.28_0.06_60)] to-[oklch(0.19_0.02_60)] hairline-gold animate-pulse-glow"
-                        : passed
-                          ? "bg-surface/40 text-muted-foreground hairline"
-                          : "bg-surface/60 hairline",
-                    ].join(" ")}
-                  >
-                    <span className="w-12 font-serif text-base tabular-nums">{s.time}</span>
-                    <span className={passed ? "line-through" : ""}>{s.label}</span>
-                    {isNext && (
-                      <span className="ml-auto text-[10px] uppercase tracking-widest text-gold">
-                        berikutnya
-                      </span>
-                    )}
+                <Link
+                  key={g.id}
+                  to="/goals"
+                  className="card-cinema group animate-float-y block p-4 transition hover:-translate-y-0.5"
+                  style={{ animationDelay: `${i * 0.28}s` }}
+                >
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <p className="font-serif text-lg leading-tight">{g.title}</p>
+                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                      {g.progress}%
+                    </span>
                   </div>
-                </li>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-black/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                      style={{ width: `${hydrated ? g.progress : 0}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    {done} / {g.milestones.length} tonggak
+                  </p>
+                </Link>
               );
             })}
-          </ol>
+          </div>
         </section>
       )}
 
@@ -206,8 +220,8 @@ function Index() {
                     className={[
                       "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
                       done
-                        ? "bg-white/[0.04] text-muted-foreground"
-                        : "bg-gradient-to-br from-white/[0.07] to-white/[0.02] text-gold",
+                        ? "bg-black/[0.04] text-muted-foreground"
+                        : "bg-gradient-to-br from-black/[0.07] to-black/[0.02] text-gold",
                     ].join(" ")}
                   >
                     <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
@@ -232,7 +246,7 @@ function Index() {
                     "grid size-6 shrink-0 place-items-center rounded-full transition-all",
                     done
                       ? "bg-gold text-canvas scale-100"
-                      : "ring-2 ring-white/15 group-hover:ring-gold/60",
+                      : "ring-2 ring-black/15 group-hover:ring-gold/60",
                   ].join(" ")}
                 >
                   {done && <Check className="size-3.5" strokeWidth={3} />}
@@ -260,7 +274,7 @@ function VisionCard({
       className={[
         "rounded-[28px] p-6 transition hover:translate-y-[-2px]",
         dashed
-          ? "border border-dashed border-gold/25 bg-gradient-to-br from-[oklch(0.22_0.04_55)]/40 to-transparent"
+          ? "border border-dashed border-gold/25 bg-gradient-to-br from-[oklch(0.96_0.02_195)]/40 to-transparent"
           : "card-cinema",
       ].join(" ")}
     >
@@ -281,5 +295,131 @@ function VisionCard({
         ))}
       </ul>
     </div>
+  );
+}
+
+type SchedItem = { id: string; time: string; label: string };
+
+function ScheduleSection({
+  date,
+  items,
+  nextIdx,
+  nowHHmm,
+  hydrated,
+  onAdd,
+  onRemove,
+}: {
+  date: string;
+  items: SchedItem[];
+  nextIdx: number;
+  nowHHmm: string;
+  hydrated: boolean;
+  onAdd: (time: string, label: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [time, setTime] = useState("08:00");
+  const [label, setLabel] = useState("");
+  return (
+    <section className="animate-rise mb-10">
+      <div className="mb-4 flex items-end justify-between">
+        <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          <Clock className="size-3" />
+          Jadwal hari ini
+        </p>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
+        >
+          {open ? "Tutup" : (<><Plus className="size-3" /> Tambah</>)}
+        </button>
+      </div>
+
+      {open && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!label.trim()) return;
+            onAdd(time, label.trim());
+            setLabel("");
+          }}
+          className="mb-3 flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+        >
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className="w-20 bg-transparent text-sm tabular-nums outline-none"
+          />
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Agenda untuk hari ini"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            autoFocus
+          />
+          <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
+            <Plus className="size-4" />
+          </button>
+        </form>
+      )}
+
+      {items.length === 0 ? (
+        <p className="rounded-2xl bg-black/[0.03] p-4 text-sm text-muted-foreground hairline">
+          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> untuk esok, atau tambah langsung di sini.
+        </p>
+      ) : (
+        <ol className="relative space-y-2 pl-4">
+          <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/40 via-black/10 to-transparent" />
+          {items.map((s, i) => {
+            const isNext = hydrated && i === nextIdx;
+            const passed = hydrated && s.time < nowHHmm;
+            return (
+              <li key={s.id} className="relative flex items-center gap-3">
+                <span
+                  className={[
+                    "absolute -left-[13px] grid size-3 place-items-center rounded-full",
+                    isNext
+                      ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_195/0.55)]"
+                      : passed
+                        ? "bg-black/20"
+                        : "bg-black/40",
+                  ].join(" ")}
+                />
+                <div
+                  className={[
+                    "group flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
+                    isNext
+                      ? "bg-gradient-to-r from-[oklch(0.94_0.03_195)] to-[oklch(0.99_0.005_200)] hairline-gold animate-pulse-glow"
+                      : passed
+                        ? "bg-black/[0.02] text-muted-foreground hairline"
+                        : "bg-white/70 hairline",
+                  ].join(" ")}
+                >
+                  <span className="w-12 font-serif text-base tabular-nums">{s.time}</span>
+                  <span className={passed ? "flex-1 line-through" : "flex-1"}>{s.label}</span>
+                  {isNext && (
+                    <span className="text-[10px] uppercase tracking-widest text-gold">
+                      berikutnya
+                    </span>
+                  )}
+                  <button
+                    onClick={() => onRemove(s.id)}
+                    className="rounded-md p-1 text-muted-foreground opacity-0 transition hover:bg-black/[0.05] hover:text-foreground group-hover:opacity-100"
+                    aria-label="Hapus"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        Isi jadwal esok dari <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok akan muncul di sini dan tetap bisa disesuaikan.
+      </p>
+      <span className="sr-only">{date}</span>
+    </section>
   );
 }

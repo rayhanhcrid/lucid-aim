@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Plus, X, Clock } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { todayKey, useHydrated, useStore } from "@/lib/store";
 
@@ -17,8 +18,22 @@ function JournalPage() {
   const hydrated = useHydrated();
   const journal = useStore((s) => s.journal);
   const upsert = useStore((s) => s.upsertJournal);
+  const schedules = useStore((s) => s.schedules);
+  const addScheduleItem = useStore((s) => s.addScheduleItem);
+  const removeScheduleItem = useStore((s) => s.removeScheduleItem);
 
   const today = todayKey();
+  const tomorrow = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return todayKey(d);
+  })();
+  const tomorrowLabel = new Date(Date.now() + 86400000).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  const tomorrowSchedule = schedules[tomorrow] || [];
   const existing = journal.find((j) => j.date === today);
 
   const [form, setForm] = useState({
@@ -58,6 +73,14 @@ function JournalPage() {
         <JournalField label="Kemenangan hari ini" placeholder="Satu kemenangan kecil." value={form.winToday} onChange={(v) => setForm({ ...form, winToday: v })} />
         <JournalField label="Fokus untuk esok" placeholder="Satu hal terpenting untuk esok." value={form.tomorrowFocus} onChange={(v) => setForm({ ...form, tomorrowFocus: v })} />
 
+        <TomorrowSchedule
+          date={tomorrow}
+          label={tomorrowLabel}
+          items={hydrated ? tomorrowSchedule : []}
+          onAdd={(t, l) => addScheduleItem(tomorrow, t, l)}
+          onRemove={(id) => removeScheduleItem(tomorrow, id)}
+        />
+
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
             {saved ? "Tersimpan · terima kasih sudah hadir" : "Halaman ini pribadi, hanya di perangkatmu."}
@@ -68,7 +91,7 @@ function JournalPage() {
               setSaved(true);
               setTimeout(() => setSaved(false), 2400);
             }}
-            className="rounded-full bg-gradient-to-br from-[oklch(0.82_0.12_75)] to-[oklch(0.55_0.15_35)] px-5 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.82_0.12_75/0.5)] active:scale-95"
+            className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-5 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
           >
             Simpan
           </button>
@@ -154,12 +177,89 @@ function Scale({
             onClick={() => onChange(n)}
             className={[
               "h-8 flex-1 rounded-lg transition",
-              n <= value ? "bg-gradient-to-t from-[oklch(0.55_0.15_35)] to-[oklch(0.82_0.12_75)]" : "bg-white/[0.06] hover:bg-white/[0.1]",
+              n <= value ? "bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)]" : "bg-black/[0.06] hover:bg-black/[0.1]",
             ].join(" ")}
             aria-label={`${label} ${n}`}
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function TomorrowSchedule({
+  date,
+  label,
+  items,
+  onAdd,
+  onRemove,
+}: {
+  date: string;
+  label: string;
+  items: { id: string; time: string; label: string }[];
+  onAdd: (time: string, label: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [time, setTime] = useState("08:00");
+  const [text, setText] = useState("");
+  return (
+    <div className="rounded-2xl card-cinema p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <Clock className="size-3" /> Jadwal untuk esok
+        </span>
+        <span className="text-[10px] uppercase tracking-widest text-gold">{label}</span>
+      </div>
+      {items.length > 0 ? (
+        <ul className="mb-3 space-y-1.5">
+          {items.map((s) => (
+            <li
+              key={s.id}
+              className="flex items-center gap-3 rounded-xl bg-black/[0.03] px-3 py-2 text-sm hairline"
+            >
+              <span className="w-12 font-serif text-base tabular-nums text-gold">{s.time}</span>
+              <span className="flex-1">{s.label}</span>
+              <button
+                onClick={() => onRemove(s.id)}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Hapus"
+              >
+                <X className="size-3" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mb-3 text-sm italic text-muted-foreground">
+          Tulis rencana esok — akan langsung muncul di beranda ketika hari berganti.
+        </p>
+      )}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!text.trim()) return;
+          onAdd(time, text.trim());
+          setText("");
+        }}
+        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+      >
+        <input
+          type="time"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          className="w-20 bg-transparent text-sm tabular-nums outline-none"
+        />
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Agenda esok…"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
+        <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
+          <Plus className="size-4" />
+        </button>
+      </form>
+      <span className="sr-only">{date}</span>
     </div>
   );
 }
