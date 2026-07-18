@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ArrowUpRight, Flame, Clock, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { Check, ArrowUpRight, Flame, Clock, Sparkles, Plus, X, Target } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
@@ -26,12 +27,20 @@ function Index() {
   const completions = useStore((s) => s.completions);
   const toggleHabit = useStore((s) => s.toggleHabit);
   const todaysFocus = useStore((s) => s.todaysFocus);
-  const todaysSchedule = useStore((s) => s.todaysSchedule);
+  const schedules = useStore((s) => s.schedules);
+  const addScheduleItem = useStore((s) => s.addScheduleItem);
+  const removeScheduleItem = useStore((s) => s.removeScheduleItem);
+  const goals = useStore((s) => s.goals);
   const becoming = useStore((s) => s.becoming);
   const vision = useStore((s) => s.vision);
   const visionYear = useStore((s) => s.visionYear);
 
   const today = todayKey();
+  const todaysSchedule = schedules[today] || [];
+  const weeklyGoals = goals.filter((g) => g.horizon === "weekly");
+  const weeklyPct = weeklyGoals.length
+    ? Math.round(weeklyGoals.reduce((s, g) => s + g.progress, 0) / weeklyGoals.length)
+    : 0;
   const doneToday = habits.filter((h) => (completions[h.id] || []).includes(today)).length;
   const total = habits.length || 1;
   const pct = Math.round((doneToday / total) * 100);
