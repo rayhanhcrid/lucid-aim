@@ -42,7 +42,7 @@ type State = {
   vision: VisionItem[];
   visionYear: string;
   todaysFocus: string[];
-  todaysSchedule: { id: string; time: string; label: string }[];
+  schedules: Record<string, { id: string; time: string; label: string }[]>;
   habits: Habit[];
   completions: Record<string, string[]>; // habitId -> [yyyy-mm-dd]
   goals: Goal[];
@@ -50,9 +50,10 @@ type State = {
 
   setName: (n: string) => void;
   setTodaysFocus: (items: string[]) => void;
-  addScheduleItem: (time: string, label: string) => void;
-  removeScheduleItem: (id: string) => void;
-  setSchedule: (items: { id: string; time: string; label: string }[]) => void;
+  addScheduleItem: (date: string, time: string, label: string) => void;
+  removeScheduleItem: (date: string, id: string) => void;
+  updateScheduleItem: (date: string, id: string, patch: { time?: string; label?: string }) => void;
+  setSchedule: (date: string, items: { id: string; time: string; label: string }[]) => void;
   addBecoming: (label: string) => void;
   removeBecoming: (id: string) => void;
   addVision: (label: string) => void;
@@ -82,7 +83,7 @@ export const todayKey = (d: Date = new Date()) => {
 
 const seed: Pick<
   State,
-  "name" | "becoming" | "vision" | "visionYear" | "todaysFocus" | "todaysSchedule" | "habits" | "completions" | "goals" | "journal"
+  "name" | "becoming" | "vision" | "visionYear" | "todaysFocus" | "schedules" | "habits" | "completions" | "goals" | "journal"
 > = {
   name: "Syams",
   visionYear: "2026",
@@ -106,13 +107,15 @@ const seed: Pick<
     "Sesi gym",
     "Baca 20 halaman",
   ],
-  todaysSchedule: [
-    { id: uid(), time: "06:00", label: "Meditasi & jurnal pagi" },
-    { id: uid(), time: "09:00", label: "Deep work — skripsi" },
-    { id: uid(), time: "13:00", label: "Editing video" },
-    { id: uid(), time: "17:30", label: "Latihan di gym" },
-    { id: uid(), time: "21:00", label: "Baca & refleksi" },
-  ],
+  schedules: {
+    [todayKey()]: [
+      { id: uid(), time: "06:00", label: "Meditasi & jurnal pagi" },
+      { id: uid(), time: "09:00", label: "Deep work — skripsi" },
+      { id: uid(), time: "13:00", label: "Editing video" },
+      { id: uid(), time: "17:30", label: "Latihan di gym" },
+      { id: uid(), time: "21:00", label: "Baca & refleksi" },
+    ],
+  },
   habits: [
     { id: "h1", name: "Meditasi pagi",        emoji: "meditation", category: "Pikiran", priority: "high", duration: "10 mnt", createdAt: new Date().toISOString() },
     { id: "h2", name: "Sesi deep work",       emoji: "work",       category: "Fokus",   priority: "high", duration: "90 mnt", createdAt: new Date().toISOString() },
@@ -142,6 +145,31 @@ const seed: Pick<
     return c;
   })(),
   goals: [
+    {
+      id: "gw1",
+      title: "Selesai bab 5 skripsi",
+      horizon: "weekly",
+      progress: 40,
+      milestones: [
+        { id: uid(), title: "Kerangka bab 5", done: true },
+        { id: uid(), title: "Draft pembahasan", done: false },
+        { id: uid(), title: "Simpulan awal", done: false },
+      ],
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: "gw2",
+      title: "Rekam 2 video panjang",
+      horizon: "weekly",
+      progress: 50,
+      milestones: [
+        { id: uid(), title: "Naskah video A", done: true },
+        { id: uid(), title: "Naskah video B", done: true },
+        { id: uid(), title: "Rekam video A", done: false },
+        { id: uid(), title: "Rekam video B", done: false },
+      ],
+      createdAt: new Date().toISOString(),
+    },
     {
       id: "g1",
       title: "Lulus dengan cumlaude",
@@ -192,11 +220,32 @@ export const useStore = create<State>()(
       ...seed,
       setName: (name) => set({ name }),
       setTodaysFocus: (todaysFocus) => set({ todaysFocus }),
-      addScheduleItem: (time, label) =>
-        set((s) => ({ todaysSchedule: [...s.todaysSchedule, { id: uid(), time, label }].sort((a, b) => a.time.localeCompare(b.time)) })),
-      removeScheduleItem: (id) =>
-        set((s) => ({ todaysSchedule: s.todaysSchedule.filter((i) => i.id !== id) })),
-      setSchedule: (todaysSchedule) => set({ todaysSchedule }),
+      addScheduleItem: (date, time, label) =>
+        set((s) => {
+          const list = s.schedules[date] || [];
+          const next = [...list, { id: uid(), time, label }].sort((a, b) =>
+            a.time.localeCompare(b.time),
+          );
+          return { schedules: { ...s.schedules, [date]: next } };
+        }),
+      removeScheduleItem: (date, id) =>
+        set((s) => ({
+          schedules: {
+            ...s.schedules,
+            [date]: (s.schedules[date] || []).filter((i) => i.id !== id),
+          },
+        })),
+      updateScheduleItem: (date, id, patch) =>
+        set((s) => ({
+          schedules: {
+            ...s.schedules,
+            [date]: (s.schedules[date] || [])
+              .map((i) => (i.id === id ? { ...i, ...patch } : i))
+              .sort((a, b) => a.time.localeCompare(b.time)),
+          },
+        })),
+      setSchedule: (date, items) =>
+        set((s) => ({ schedules: { ...s.schedules, [date]: items } })),
       addBecoming: (label) =>
         set((s) => ({ becoming: [...s.becoming, { id: uid(), label }] })),
       removeBecoming: (id) =>
@@ -283,16 +332,23 @@ export const useStore = create<State>()(
     }),
     {
       name: "aura-life-os",
-      version: 2,
+      version: 3,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
-        if (!persisted.todaysSchedule) persisted.todaysSchedule = seed.todaysSchedule;
+        if (!persisted.schedules) persisted.schedules = {};
+        if (persisted.todaysSchedule && Object.keys(persisted.schedules).length === 0) {
+          persisted.schedules[todayKey()] = persisted.todaysSchedule;
+        }
+        delete persisted.todaysSchedule;
         return persisted;
       },
       merge: (persisted: any, current) => ({
         ...current,
         ...(persisted || {}),
-        todaysSchedule: (persisted && persisted.todaysSchedule) || current.todaysSchedule,
+        schedules: {
+          ...(current.schedules || {}),
+          ...((persisted && persisted.schedules) || {}),
+        },
       }),
     },
   ),
