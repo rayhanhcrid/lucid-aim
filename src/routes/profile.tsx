@@ -156,4 +156,3 @@ function FocusList({ items, onChange }: { items: string[]; onChange: (list: stri
   );
 }
 
-}
