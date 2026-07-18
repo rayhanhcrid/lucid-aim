@@ -297,3 +297,129 @@ function VisionCard({
     </div>
   );
 }
+
+type SchedItem = { id: string; time: string; label: string };
+
+function ScheduleSection({
+  date,
+  items,
+  nextIdx,
+  nowHHmm,
+  hydrated,
+  onAdd,
+  onRemove,
+}: {
+  date: string;
+  items: SchedItem[];
+  nextIdx: number;
+  nowHHmm: string;
+  hydrated: boolean;
+  onAdd: (time: string, label: string) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [time, setTime] = useState("08:00");
+  const [label, setLabel] = useState("");
+  return (
+    <section className="animate-rise mb-10">
+      <div className="mb-4 flex items-end justify-between">
+        <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          <Clock className="size-3" />
+          Jadwal hari ini
+        </p>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
+        >
+          {open ? "Tutup" : (<><Plus className="size-3" /> Tambah</>)}
+        </button>
+      </div>
+
+      {open && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!label.trim()) return;
+            onAdd(time, label.trim());
+            setLabel("");
+          }}
+          className="mb-3 flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+        >
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className="w-20 bg-transparent text-sm tabular-nums outline-none"
+          />
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="Agenda untuk hari ini"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            autoFocus
+          />
+          <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
+            <Plus className="size-4" />
+          </button>
+        </form>
+      )}
+
+      {items.length === 0 ? (
+        <p className="rounded-2xl bg-black/[0.03] p-4 text-sm text-muted-foreground hairline">
+          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> untuk esok, atau tambah langsung di sini.
+        </p>
+      ) : (
+        <ol className="relative space-y-2 pl-4">
+          <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/40 via-black/10 to-transparent" />
+          {items.map((s, i) => {
+            const isNext = hydrated && i === nextIdx;
+            const passed = hydrated && s.time < nowHHmm;
+            return (
+              <li key={s.id} className="relative flex items-center gap-3">
+                <span
+                  className={[
+                    "absolute -left-[13px] grid size-3 place-items-center rounded-full",
+                    isNext
+                      ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_195/0.55)]"
+                      : passed
+                        ? "bg-black/20"
+                        : "bg-black/40",
+                  ].join(" ")}
+                />
+                <div
+                  className={[
+                    "group flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
+                    isNext
+                      ? "bg-gradient-to-r from-[oklch(0.94_0.03_195)] to-[oklch(0.99_0.005_200)] hairline-gold animate-pulse-glow"
+                      : passed
+                        ? "bg-black/[0.02] text-muted-foreground hairline"
+                        : "bg-white/70 hairline",
+                  ].join(" ")}
+                >
+                  <span className="w-12 font-serif text-base tabular-nums">{s.time}</span>
+                  <span className={passed ? "flex-1 line-through" : "flex-1"}>{s.label}</span>
+                  {isNext && (
+                    <span className="text-[10px] uppercase tracking-widest text-gold">
+                      berikutnya
+                    </span>
+                  )}
+                  <button
+                    onClick={() => onRemove(s.id)}
+                    className="rounded-md p-1 text-muted-foreground opacity-0 transition hover:bg-black/[0.05] hover:text-foreground group-hover:opacity-100"
+                    aria-label="Hapus"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        Isi jadwal esok dari <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok akan muncul di sini dan tetap bisa disesuaikan.
+      </p>
+      <span className="sr-only">{date}</span>
+    </section>
+  );
+}
