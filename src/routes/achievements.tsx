@@ -6,7 +6,7 @@ export const Route = createFileRoute("/achievements")({
   head: () => ({
     meta: [
       { title: "Pencapaian · Aura" },
-      { name: "description", content: "Tonggak-tonggak tenang untuk diri yang sedang kamu tuju." },
+      { name: "description", content: "Pencapaian kecil yang menandai progres perjalananmu." },
     ],
   }),
   component: AchievementsPage,

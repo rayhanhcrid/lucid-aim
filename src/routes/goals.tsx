@@ -152,7 +152,7 @@ function GoalsPage() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md space-y-4 rounded-[28px] card-cinema p-6"
+            className="max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto rounded-[28px] card-cinema p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-serif text-2xl">Tujuan baru</h2>

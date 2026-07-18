@@ -27,6 +27,7 @@ function Index() {
   const completions = useStore((s) => s.completions);
   const toggleHabit = useStore((s) => s.toggleHabit);
   const todaysFocus = useStore((s) => s.todaysFocus);
+  const toggleFocusItem = useStore((s) => s.toggleFocusItem);
   const schedules = useStore((s) => s.schedules);
   const addScheduleItem = useStore((s) => s.addScheduleItem);
   const removeScheduleItem = useStore((s) => s.removeScheduleItem);
@@ -44,6 +45,10 @@ function Index() {
   const doneToday = habits.filter((h) => (completions[h.id] || []).includes(today)).length;
   const total = habits.length || 1;
   const pct = Math.round((doneToday / total) * 100);
+
+  const doneFocus = todaysFocus.filter((f) => f.done).length;
+  const totalFocus = todaysFocus.length || 1;
+  const focusPct = Math.round((doneFocus / totalFocus) * 100);
 
   const overallStreak = Math.max(
     0,
@@ -77,42 +82,64 @@ function Index() {
       {/* Focus + Ring */}
       <section className="animate-rise mb-10 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:gap-10">
         <div>
-          <p className="mb-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            <Sparkles className="size-3 text-gold animate-breathe" />
-            Fokus hari ini
-          </p>
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+              <Sparkles className="size-3 text-gold animate-breathe" />
+              Fokus hari ini
+            </p>
+            {todaysFocus.length > 0 && (
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {hydrated ? `${doneFocus}/${todaysFocus.length} · ${focusPct}%` : "—"}
+              </span>
+            )}
+          </div>
           <ul className="space-y-2">
-            {todaysFocus.map((f, i) => (
-              <li
-                key={i}
-                className="group flex items-center gap-3 rounded-2xl bg-surface/50 px-3.5 py-2.5 text-[15px] text-foreground/90 hairline transition hover:bg-surface animate-float-y"
-                style={{ animationDelay: `${i * 0.25}s` }}
-              >
-                <span className="relative grid size-2 place-items-center">
-                  <span className="absolute inset-0 rounded-full bg-gold/40 blur-[3px] animate-breathe" />
-                  <span className="relative size-1.5 rounded-full bg-gold" />
-                </span>
-                <span className="flex-1">{f}</span>
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 opacity-0 transition group-hover:opacity-100">
-                  #{i + 1}
-                </span>
-              </li>
-            ))}
+            {todaysFocus.map((f, i) => {
+              const done = hydrated && f.done;
+              return (
+                <li key={f.id}>
+                  <button
+                    onClick={() => toggleFocusItem(f.id)}
+                    className="group flex w-full items-center gap-3 rounded-2xl bg-surface/50 px-3.5 py-2.5 text-left text-[15px] hairline transition hover:bg-surface animate-float-y"
+                    style={{ animationDelay: `${i * 0.25}s` }}
+                  >
+                    <span
+                      className={[
+                        "grid size-5 shrink-0 place-items-center rounded-full transition-all",
+                        done
+                          ? "bg-gold text-canvas"
+                          : "ring-2 ring-black/15 group-hover:ring-gold/60",
+                      ].join(" ")}
+                    >
+                      {done && <Check className="size-3" strokeWidth={3} />}
+                    </span>
+                    <span
+                      className={[
+                        "flex-1",
+                        done ? "text-muted-foreground line-through" : "text-foreground/90",
+                      ].join(" ")}
+                    >
+                      {f.label}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
           {overallStreak > 0 && (
             <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 hairline-gold">
               <Flame className="size-3.5 text-gold" />
               <span className="text-xs text-muted-foreground">
-                Beruntun {overallStreak} hari · jaga apinya
+                Beruntun {overallStreak} hari · terus pertahankan
               </span>
             </div>
           )}
         </div>
         <div className="flex md:block">
           <ProgressRing
-            value={hydrated ? pct : 0}
-            label={`${hydrated ? pct : 0}%`}
-            sub={`${doneToday} dari ${habits.length}`}
+            value={hydrated ? focusPct : 0}
+            label={`${hydrated ? focusPct : 0}%`}
+            sub={`${doneFocus} dari ${todaysFocus.length}`}
           />
         </div>
       </section>
@@ -201,6 +228,21 @@ function Index() {
           >
             Semua <ArrowUpRight className="size-3" />
           </Link>
+        </div>
+
+        <div className="mb-4">
+          <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
+            <span>Progres hari ini</span>
+            <span className="tabular-nums text-foreground">
+              {hydrated ? `${doneToday}/${habits.length} · ${pct}%` : "—"}
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
+              style={{ width: `${hydrated ? pct : 0}%` }}
+            />
+          </div>
         </div>
 
         <div className="space-y-2.5">

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
       { title: "Profil · Aura" },
-      { name: "description", content: "Bentuk identitas dan visi yang hari-harimu layani." },
+      { name: "description", content: "Atur identitas dan visi yang jadi arah harimu." },
     ],
   }),
   component: ProfilePage,
@@ -26,7 +26,8 @@ function ProfilePage() {
   const visionYear = useStore((s) => s.visionYear);
   const setVisionYear = useStore((s) => s.setVisionYear);
   const todaysFocus = useStore((s) => s.todaysFocus);
-  const setTodaysFocus = useStore((s) => s.setTodaysFocus);
+  const addFocusItem = useStore((s) => s.addFocusItem);
+  const removeFocusItem = useStore((s) => s.removeFocusItem);
 
   return (
     <AppShell>
@@ -62,7 +63,7 @@ function ProfilePage() {
 
         <TagList title={`Visi ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Tambah item visi" />
 
-        <FocusList items={todaysFocus} onChange={setTodaysFocus} />
+        <FocusList items={todaysFocus} onAdd={addFocusItem} onRemove={removeFocusItem} />
         <p className="rounded-2xl bg-black/[0.03] px-4 py-3 text-xs text-muted-foreground hairline">
           Jadwal untuk esok kini diatur langsung di halaman <span className="text-foreground">Jurnal</span>, dan bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
         </p>
@@ -119,17 +120,27 @@ function TagList({
   );
 }
 
-function FocusList({ items, onChange }: { items: string[]; onChange: (list: string[]) => void }) {
+function FocusList({
+  items,
+  onAdd,
+  onRemove,
+}: {
+  items: { id: string; label: string; done: boolean }[];
+  onAdd: (label: string) => void;
+  onRemove: (id: string) => void;
+}) {
   const [v, setV] = useState("");
   return (
     <div className="rounded-2xl card-cinema p-5">
       <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Fokus hari ini</p>
       <ul className="mb-3 space-y-2">
-        {items.map((f, i) => (
-          <li key={i} className="flex items-center gap-3 text-sm">
-            <span className="size-1.5 rounded-full bg-gold" />
-            <span className="flex-1">{f}</span>
-            <button onClick={() => onChange(items.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-foreground" aria-label="Hapus">
+        {items.map((f) => (
+          <li key={f.id} className="flex items-center gap-3 text-sm">
+            <span className={["size-1.5 rounded-full", f.done ? "bg-black/20" : "bg-gold"].join(" ")} />
+            <span className={["flex-1", f.done && "text-muted-foreground line-through"].filter(Boolean).join(" ")}>
+              {f.label}
+            </span>
+            <button onClick={() => onRemove(f.id)} className="text-muted-foreground hover:text-foreground" aria-label="Hapus">
               <X className="size-3" />
             </button>
           </li>
@@ -139,7 +150,7 @@ function FocusList({ items, onChange }: { items: string[]; onChange: (list: stri
         onSubmit={(e) => {
           e.preventDefault();
           if (!v.trim()) return;
-          onChange([...items, v.trim()]);
+          onAdd(v.trim());
           setV("");
         }}
         className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/journal")({
   head: () => ({
     meta: [
       { title: "Jurnal · Aura" },
-      { name: "description", content: "Halaman pribadi untuk hari ini — mood, syukur, dan apa yang esok minta darimu." },
+      { name: "description", content: "Catat mood, rasa syukur, dan satu fokus buat besok." },
     ],
   }),
   component: JournalPage,
@@ -50,7 +50,7 @@ function JournalPage() {
     <AppShell>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Halaman hari ini
+          Catatan hari ini
         </p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Jurnal hari ini</h1>
         <p className="mt-2 text-muted-foreground">
@@ -83,7 +83,7 @@ function JournalPage() {
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {saved ? "Tersimpan · terima kasih sudah hadir" : "Halaman ini pribadi, hanya di perangkatmu."}
+            {saved ? "Tersimpan · terima kasih sudah hadir" : "Otomatis tersimpan ke cloud — bisa dibuka dari device manapun, tanpa login."}
           </span>
           <button
             onClick={() => {

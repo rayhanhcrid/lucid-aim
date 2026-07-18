@@ -41,7 +41,7 @@ function HabitsPage() {
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Susunan hari
+            Rutinitasmu
           </p>
           <h1 className="font-serif text-4xl leading-tight md:text-5xl">Ritual harian</h1>
         </div>
@@ -120,11 +120,11 @@ function HabitsPage() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-[28px] card-cinema p-6"
+            className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-[28px] card-cinema p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="mb-1 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              Ritual baru
+              Kebiasaan baru
             </p>
             <h2 className="font-serif text-2xl">Rancang kebiasaanmu</h2>
 

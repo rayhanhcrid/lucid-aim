@@ -35,13 +35,14 @@ export type JournalEntry = {
 
 export type Identity = { id: string; label: string };
 export type VisionItem = { id: string; label: string };
+export type FocusItem = { id: string; label: string; done: boolean };
 
-type State = {
+export type State = {
   name: string;
   becoming: Identity[];
   vision: VisionItem[];
   visionYear: string;
-  todaysFocus: string[];
+  todaysFocus: FocusItem[];
   schedules: Record<string, { id: string; time: string; label: string }[]>;
   habits: Habit[];
   completions: Record<string, string[]>; // habitId -> [yyyy-mm-dd]
@@ -49,7 +50,9 @@ type State = {
   journal: JournalEntry[];
 
   setName: (n: string) => void;
-  setTodaysFocus: (items: string[]) => void;
+  addFocusItem: (label: string) => void;
+  removeFocusItem: (id: string) => void;
+  toggleFocusItem: (id: string) => void;
   addScheduleItem: (date: string, time: string, label: string) => void;
   removeScheduleItem: (date: string, id: string) => void;
   updateScheduleItem: (date: string, id: string, patch: { time?: string; label?: string }) => void;
@@ -81,10 +84,20 @@ export const todayKey = (d: Date = new Date()) => {
   return `${y}-${m}-${day}`;
 };
 
-const seed: Pick<
-  State,
-  "name" | "becoming" | "vision" | "visionYear" | "todaysFocus" | "schedules" | "habits" | "completions" | "goals" | "journal"
-> = {
+export const SYNCED_KEYS = [
+  "name",
+  "becoming",
+  "vision",
+  "visionYear",
+  "todaysFocus",
+  "schedules",
+  "habits",
+  "completions",
+  "goals",
+  "journal",
+] as const;
+
+const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
   name: "Syams",
   visionYear: "2026",
   becoming: [
@@ -106,7 +119,7 @@ const seed: Pick<
     "Upload satu video",
     "Sesi gym",
     "Baca 20 halaman",
-  ],
+  ].map((label) => ({ id: uid(), label, done: false })),
   schedules: {
     [todayKey()]: [
       { id: uid(), time: "06:00", label: "Meditasi & jurnal pagi" },
@@ -219,7 +232,18 @@ export const useStore = create<State>()(
     (set) => ({
       ...seed,
       setName: (name) => set({ name }),
-      setTodaysFocus: (todaysFocus) => set({ todaysFocus }),
+      addFocusItem: (label) =>
+        set((s) => ({
+          todaysFocus: [...s.todaysFocus, { id: uid(), label, done: false }],
+        })),
+      removeFocusItem: (id) =>
+        set((s) => ({ todaysFocus: s.todaysFocus.filter((f) => f.id !== id) })),
+      toggleFocusItem: (id) =>
+        set((s) => ({
+          todaysFocus: s.todaysFocus.map((f) =>
+            f.id === id ? { ...f, done: !f.done } : f,
+          ),
+        })),
       addScheduleItem: (date, time, label) =>
         set((s) => {
           const list = s.schedules[date] || [];
@@ -332,7 +356,7 @@ export const useStore = create<State>()(
     }),
     {
       name: "aura-life-os",
-      version: 3,
+      version: 4,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
         if (!persisted.schedules) persisted.schedules = {};
@@ -340,6 +364,11 @@ export const useStore = create<State>()(
           persisted.schedules[todayKey()] = persisted.todaysSchedule;
         }
         delete persisted.todaysSchedule;
+        if (Array.isArray(persisted.todaysFocus) && persisted.todaysFocus.some((f: unknown) => typeof f === "string")) {
+          persisted.todaysFocus = persisted.todaysFocus.map((f: unknown) =>
+            typeof f === "string" ? { id: uid(), label: f, done: false } : f,
+          );
+        }
         return persisted;
       },
       merge: (persisted: any, current) => ({

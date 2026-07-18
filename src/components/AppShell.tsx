@@ -107,7 +107,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           onClick={() => setMenu(false)}
         >
           <div
-            className="w-full rounded-t-[32px] card-cinema animate-rise p-6 pb-8"
+            className="max-h-[85vh] w-full overflow-y-auto rounded-t-[32px] card-cinema animate-rise p-6 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15" />

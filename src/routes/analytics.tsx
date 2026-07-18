@@ -6,7 +6,7 @@ export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
       { title: "Analitik · Aura" },
-      { name: "description", content: "Angka-angka tenang dari bulan yang dihidupi dengan baik." },
+      { name: "description", content: "Ringkasan progres dan konsistensi kamu bulan ini." },
     ],
   }),
   component: AnalyticsPage,
@@ -115,8 +115,8 @@ function AnalyticsPage() {
         </p>
         <p className="font-serif text-2xl italic leading-snug text-balance">
           Kamu paling produktif di hari{" "}
-          <span className="text-gold not-italic">{dowLabel[bestDow.wd]}</span>. Jaga jendela itu —
-          di sanalah bunga majemuknya tumbuh.
+          <span className="text-gold not-italic">{dowLabel[bestDow.wd]}</span>. Manfaatin momentum
+          itu — di situ progres kamu tumbuh paling cepat.
         </p>
       </section>
     </AppShell>
