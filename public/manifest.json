@@ -1,0 +1,25 @@
+{
+  "name": "Aura",
+  "short_name": "Aura",
+  "description": "Aura — Sistem Operasi Pribadi yang tenang & sinematik untuk membangun diri yang sedang kamu tuju.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fafefe",
+  "theme_color": "#009a9b",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
