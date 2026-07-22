@@ -23,9 +23,9 @@ const primary = [
 ] as const;
 
 const extras = [
-  { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat mood, syukur, & refleksi hari ini." },
-  { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, konsistensi, dan angka bulan ini." },
-  { to: "/achievements", label: "Pencapaian", icon: Award,     desc: "Tonggak-tonggak kecil yang kamu kumpulkan." },
+  { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat mood, gratitude, & refleksi hari ini." },
+  { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, consistency, dan angka bulan ini." },
+  { to: "/achievements", label: "Pencapaian", icon: Award,     desc: "Small milestones yang udah kamu kumpulin." },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -45,12 +45,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="px-7 pb-8 pt-10">
           <Link to="/" className="flex items-center gap-2">
             <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] font-serif text-lg text-canvas shadow-[0_8px_24px_-8px_oklch(0.62_0.11_195/0.6)]">
-              A
+              R
             </div>
-            <span className="font-serif text-2xl tracking-tight">Aura</span>
+            <span className="font-serif text-2xl tracking-tight">Rayhan</span>
           </Link>
           <p className="mt-2 pl-11 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Sistem Diri
+            Life OS
           </p>
         </div>
 
@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="p-4">
           <div className="card-cinema p-4">
             <p className="font-serif text-lg italic leading-snug text-foreground/90">
-              "Langkah kecil yang tenang, perlahan menjadi bentuk sebuah hidup."
+              "Small steps yang tenang, perlahan ngebentuk hidup yang kamu mau."
             </p>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Semua fitur</p>
-                <h3 className="font-serif text-2xl">Jelajah Aura</h3>
+                <h3 className="font-serif text-2xl">Explore Rayhan</h3>
               </div>
               <button
                 onClick={() => setMenu(false)}

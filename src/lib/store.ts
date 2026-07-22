@@ -42,7 +42,7 @@ export type State = {
   becoming: Identity[];
   vision: VisionItem[];
   visionYear: string;
-  todaysFocus: FocusItem[];
+  focusItems: Record<string, FocusItem[]>; // dateKey -> focus items
   schedules: Record<string, { id: string; time: string; label: string }[]>;
   habits: Habit[];
   completions: Record<string, string[]>; // habitId -> [yyyy-mm-dd]
@@ -50,9 +50,9 @@ export type State = {
   journal: JournalEntry[];
 
   setName: (n: string) => void;
-  addFocusItem: (label: string) => void;
-  removeFocusItem: (id: string) => void;
-  toggleFocusItem: (id: string) => void;
+  addFocusItem: (date: string, label: string) => void;
+  removeFocusItem: (date: string, id: string) => void;
+  toggleFocusItem: (date: string, id: string) => void;
   addScheduleItem: (date: string, time: string, label: string) => void;
   removeScheduleItem: (date: string, id: string) => void;
   updateScheduleItem: (date: string, id: string, patch: { time?: string; label?: string }) => void;
@@ -89,7 +89,7 @@ export const SYNCED_KEYS = [
   "becoming",
   "vision",
   "visionYear",
-  "todaysFocus",
+  "focusItems",
   "schedules",
   "habits",
   "completions",
@@ -114,12 +114,14 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
     { id: uid(), label: "Meluncurkan perusahaan" },
     { id: uid(), label: "Berlibur ke Jepang" },
   ],
-  todaysFocus: [
-    "Selesaikan satu bab skripsi",
-    "Upload satu video",
-    "Sesi gym",
-    "Baca 20 halaman",
-  ].map((label) => ({ id: uid(), label, done: false })),
+  focusItems: {
+    [todayKey()]: [
+      "Selesaikan satu bab skripsi",
+      "Upload satu video",
+      "Sesi gym",
+      "Baca 20 halaman",
+    ].map((label) => ({ id: uid(), label, done: false })),
+  },
   schedules: {
     [todayKey()]: [
       { id: uid(), time: "06:00", label: "Meditasi & jurnal pagi" },
@@ -232,17 +234,28 @@ export const useStore = create<State>()(
     (set) => ({
       ...seed,
       setName: (name) => set({ name }),
-      addFocusItem: (label) =>
+      addFocusItem: (date, label) =>
         set((s) => ({
-          todaysFocus: [...s.todaysFocus, { id: uid(), label, done: false }],
+          focusItems: {
+            ...s.focusItems,
+            [date]: [...(s.focusItems[date] || []), { id: uid(), label, done: false }],
+          },
         })),
-      removeFocusItem: (id) =>
-        set((s) => ({ todaysFocus: s.todaysFocus.filter((f) => f.id !== id) })),
-      toggleFocusItem: (id) =>
+      removeFocusItem: (date, id) =>
         set((s) => ({
-          todaysFocus: s.todaysFocus.map((f) =>
-            f.id === id ? { ...f, done: !f.done } : f,
-          ),
+          focusItems: {
+            ...s.focusItems,
+            [date]: (s.focusItems[date] || []).filter((f) => f.id !== id),
+          },
+        })),
+      toggleFocusItem: (date, id) =>
+        set((s) => ({
+          focusItems: {
+            ...s.focusItems,
+            [date]: (s.focusItems[date] || []).map((f) =>
+              f.id === id ? { ...f, done: !f.done } : f,
+            ),
+          },
         })),
       addScheduleItem: (date, time, label) =>
         set((s) => {
@@ -356,7 +369,7 @@ export const useStore = create<State>()(
     }),
     {
       name: "aura-life-os",
-      version: 4,
+      version: 5,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
         if (!persisted.schedules) persisted.schedules = {};
@@ -364,16 +377,23 @@ export const useStore = create<State>()(
           persisted.schedules[todayKey()] = persisted.todaysSchedule;
         }
         delete persisted.todaysSchedule;
-        if (Array.isArray(persisted.todaysFocus) && persisted.todaysFocus.some((f: unknown) => typeof f === "string")) {
-          persisted.todaysFocus = persisted.todaysFocus.map((f: unknown) =>
+        if (Array.isArray(persisted.todaysFocus)) {
+          const list = persisted.todaysFocus.map((f: unknown) =>
             typeof f === "string" ? { id: uid(), label: f, done: false } : f,
           );
+          persisted.focusItems = { ...(persisted.focusItems || {}), [todayKey()]: list };
         }
+        delete persisted.todaysFocus;
+        if (!persisted.focusItems) persisted.focusItems = {};
         return persisted;
       },
       merge: (persisted: any, current) => ({
         ...current,
         ...(persisted || {}),
+        focusItems: {
+          ...(current.focusItems || {}),
+          ...((persisted && persisted.focusItems) || {}),
+        },
         schedules: {
           ...(current.schedules || {}),
           ...((persisted && persisted.schedules) || {}),

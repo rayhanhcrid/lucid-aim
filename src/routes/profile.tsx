@@ -2,13 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { useStore } from "@/lib/store";
+import { todayKey, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
-      { title: "Profil · Aura" },
-      { name: "description", content: "Atur identitas dan visi yang jadi arah harimu." },
+      { title: "Profil · Rayhan" },
+      { name: "description", content: "Atur identitas dan visi yang jadi arah hidup kamu." },
     ],
   }),
   component: ProfilePage,
@@ -25,21 +25,23 @@ function ProfilePage() {
   const removeVision = useStore((s) => s.removeVision);
   const visionYear = useStore((s) => s.visionYear);
   const setVisionYear = useStore((s) => s.setVisionYear);
-  const todaysFocus = useStore((s) => s.todaysFocus);
+  const focusItems = useStore((s) => s.focusItems);
   const addFocusItem = useStore((s) => s.addFocusItem);
   const removeFocusItem = useStore((s) => s.removeFocusItem);
+  const today = todayKey();
+  const todaysFocus = focusItems[today] || [];
 
   return (
     <AppShell>
       <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Kamu</p>
+        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">You</p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Profil</h1>
       </header>
 
       <div className="animate-rise space-y-4">
         <label className="block rounded-2xl card-cinema p-4">
           <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Namamu
+            Your Name
           </span>
           <input
             value={name}
@@ -50,7 +52,7 @@ function ProfilePage() {
 
         <label className="block rounded-2xl card-cinema p-4">
           <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Tahun visi
+            Vision Year
           </span>
           <input
             value={visionYear}
@@ -59,13 +61,17 @@ function ProfilePage() {
           />
         </label>
 
-        <TagList title="Diri yang aku tuju" items={becoming} onAdd={addBecoming} onRemove={removeBecoming} placeholder="Tambah identitas" />
+        <TagList title="Who I'm Becoming" items={becoming} onAdd={addBecoming} onRemove={removeBecoming} placeholder="Add identity" />
 
-        <TagList title={`Visi ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Tambah item visi" />
+        <TagList title={`Vision ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Add vision item" />
 
-        <FocusList items={todaysFocus} onAdd={addFocusItem} onRemove={removeFocusItem} />
+        <FocusList
+          items={todaysFocus}
+          onAdd={(label) => addFocusItem(today, label)}
+          onRemove={(id) => removeFocusItem(today, id)}
+        />
         <p className="rounded-2xl bg-black/[0.03] px-4 py-3 text-xs text-muted-foreground hairline">
-          Jadwal untuk esok kini diatur langsung di halaman <span className="text-foreground">Jurnal</span>, dan bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
+          Jadwal for tomorrow is now set directly di halaman <span className="text-foreground">Jurnal</span>, and bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
         </p>
       </div>
     </AppShell>
@@ -132,7 +138,7 @@ function FocusList({
   const [v, setV] = useState("");
   return (
     <div className="rounded-2xl card-cinema p-5">
-      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Fokus hari ini</p>
+      <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Today's Fokus</p>
       <ul className="mb-3 space-y-2">
         {items.map((f) => (
           <li key={f.id} className="flex items-center gap-3 text-sm">
@@ -159,7 +165,7 @@ function FocusList({
         <input
           value={v}
           onChange={(e) => setV(e.target.value)}
-          placeholder="Tambah fokus untuk hari ini"
+          placeholder="Add fokus for today"
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
       </form>

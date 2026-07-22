@@ -79,15 +79,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Aura — Personal Operating System" },
-      { name: "description", content: "Aura — Sistem Operasi Pribadi yang tenang & sinematik untuk membangun diri yang sedang kamu tuju. Kebiasaan, tujuan, jurnal, dan visi dalam satu sistem." },
-      { property: "og:title", content: "Aura — Personal Operating System" },
-      { property: "og:description", content: "Sistem Operasi Pribadi yang tenang & sinematik untuk membangun diri yang sedang kamu tuju." },
+      { title: "Rayhan — Life OS" },
+      { name: "description", content: "Rayhan — Life OS yang tenang & sinematik buat nge-build diri yang kamu tuju. Habits, goals, journal, dan visi, all in one system." },
+      { property: "og:title", content: "Rayhan — Life OS" },
+      { property: "og:description", content: "Life OS yang tenang & sinematik buat nge-build diri yang kamu tuju." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#009a9b" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
-      { name: "apple-mobile-web-app-title", content: "Aura" },
+      { name: "apple-mobile-web-app-title", content: "Rayhan" },
     ],
     links: [
       {

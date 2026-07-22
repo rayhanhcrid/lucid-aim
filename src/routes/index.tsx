@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ArrowUpRight, Flame, Clock, Sparkles, Plus, X, Target } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
@@ -12,12 +12,42 @@ export const Route = createFileRoute("/")({
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 5)  return "Masih terjaga";
-  if (h < 11) return "Selamat pagi";
-  if (h < 15) return "Selamat siang";
-  if (h < 18) return "Selamat sore";
-  if (h < 22) return "Selamat malam";
-  return "Sudah larut";
+  if (h < 5)  return "Still up";
+  if (h < 11) return "Morning";
+  if (h < 15) return "Afternoon";
+  if (h < 18) return "Evening";
+  if (h < 22) return "Night";
+  return "So late";
+}
+
+function DigitalClock() {
+  const hydrated = useHydrated();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(id);
+  }, []);
+
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const dayLabel = now.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" });
+
+  return (
+    <div
+      className="sticky top-6 z-10 hidden shrink-0 rounded-[24px] md:block"
+      style={{ boxShadow: "0 0 48px -4px oklch(0.62 0.11 195 / 0.75), 0 0 16px -2px oklch(0.62 0.11 195 / 0.5)" }}
+    >
+      <div className="flex flex-col items-center gap-1.5 rounded-[24px] card-cinema px-7 py-5">
+        <span className="font-sans text-4xl font-medium tabular-nums leading-none tracking-tight">
+          {hydrated ? `${hh}:${mm}` : "--:--"}
+        </span>
+        <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+          {hydrated ? dayLabel : "—"}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 function Index() {
@@ -26,7 +56,9 @@ function Index() {
   const habits = useStore((s) => s.habits);
   const completions = useStore((s) => s.completions);
   const toggleHabit = useStore((s) => s.toggleHabit);
-  const todaysFocus = useStore((s) => s.todaysFocus);
+  const focusItems = useStore((s) => s.focusItems);
+  const addFocusItem = useStore((s) => s.addFocusItem);
+  const removeFocusItem = useStore((s) => s.removeFocusItem);
   const toggleFocusItem = useStore((s) => s.toggleFocusItem);
   const schedules = useStore((s) => s.schedules);
   const addScheduleItem = useStore((s) => s.addScheduleItem);
@@ -37,6 +69,7 @@ function Index() {
   const visionYear = useStore((s) => s.visionYear);
 
   const today = todayKey();
+  const todaysFocus = focusItems[today] || [];
   const todaysSchedule = schedules[today] || [];
   const weeklyGoals = goals.filter((g) => g.horizon === "weekly");
   const weeklyPct = weeklyGoals.length
@@ -65,84 +98,34 @@ function Index() {
 
   return (
     <AppShell>
-      <header className="animate-rise mb-10">
-        <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          <span className="inline-block size-1 rounded-full bg-gold animate-breathe" />
-          {dateLabel}
-        </p>
-        <h1 className="font-serif text-5xl leading-[1.05] text-balance md:text-6xl">
-          {greeting()},{" "}
-          <span className="shimmer-text italic">{name}.</span>
-        </h1>
-        <p className="mt-4 max-w-[52ch] text-pretty text-muted-foreground">
-          Hari ini belum ditulis. Satu niat sudah cukup untuk memulainya.
-        </p>
+      <header className="animate-rise mb-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div>
+          <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            <span className="inline-block size-1 rounded-full bg-gold animate-breathe" />
+            {dateLabel}
+          </p>
+          <h1 className="font-serif text-5xl leading-[1.05] text-balance md:text-6xl">
+            {greeting()},{" "}
+            <span className="shimmer-text italic">{name}.</span>
+          </h1>
+          <p className="mt-4 max-w-[52ch] text-pretty text-muted-foreground">
+            Hari ini masih blank sih — satu niat aja udah cukup buat mulai.
+          </p>
+        </div>
+        <DigitalClock />
       </header>
 
       {/* Focus + Ring */}
-      <section className="animate-rise mb-10 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:gap-10">
-        <div>
-          <div className="mb-4 flex items-center justify-between gap-2">
-            <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              <Sparkles className="size-3 text-gold animate-breathe" />
-              Fokus hari ini
-            </p>
-            {todaysFocus.length > 0 && (
-              <span className="text-xs tabular-nums text-muted-foreground">
-                {hydrated ? `${doneFocus}/${todaysFocus.length} · ${focusPct}%` : "—"}
-              </span>
-            )}
-          </div>
-          <ul className="space-y-2">
-            {todaysFocus.map((f, i) => {
-              const done = hydrated && f.done;
-              return (
-                <li key={f.id}>
-                  <button
-                    onClick={() => toggleFocusItem(f.id)}
-                    className="group flex w-full items-center gap-3 rounded-2xl bg-surface/50 px-3.5 py-2.5 text-left text-[15px] hairline transition hover:bg-surface animate-float-y"
-                    style={{ animationDelay: `${i * 0.25}s` }}
-                  >
-                    <span
-                      className={[
-                        "grid size-5 shrink-0 place-items-center rounded-full transition-all",
-                        done
-                          ? "bg-gold text-canvas"
-                          : "ring-2 ring-black/15 group-hover:ring-gold/60",
-                      ].join(" ")}
-                    >
-                      {done && <Check className="size-3" strokeWidth={3} />}
-                    </span>
-                    <span
-                      className={[
-                        "flex-1",
-                        done ? "text-muted-foreground line-through" : "text-foreground/90",
-                      ].join(" ")}
-                    >
-                      {f.label}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-          {overallStreak > 0 && (
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 hairline-gold">
-              <Flame className="size-3.5 text-gold" />
-              <span className="text-xs text-muted-foreground">
-                Beruntun {overallStreak} hari · terus pertahankan
-              </span>
-            </div>
-          )}
-        </div>
-        <div className="flex md:block">
-          <ProgressRing
-            value={hydrated ? focusPct : 0}
-            label={`${hydrated ? focusPct : 0}%`}
-            sub={`${doneFocus} dari ${todaysFocus.length}`}
-          />
-        </div>
-      </section>
+      <FocusSection
+        items={todaysFocus}
+        hydrated={hydrated}
+        doneFocus={doneFocus}
+        focusPct={focusPct}
+        overallStreak={overallStreak}
+        onAdd={(label) => addFocusItem(today, label)}
+        onRemove={(id) => removeFocusItem(today, id)}
+        onToggle={(id) => toggleFocusItem(today, id)}
+      />
 
       {/* Today's schedule */}
       <ScheduleSection
@@ -161,11 +144,11 @@ function Index() {
           <div className="mb-4 flex items-end justify-between">
             <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               <Target className="size-3" />
-              Tujuan minggu ini
+              This Week's Tujuan
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="font-serif text-base text-foreground tabular-nums">{weeklyPct}%</span>
-              <span>rata-rata</span>
+              <span>on average</span>
             </div>
           </div>
           <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
@@ -197,7 +180,7 @@ function Index() {
                     />
                   </div>
                   <p className="mt-2 text-[11px] text-muted-foreground">
-                    {done} / {g.milestones.length} tonggak
+                    {done} / {g.milestones.length} milestone
                   </p>
                 </Link>
               );
@@ -208,9 +191,9 @@ function Index() {
 
       {/* Vision cards */}
       <section className="animate-rise mb-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <VisionCard title="Diri yang aku tuju" items={becoming.map((b) => b.label)} />
+        <VisionCard title="Who I'm Becoming" items={becoming.map((b) => b.label)} />
         <VisionCard
-          title={`Visi ${visionYear}`}
+          title={`Vision ${visionYear}`}
           items={vision.map((v) => v.label)}
           dashed
         />
@@ -220,19 +203,19 @@ function Index() {
       <section className="animate-rise">
         <div className="mb-4 flex items-end justify-between">
           <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Ritual harian
+            Daily Ritual
           </p>
           <Link
             to="/habits"
             className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
-            Semua <ArrowUpRight className="size-3" />
+            See all <ArrowUpRight className="size-3" />
           </Link>
         </div>
 
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span>Progres hari ini</span>
+            <span>Today's Progress</span>
             <span className="tabular-nums text-foreground">
               {hydrated ? `${doneToday}/${habits.length} · ${pct}%` : "—"}
             </span>
@@ -340,6 +323,148 @@ function VisionCard({
   );
 }
 
+type FocusListItem = { id: string; label: string; done: boolean };
+
+function FocusSection({
+  items,
+  hydrated,
+  doneFocus,
+  focusPct,
+  overallStreak,
+  onAdd,
+  onRemove,
+  onToggle,
+}: {
+  items: FocusListItem[];
+  hydrated: boolean;
+  doneFocus: number;
+  focusPct: number;
+  overallStreak: number;
+  onAdd: (label: string) => void;
+  onRemove: (id: string) => void;
+  onToggle: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [label, setLabel] = useState("");
+
+  return (
+    <section className="animate-rise mb-10 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:gap-10">
+      <div>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            <Sparkles className="size-3 text-gold animate-breathe" />
+            Today's Fokus
+          </p>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
+          >
+            {open ? "Close" : (<><Plus className="size-3" /> Add</>)}
+          </button>
+        </div>
+
+        {open && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!label.trim()) return;
+              onAdd(label.trim());
+              setLabel("");
+            }}
+            className="mb-3 flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+          >
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder="One thing yang mau kamu fokusin hari ini"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              autoFocus
+            />
+            <button type="submit" className="text-gold hover:opacity-80" aria-label="Add">
+              <Plus className="size-4" />
+            </button>
+          </form>
+        )}
+
+        {items.length === 0 ? (
+          <p className="rounded-2xl bg-black/[0.03] p-4 text-sm text-muted-foreground hairline">
+            Belum ada fokus for today. Tulis{" "}
+            <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
+              di jurnal malam ini
+            </Link>{" "}
+            buat besok, or tambah langsung di sini.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {items.map((f, i) => {
+              const done = hydrated && f.done;
+              return (
+                <li key={f.id} className="group flex items-center gap-2">
+                  <button
+                    onClick={() => onToggle(f.id)}
+                    className="flex w-full min-w-0 items-center gap-3 rounded-2xl bg-surface/50 px-3.5 py-2.5 text-left text-[15px] hairline transition hover:bg-surface animate-float-y"
+                    style={{ animationDelay: `${i * 0.25}s` }}
+                  >
+                    <span
+                      className={[
+                        "grid size-5 shrink-0 place-items-center rounded-full transition-all",
+                        done
+                          ? "bg-gold text-canvas"
+                          : "ring-2 ring-black/15 group-hover:ring-gold/60",
+                      ].join(" ")}
+                    >
+                      {done && <Check className="size-3" strokeWidth={3} />}
+                    </span>
+                    <span
+                      className={[
+                        "min-w-0 flex-1 truncate",
+                        done ? "text-muted-foreground line-through" : "text-foreground/90",
+                      ].join(" ")}
+                    >
+                      {f.label}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => onRemove(f.id)}
+                    className="shrink-0 rounded-lg p-1.5 text-muted-foreground opacity-0 transition hover:bg-black/[0.04] hover:text-foreground group-hover:opacity-100"
+                    aria-label="Hapus fokus"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          Isi fokus buat besok dari{" "}
+          <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
+            jurnal malam ini
+          </Link>{" "}
+          — besok bakal muncul di sini and tetap bisa disesuaikan kok.
+        </p>
+
+        {overallStreak > 0 && (
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 hairline-gold">
+            <Flame className="size-3.5 text-gold" />
+            <span className="text-xs text-muted-foreground">
+              {overallStreak}-day streak · keep it up!
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="flex md:block">
+        <ProgressRing
+          value={hydrated ? focusPct : 0}
+          label={`${hydrated ? focusPct : 0}%`}
+          sub={`${doneFocus} dari ${items.length}`}
+        />
+      </div>
+    </section>
+  );
+}
+
 type SchedItem = { id: string; time: string; label: string };
 
 function ScheduleSection({
@@ -367,13 +492,13 @@ function ScheduleSection({
       <div className="mb-4 flex items-end justify-between">
         <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           <Clock className="size-3" />
-          Jadwal hari ini
+          Today's Jadwal
         </p>
         <button
           onClick={() => setOpen((v) => !v)}
           className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
         >
-          {open ? "Tutup" : (<><Plus className="size-3" /> Tambah</>)}
+          {open ? "Close" : (<><Plus className="size-3" /> Add</>)}
         </button>
       </div>
 
@@ -396,11 +521,11 @@ function ScheduleSection({
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="Agenda untuk hari ini"
+            placeholder="Agenda buat hari ini"
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             autoFocus
           />
-          <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
+          <button type="submit" className="text-gold hover:opacity-80" aria-label="Add">
             <Plus className="size-4" />
           </button>
         </form>
@@ -408,7 +533,7 @@ function ScheduleSection({
 
       {items.length === 0 ? (
         <p className="rounded-2xl bg-black/[0.03] p-4 text-sm text-muted-foreground hairline">
-          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> untuk esok, atau tambah langsung di sini.
+          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> buat besok, or tambah langsung di sini.
         </p>
       ) : (
         <ol className="relative space-y-2 pl-4">
@@ -442,7 +567,7 @@ function ScheduleSection({
                   <span className={passed ? "flex-1 line-through" : "flex-1"}>{s.label}</span>
                   {isNext && (
                     <span className="text-[10px] uppercase tracking-widest text-gold">
-                      berikutnya
+                      up next
                     </span>
                   )}
                   <button
@@ -459,7 +584,7 @@ function ScheduleSection({
         </ol>
       )}
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Isi jadwal esok dari <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok akan muncul di sini dan tetap bisa disesuaikan.
+        Isi jadwal buat besok dari <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok bakal muncul di sini and tetap bisa disesuaikan kok.
       </p>
       <span className="sr-only">{date}</span>
     </section>

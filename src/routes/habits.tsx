@@ -9,8 +9,8 @@ import { useUIStore } from "@/lib/ui-store";
 export const Route = createFileRoute("/habits")({
   head: () => ({
     meta: [
-      { title: "Kebiasaan · Aura" },
-      { name: "description", content: "Ritual harianmu — tenang, konsisten, dan berbunga perlahan." },
+      { title: "Kebiasaan · Rayhan" },
+      { name: "description", content: "Ritual harian kamu — tenang, consistent, dan berkembang perlahan." },
     ],
   }),
   component: HabitsPage,
@@ -48,15 +48,15 @@ function HabitsPage() {
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Rutinitasmu
+            Your Rutinitas
           </p>
-          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Ritual harian</h1>
+          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Daily Ritual</h1>
         </div>
         <button
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] transition-transform active:scale-95"
         >
-          <Plus className="size-4" strokeWidth={2.5} /> Baru
+          <Plus className="size-4" strokeWidth={2.5} /> New
         </button>
       </header>
 
@@ -113,7 +113,7 @@ function HabitsPage() {
                   <span className="inline-flex items-center gap-1">
                     <Flame className="size-3 text-gold" /> {streak}h
                   </span>
-                  <span>Rekor {best}h</span>
+                  <span>Record {best}h</span>
                 </div>
               </div>
             </div>
@@ -131,12 +131,12 @@ function HabitsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <p className="mb-1 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              Kebiasaan baru
+              New Kebiasaan
             </p>
-            <h2 className="font-serif text-2xl">Rancang kebiasaanmu</h2>
+            <h2 className="font-serif text-2xl">Design your kebiasaan</h2>
 
             <div className="mt-5 space-y-4">
-              <Field label="Nama">
+              <Field label="Name">
                 <input
                   autoFocus
                   className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
@@ -146,7 +146,7 @@ function HabitsPage() {
                 />
               </Field>
 
-              <Field label="Ikon">
+              <Field label="Icon">
                 <div className="grid grid-cols-8 gap-1.5">
                   {ICON_KEYS.map((k) => (
                     <button
@@ -167,7 +167,7 @@ function HabitsPage() {
               </Field>
 
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Kategori">
+                <Field label="Category">
                   <select
                     className="w-full bg-transparent text-[15px] outline-none"
                     value={form.category}
@@ -180,7 +180,7 @@ function HabitsPage() {
                     ))}
                   </select>
                 </Field>
-                <Field label="Durasi">
+                <Field label="Duration">
                   <input
                     className="w-full bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
                     placeholder="10 mnt"
@@ -190,7 +190,7 @@ function HabitsPage() {
                 </Field>
               </div>
 
-              <Field label="Prioritas">
+              <Field label="Priority">
                 <div className="flex gap-1.5">
                   {(["low", "med", "high"] as const).map((p) => (
                     <button
@@ -203,7 +203,7 @@ function HabitsPage() {
                           : "bg-black/[0.03] text-muted-foreground hover:bg-black/[0.06]",
                       ].join(" ")}
                     >
-                      {p === "low" ? "rendah" : p === "med" ? "sedang" : "tinggi"}
+                      {p === "low" ? "low" : p === "med" ? "medium" : "high"}
                     </button>
                   ))}
                 </div>
@@ -215,7 +215,7 @@ function HabitsPage() {
                 onClick={() => setOpen(false)}
                 className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
-                Batal
+                Cancel
               </button>
               <button
                 onClick={() => {
@@ -226,7 +226,7 @@ function HabitsPage() {
                 }}
                 className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-canvas"
               >
-                Tambah ritual
+                Add Ritual
               </button>
             </div>
           </div>

@@ -5,8 +5,8 @@ import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@
 export const Route = createFileRoute("/analytics")({
   head: () => ({
     meta: [
-      { title: "Analitik · Aura" },
-      { name: "description", content: "Ringkasan progres dan konsistensi kamu bulan ini." },
+      { title: "Analitik · Rayhan" },
+      { name: "description", content: "Ringkasan progress dan consistency kamu bulan ini." },
     ],
   }),
   component: AnalyticsPage,
@@ -61,21 +61,21 @@ function AnalyticsPage() {
     <AppShell>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Angka-angka
+          The Numbers
         </p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Analitik</h1>
       </header>
 
       <div className="animate-rise mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Runtutan kini" value={`${streak}h`} />
-        <Stat label="Rekor runtutan" value={`${best}h`} />
-        <Stat label="Kebiasaan tuntas" value={String(totalDone)} />
-        <Stat label="Rata-rata 30h" value={`${Math.round(avg * 100)}%`} />
+        <Stat label="Current Streak" value={`${streak}h`} />
+        <Stat label="Best Streak" value={`${best}h`} />
+        <Stat label="Habits Completed" value={String(totalDone)} />
+        <Stat label="30-Day Average" value={`${Math.round(avg * 100)}%`} />
       </div>
 
       <section className="animate-rise card-cinema mb-6 p-5 md:p-6">
         <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Ritme 30 hari
+          30-Day Ritme
         </p>
         <div className="flex h-32 items-end gap-1">
           {trend.map((t) => (
@@ -91,7 +91,7 @@ function AnalyticsPage() {
 
       <section className="animate-rise card-cinema mb-6 p-5 md:p-6">
         <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Peta konsistensi
+          Consistency Map
         </p>
         <div className="flex gap-1 overflow-x-auto">
           {weeks.map((col, i) => (
@@ -114,9 +114,9 @@ function AnalyticsPage() {
           Insight
         </p>
         <p className="font-serif text-2xl italic leading-snug text-balance">
-          Kamu paling produktif di hari{" "}
+          Kamu paling produktif on{" "}
           <span className="text-gold not-italic">{dowLabel[bestDow.wd]}</span>. Manfaatin momentum
-          itu — di situ progres kamu tumbuh paling cepat.
+          itu — that's where progress kamu tumbuh paling cepat.
         </p>
       </section>
     </AppShell>

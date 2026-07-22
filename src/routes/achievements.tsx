@@ -5,8 +5,8 @@ import { currentStreak, longestStreak, useHydrated, useStore } from "@/lib/store
 export const Route = createFileRoute("/achievements")({
   head: () => ({
     meta: [
-      { title: "Pencapaian · Aura" },
-      { name: "description", content: "Pencapaian kecil yang menandai progres perjalananmu." },
+      { title: "Pencapaian · Rayhan" },
+      { name: "description", content: "Small wins yang nandain progress perjalanan kamu." },
     ],
   }),
   component: AchievementsPage,
@@ -27,22 +27,22 @@ function AchievementsPage() {
   const goalsDone = goals.filter((g) => g.progress >= 100).length;
 
   const badges: Badge[] = [
-    { title: "Cahaya pertama", hint: "Tuntaskan kebiasaan pertamamu", unlocked: totalDone >= 1 },
-    { title: "Tujuh hari", hint: "Runtutan 7 hari", unlocked: bestStreak >= 7, progress: Math.min(1, bestStreak / 7) },
-    { title: "Tiga puluh hari", hint: "Runtutan 30 hari", unlocked: bestStreak >= 30, progress: Math.min(1, bestStreak / 30) },
-    { title: "Seratus hari", hint: "Runtutan 100 hari", unlocked: bestStreak >= 100, progress: Math.min(1, bestStreak / 100) },
-    { title: "Klub seratus", hint: "100 kebiasaan tuntas", unlocked: totalDone >= 100, progress: Math.min(1, totalDone / 100) },
-    { title: "Penjaga jurnal", hint: "Catatan pertama tersimpan", unlocked: journal.length >= 1 },
-    { title: "Penuntas tujuan", hint: "Tuntaskan tujuan pertamamu", unlocked: goalsDone >= 1 },
-    { title: "Api yang tenang", hint: "Runtutan aktif 14+ hari", unlocked: currStreak >= 14, progress: Math.min(1, currStreak / 14) },
-    { title: "Penjaga hening", hint: "5 catatan jurnal", unlocked: journal.length >= 5, progress: Math.min(1, journal.length / 5) },
+    { title: "First Light", hint: "Tuntasin kebiasaan pertama kamu", unlocked: totalDone >= 1 },
+    { title: "7-Day Streak", hint: "7 hari berturut-turut", unlocked: bestStreak >= 7, progress: Math.min(1, bestStreak / 7) },
+    { title: "30-Day Streak", hint: "30 hari berturut-turut", unlocked: bestStreak >= 30, progress: Math.min(1, bestStreak / 30) },
+    { title: "100-Day Streak", hint: "100 hari berturut-turut", unlocked: bestStreak >= 100, progress: Math.min(1, bestStreak / 100) },
+    { title: "Club 100", hint: "100 kebiasaan completed", unlocked: totalDone >= 100, progress: Math.min(1, totalDone / 100) },
+    { title: "Jurnal Keeper", hint: "First entry saved", unlocked: journal.length >= 1 },
+    { title: "Goal Getter", hint: "Tuntasin tujuan pertama kamu", unlocked: goalsDone >= 1 },
+    { title: "Calm Fire", hint: "14+ hari active streak", unlocked: currStreak >= 14, progress: Math.min(1, currStreak / 14) },
+    { title: "Quiet Keeper", hint: "5 jurnal entries", unlocked: journal.length >= 5, progress: Math.min(1, journal.length / 5) },
   ];
 
   return (
     <AppShell>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Tonggak tenang
+          Milestone yang Tenang
         </p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Pencapaian</h1>
       </header>

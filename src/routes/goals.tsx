@@ -8,8 +8,8 @@ import { useUIStore } from "@/lib/ui-store";
 export const Route = createFileRoute("/goals")({
   head: () => ({
     meta: [
-      { title: "Tujuan · Aura" },
-      { name: "description", content: "Pecah visi menjadi minggu, bulan, dan langkah-langkah tenang." },
+      { title: "Tujuan · Rayhan" },
+      { name: "description", content: "Break down visi kamu jadi weekly, monthly, dan langkah-langkah yang tenang." },
     ],
   }),
   component: GoalsPage,
@@ -17,12 +17,12 @@ export const Route = createFileRoute("/goals")({
 
 const horizons = ["weekly", "monthly", "quarterly", "yearly", "lifetime"] as const;
 const horizonLabel: Record<(typeof horizons)[number] | "all", string> = {
-  all: "semua",
-  weekly: "mingguan",
-  monthly: "bulanan",
-  quarterly: "kuartal",
-  yearly: "tahunan",
-  lifetime: "seumur hidup",
+  all: "all",
+  weekly: "weekly",
+  monthly: "monthly",
+  quarterly: "quarterly",
+  yearly: "yearly",
+  lifetime: "lifetime",
 };
 
 function GoalsPage() {
@@ -56,7 +56,7 @@ function GoalsPage() {
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Jalan yang kutempuh
+            Jalan yang Kutempuh, step by step
           </p>
           <h1 className="font-serif text-4xl leading-tight md:text-5xl">Tujuan</h1>
         </div>
@@ -64,7 +64,7 @@ function GoalsPage() {
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
         >
-          <Plus className="size-4" strokeWidth={2.5} /> Tujuan baru
+          <Plus className="size-4" strokeWidth={2.5} /> New Tujuan
         </button>
       </header>
 
@@ -109,7 +109,7 @@ function GoalsPage() {
 
             <div className="mt-4">
               <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-                <span>Progres</span>
+                <span>Progress</span>
                 <span>{g.progress}%</span>
               </div>
               <div className="h-1 w-full overflow-hidden rounded-full bg-black/[0.06]">
@@ -162,10 +162,10 @@ function GoalsPage() {
             className="max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto rounded-[28px] card-cinema p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-serif text-2xl">Tujuan baru</h2>
+            <h2 className="font-serif text-2xl">New Tujuan</h2>
             <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Judul
+                Title
               </span>
               <input
                 autoFocus
@@ -176,7 +176,7 @@ function GoalsPage() {
             </label>
             <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Deskripsi
+                Description
               </span>
               <textarea
                 rows={2}
@@ -188,7 +188,7 @@ function GoalsPage() {
             <div className="grid grid-cols-2 gap-3">
               <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
                 <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Rentang
+                  Timeframe
                 </span>
                 <select
                   className="w-full bg-transparent text-[15px] outline-none"
@@ -206,7 +206,7 @@ function GoalsPage() {
               </label>
               <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
                 <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                  Tenggat
+                  Deadline
                 </span>
                 <input
                   type="date"
@@ -218,7 +218,7 @@ function GoalsPage() {
             </div>
             <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                Tonggak (satu per baris)
+                Milestones (one per line)
               </span>
               <textarea
                 rows={3}
@@ -232,7 +232,7 @@ function GoalsPage() {
                 onClick={() => setOpen(false)}
                 className="rounded-full px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
               >
-                Batal
+                Cancel
               </button>
               <button
                 onClick={() => {
@@ -252,7 +252,7 @@ function GoalsPage() {
                 }}
                 className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-canvas"
               >
-                Simpan tujuan
+                Save Tujuan
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ function MilestoneAdd({ onAdd }: { onAdd: (t: string) => void }) {
       <input
         value={v}
         onChange={(e) => setV(e.target.value)}
-        placeholder="Tambah tonggak"
+        placeholder="Add milestone"
         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
     </form>

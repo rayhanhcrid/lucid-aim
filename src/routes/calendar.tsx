@@ -8,8 +8,8 @@ import { todayKey, useHydrated, useStore } from "@/lib/store";
 export const Route = createFileRoute("/calendar")({
   head: () => ({
     meta: [
-      { title: "Kalender · Aura" },
-      { name: "description", content: "Ritual, tonggak, dan refleksi dalam satu pandangan yang tenang." },
+      { title: "Kalender · Rayhan" },
+      { name: "description", content: "Ritual, milestone, dan refleksi dalam satu tampilan yang tenang." },
     ],
   }),
   component: CalendarPage,
@@ -62,7 +62,7 @@ function CalendarPage() {
     <AppShell>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Bulan ini
+          This Month
         </p>
         <div className="flex items-center justify-between">
           <h1 className="font-serif text-4xl leading-tight capitalize md:text-5xl">{monthLabel}</h1>
@@ -144,12 +144,12 @@ function CalendarPage() {
             day: "numeric",
           })}
         </p>
-        <h3 className="font-serif text-2xl">Sekilas hari ini</h3>
+        <h3 className="font-serif text-2xl">Today at a Glance</h3>
 
         {/* Progress bar with percentage */}
         <div className="mt-4">
           <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span>Progres kebiasaan</span>
+            <span>Habit Progress</span>
             <span className="tabular-nums text-foreground">
               {hydrated ? `${selectedDone}/${selectedItems.habits.length} · ${selectedPct}%` : "—"}
             </span>
@@ -169,12 +169,12 @@ function CalendarPage() {
               className="flex items-center gap-2 rounded-xl bg-gold/[0.06] px-3 py-2 text-sm hairline-gold"
             >
               <span className="size-1.5 rounded-full bg-gold" />
-              Tenggat · {g.title}
+              Deadline · {g.title}
             </div>
           ))}
 
           <p className="pt-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Ceklis kebiasaan
+            Habit Checklist
           </p>
           {selectedItems.habits.map(({ h, done }) => (
             <button
