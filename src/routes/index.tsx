@@ -151,7 +151,7 @@ function Index() {
               <span>on average</span>
             </div>
           </div>
-          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
             <div
               className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
               style={{ width: `${hydrated ? weeklyPct : 0}%` }}
@@ -173,7 +173,7 @@ function Index() {
                       {g.progress}%
                     </span>
                   </div>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-black/[0.06]">
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
                       style={{ width: `${hydrated ? g.progress : 0}%` }}
@@ -220,7 +220,7 @@ function Index() {
               {hydrated ? `${doneToday}/${habits.length} · ${pct}%` : "—"}
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
             <div
               className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
               style={{ width: `${hydrated ? pct : 0}%` }}
@@ -245,8 +245,8 @@ function Index() {
                     className={[
                       "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
                       done
-                        ? "bg-black/[0.04] text-muted-foreground"
-                        : "bg-gradient-to-br from-black/[0.07] to-black/[0.02] text-gold",
+                        ? "bg-white/[0.05] text-muted-foreground"
+                        : "bg-gradient-to-br from-white/[0.09] to-white/[0.02] text-gold",
                     ].join(" ")}
                   >
                     <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
@@ -270,8 +270,8 @@ function Index() {
                   className={[
                     "grid size-6 shrink-0 place-items-center rounded-full transition-all",
                     done
-                      ? "bg-gold text-canvas scale-100"
-                      : "ring-2 ring-black/15 group-hover:ring-gold/60",
+                      ? "bg-gold text-white scale-100"
+                      : "ring-2 ring-white/15 group-hover:ring-gold/60",
                   ].join(" ")}
                 >
                   {done && <Check className="size-3.5" strokeWidth={3} />}
@@ -299,7 +299,7 @@ function VisionCard({
       className={[
         "rounded-[28px] p-6 transition hover:translate-y-[-2px]",
         dashed
-          ? "border border-dashed border-gold/25 bg-gradient-to-br from-[oklch(0.96_0.02_195)]/40 to-transparent"
+          ? "border border-dashed border-gold/30 bg-gradient-to-br from-[oklch(0.6_0.1_190_/_0.14)] to-transparent"
           : "card-cinema",
       ].join(" ")}
     >
@@ -357,7 +357,7 @@ function FocusSection({
           </p>
           <button
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
           >
             {open ? "Close" : (<><Plus className="size-3" /> Add</>)}
           </button>
@@ -371,7 +371,7 @@ function FocusSection({
               onAdd(label.trim());
               setLabel("");
             }}
-            className="mb-3 flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+            className="mb-3 flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-2 hairline"
           >
             <input
               value={label}
@@ -387,7 +387,7 @@ function FocusSection({
         )}
 
         {items.length === 0 ? (
-          <p className="rounded-2xl bg-black/[0.03] p-4 text-sm text-muted-foreground hairline">
+          <p className="rounded-2xl bg-white/[0.04] p-4 text-sm text-muted-foreground hairline">
             Belum ada fokus for today. Tulis{" "}
             <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
               di jurnal malam ini
@@ -409,8 +409,8 @@ function FocusSection({
                       className={[
                         "grid size-5 shrink-0 place-items-center rounded-full transition-all",
                         done
-                          ? "bg-gold text-canvas"
-                          : "ring-2 ring-black/15 group-hover:ring-gold/60",
+                          ? "bg-gold text-white"
+                          : "ring-2 ring-white/15 group-hover:ring-gold/60",
                       ].join(" ")}
                     >
                       {done && <Check className="size-3" strokeWidth={3} />}
@@ -426,7 +426,7 @@ function FocusSection({
                   </button>
                   <button
                     onClick={() => onRemove(f.id)}
-                    className="shrink-0 rounded-lg p-1.5 text-muted-foreground opacity-0 transition hover:bg-black/[0.04] hover:text-foreground group-hover:opacity-100"
+                    className="shrink-0 rounded-lg p-1.5 text-muted-foreground opacity-0 transition hover:bg-white/[0.06] hover:text-foreground group-hover:opacity-100"
                     aria-label="Hapus fokus"
                   >
                     <X className="size-3.5" />
@@ -496,7 +496,7 @@ function ScheduleSection({
         </p>
         <button
           onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center gap-1 rounded-full bg-black/[0.04] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
+          className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
         >
           {open ? "Close" : (<><Plus className="size-3" /> Add</>)}
         </button>
@@ -510,7 +510,7 @@ function ScheduleSection({
             onAdd(time, label.trim());
             setLabel("");
           }}
-          className="mb-3 flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+          className="mb-3 flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-2 hairline"
         >
           <input
             type="time"
@@ -532,12 +532,12 @@ function ScheduleSection({
       )}
 
       {items.length === 0 ? (
-        <p className="rounded-2xl bg-black/[0.03] p-4 text-sm text-muted-foreground hairline">
+        <p className="rounded-2xl bg-white/[0.04] p-4 text-sm text-muted-foreground hairline">
           Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> buat besok, or tambah langsung di sini.
         </p>
       ) : (
         <ol className="relative space-y-2 pl-4">
-          <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/40 via-black/10 to-transparent" />
+          <span className="absolute left-[7px] top-2 bottom-2 w-px bg-gradient-to-b from-gold/40 via-white/15 to-transparent" />
           {items.map((s, i) => {
             const isNext = hydrated && i === nextIdx;
             const passed = hydrated && s.time < nowHHmm;
@@ -549,18 +549,18 @@ function ScheduleSection({
                     isNext
                       ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_195/0.55)]"
                       : passed
-                        ? "bg-black/20"
-                        : "bg-black/40",
+                        ? "bg-white/20"
+                        : "bg-white/40",
                   ].join(" ")}
                 />
                 <div
                   className={[
                     "group flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[14px] transition",
                     isNext
-                      ? "bg-gradient-to-r from-[oklch(0.94_0.03_195)] to-[oklch(0.99_0.005_200)] hairline-gold animate-pulse-glow"
+                      ? "bg-gradient-to-r from-[oklch(0.7_0.12_190_/_0.18)] to-[oklch(0.5_0.12_205_/_0.12)] hairline-gold animate-pulse-glow"
                       : passed
-                        ? "bg-black/[0.02] text-muted-foreground hairline"
-                        : "bg-white/70 hairline",
+                        ? "bg-white/[0.02] text-muted-foreground hairline"
+                        : "bg-white/[0.035] hairline",
                   ].join(" ")}
                 >
                   <span className="w-12 font-serif text-base tabular-nums">{s.time}</span>
@@ -572,7 +572,7 @@ function ScheduleSection({
                   )}
                   <button
                     onClick={() => onRemove(s.id)}
-                    className="rounded-md p-1 text-muted-foreground opacity-0 transition hover:bg-black/[0.05] hover:text-foreground group-hover:opacity-100"
+                    className="rounded-md p-1 text-muted-foreground opacity-0 transition hover:bg-white/[0.07] hover:text-foreground group-hover:opacity-100"
                     aria-label="Hapus"
                   >
                     <X className="size-3.5" />

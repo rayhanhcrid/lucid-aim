@@ -62,7 +62,7 @@ function GoalsPage() {
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> New Tujuan
         </button>
@@ -76,7 +76,7 @@ function GoalsPage() {
             className={[
               "rounded-full px-3 py-1.5 text-xs uppercase tracking-widest transition",
               filter === h
-                ? "bg-gold text-canvas"
+                ? "bg-gold text-white"
                 : "bg-surface text-muted-foreground hairline hover:text-foreground",
             ].join(" ")}
           >
@@ -101,7 +101,7 @@ function GoalsPage() {
               </div>
               <button
                 onClick={() => remove(g.id)}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-black/[0.04] hover:text-foreground"
+                className="rounded-lg p-1.5 text-muted-foreground hover:bg-white/[0.06] hover:text-foreground"
               >
                 <Trash2 className="size-3.5" />
               </button>
@@ -112,7 +112,7 @@ function GoalsPage() {
                 <span>Progress</span>
                 <span>{g.progress}%</span>
               </div>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-black/[0.06]">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
                   style={{ width: `${g.progress}%` }}
@@ -125,14 +125,14 @@ function GoalsPage() {
                 <button
                   key={m.id}
                   onClick={() => toggleMilestone(g.id, m.id)}
-                  className="group flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-left hover:bg-black/[0.03]"
+                  className="group flex w-full items-center gap-3 rounded-xl px-2 py-1.5 text-left hover:bg-white/[0.04]"
                 >
                   <span
                     className={[
                       "grid size-5 shrink-0 place-items-center rounded-md transition",
                       m.done
-                        ? "bg-gold text-canvas"
-                        : "ring-1 ring-black/20 group-hover:ring-gold/60",
+                        ? "bg-gold text-white"
+                        : "ring-1 ring-white/20 group-hover:ring-gold/60",
                     ].join(" ")}
                   >
                     {m.done && <Check className="size-3" strokeWidth={3} />}
@@ -155,7 +155,7 @@ function GoalsPage() {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 backdrop-blur-md md:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 backdrop-blur-md md:items-center"
           onClick={() => setOpen(false)}
         >
           <div
@@ -163,7 +163,7 @@ function GoalsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-serif text-2xl">New Tujuan</h2>
-            <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
+            <label className="block rounded-2xl bg-white/[0.04] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Title
               </span>
@@ -174,7 +174,7 @@ function GoalsPage() {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </label>
-            <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
+            <label className="block rounded-2xl bg-white/[0.04] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Description
               </span>
@@ -186,7 +186,7 @@ function GoalsPage() {
               />
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
+              <label className="block rounded-2xl bg-white/[0.04] px-4 py-3">
                 <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   Timeframe
                 </span>
@@ -204,7 +204,7 @@ function GoalsPage() {
                   ))}
                 </select>
               </label>
-              <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
+              <label className="block rounded-2xl bg-white/[0.04] px-4 py-3">
                 <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                   Deadline
                 </span>
@@ -216,7 +216,7 @@ function GoalsPage() {
                 />
               </label>
             </div>
-            <label className="block rounded-2xl bg-black/[0.03] px-4 py-3">
+            <label className="block rounded-2xl bg-white/[0.04] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Milestones (one per line)
               </span>
@@ -250,7 +250,7 @@ function GoalsPage() {
                   setForm({ title: "", description: "", horizon: "quarterly", deadline: "", milestones: "" });
                   setOpen(false);
                 }}
-                className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-canvas"
+                className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white"
               >
                 Save Tujuan
               </button>
@@ -274,7 +274,7 @@ function MilestoneAdd({ onAdd }: { onAdd: (t: string) => void }) {
       }}
       className="flex items-center gap-3 rounded-xl px-2 py-1.5 opacity-60 focus-within:opacity-100"
     >
-      <span className="grid size-5 shrink-0 place-items-center rounded-md ring-1 ring-dashed ring-black/20">
+      <span className="grid size-5 shrink-0 place-items-center rounded-md ring-1 ring-dashed ring-white/20">
         <Plus className="size-3" />
       </span>
       <input

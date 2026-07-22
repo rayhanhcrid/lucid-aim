@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-hairline bg-canvas/50 backdrop-blur-2xl md:flex">
         <div className="px-7 pb-8 pt-10">
           <Link to="/" className="flex items-center gap-2">
-            <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] font-serif text-lg text-canvas shadow-[0_8px_24px_-8px_oklch(0.62_0.11_195/0.6)]">
+            <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] font-serif text-lg text-white shadow-[0_8px_24px_-8px_oklch(0.62_0.11_195/0.6)]">
               R
             </div>
             <span className="font-serif text-2xl tracking-tight">Rayhan</span>
@@ -90,13 +90,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav — hidden while a dialog/sheet is open so it never blocks it */}
       {!hideMobileNav && (
-        <nav className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-24px)] max-w-[420px] -translate-x-1/2 items-center justify-around rounded-full bg-white/90 px-2 py-2 shadow-[0_18px_50px_-14px_oklch(0.35_0.08_220/0.35)] backdrop-blur-2xl hairline md:hidden">
+        <nav className="fixed bottom-5 left-1/2 z-40 flex w-[calc(100%-24px)] max-w-[420px] -translate-x-1/2 items-center justify-around rounded-full bg-surface/90 px-2 py-2 shadow-[0_18px_50px_-14px_oklch(0_0_0/0.55)] backdrop-blur-2xl hairline md:hidden">
           {primary.slice(0, 2).map(({ to, label, icon: Icon }) => (
             <NavPill key={to} to={to} label={label} Icon={Icon} active={isActive(to)} />
           ))}
           <button
             onClick={() => setMenu(true)}
-            className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-canvas shadow-[0_0_28px_-4px_oklch(0.62_0.11_195/0.55)] transition-transform active:scale-95"
+            className="grid size-11 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white shadow-[0_0_28px_-4px_oklch(0.62_0.11_195/0.55)] transition-transform active:scale-95"
             aria-label="Menu lainnya"
           >
             <LayoutGrid className="size-5" strokeWidth={2.25} />
@@ -110,14 +110,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Mobile "more" sheet — full feature access */}
       {menu && (
         <div
-          className="fixed inset-0 z-50 flex items-end bg-black/60 backdrop-blur-md md:hidden"
+          className="fixed inset-0 z-50 flex items-end bg-black/70 backdrop-blur-md md:hidden"
           onClick={() => setMenu(false)}
         >
           <div
             className="max-h-[85vh] w-full overflow-y-auto rounded-t-[32px] card-cinema animate-rise p-6 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15" />
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/15" />
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Semua fitur</p>
@@ -125,7 +125,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
               <button
                 onClick={() => setMenu(false)}
-                className="grid size-9 place-items-center rounded-full bg-black/[0.05] hairline"
+                className="grid size-9 place-items-center rounded-full bg-white/[0.06] hairline"
                 aria-label="Tutup"
               >
                 <X className="size-4" />
@@ -142,26 +142,26 @@ export function AppShell({ children }: { children: ReactNode }) {
                       "flex flex-col gap-2 rounded-2xl p-4 text-left transition",
                       active
                         ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] shadow-[0_8px_20px_-8px_oklch(0.62_0.11_195/0.5)]"
-                        : "bg-black/[0.03] hairline hover:bg-black/[0.06]",
+                        : "bg-white/[0.04] hairline hover:bg-white/[0.07]",
                     ].join(" ")}
                   >
                     <span
                       className={[
                         "grid size-9 place-items-center rounded-xl",
-                        active ? "bg-white/20 text-canvas" : "bg-black/[0.04]",
+                        active ? "bg-white/20 text-white" : "bg-white/[0.06]",
                       ].join(" ")}
                     >
                       <Icon className="size-4" strokeWidth={1.75} />
                     </span>
                     <div>
-                      <p className={["text-sm font-medium", active ? "text-canvas" : ""].join(" ")}>
+                      <p className={["text-sm font-medium", active ? "text-white" : ""].join(" ")}>
                         {label}
                       </p>
                       {"desc" in rest && (
                         <p
                           className={[
                             "mt-0.5 text-[11px] leading-snug",
-                            active ? "text-canvas/75" : "text-muted-foreground",
+                            active ? "text-white/75" : "text-muted-foreground",
                           ].join(" ")}
                         >
                           {(rest as { desc: string }).desc}

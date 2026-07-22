@@ -70,7 +70,7 @@ function ProfilePage() {
           onAdd={(label) => addFocusItem(today, label)}
           onRemove={(id) => removeFocusItem(today, id)}
         />
-        <p className="rounded-2xl bg-black/[0.03] px-4 py-3 text-xs text-muted-foreground hairline">
+        <p className="rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-muted-foreground hairline">
           Jadwal for tomorrow is now set directly di halaman <span className="text-foreground">Jurnal</span>, and bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
         </p>
       </div>
@@ -97,7 +97,7 @@ function TagList({
       <p className="mb-3 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{title}</p>
       <ul className="mb-3 flex flex-wrap gap-1.5">
         {items.map((i) => (
-          <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-black/[0.05] px-3 py-1.5 text-sm">
+          <li key={i.id} className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1.5 text-sm">
             {i.label}
             <button onClick={() => onRemove(i.id)} className="text-muted-foreground hover:text-foreground" aria-label={`Hapus ${i.label}`}>
               <X className="size-3" />
@@ -112,7 +112,7 @@ function TagList({
           onAdd(v.trim());
           setV("");
         }}
-        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-2"
       >
         <Plus className="size-4 text-muted-foreground" />
         <input
@@ -142,7 +142,7 @@ function FocusList({
       <ul className="mb-3 space-y-2">
         {items.map((f) => (
           <li key={f.id} className="flex items-center gap-3 text-sm">
-            <span className={["size-1.5 rounded-full", f.done ? "bg-black/20" : "bg-gold"].join(" ")} />
+            <span className={["size-1.5 rounded-full", f.done ? "bg-white/20" : "bg-gold"].join(" ")} />
             <span className={["flex-1", f.done && "text-muted-foreground line-through"].filter(Boolean).join(" ")}>
               {f.label}
             </span>
@@ -159,7 +159,7 @@ function FocusList({
           onAdd(v.trim());
           setV("");
         }}
-        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2"
+        className="flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-2"
       >
         <Plus className="size-4 text-muted-foreground" />
         <input

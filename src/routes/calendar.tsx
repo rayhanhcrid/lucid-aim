@@ -110,17 +110,17 @@ function CalendarPage() {
                 className={[
                   "relative aspect-square rounded-xl p-1.5 text-left transition",
                   selected === c.key
-                    ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)]"
-                    : "hover:bg-black/[0.05]",
+                    ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)]"
+                    : "hover:bg-white/[0.06]",
                 ].join(" ")}
               >
                 <span className="text-[13px]">{c.day}</span>
                 {hydrated && c.ratio > 0 && (
-                  <div className="absolute inset-x-1.5 bottom-1.5 h-1 overflow-hidden rounded-full bg-black/10">
+                  <div className="absolute inset-x-1.5 bottom-1.5 h-1 overflow-hidden rounded-full bg-white/15">
                     <div
                       className={[
                         "h-full rounded-full",
-                        selected === c.key ? "bg-canvas" : "bg-gold/80",
+                        selected === c.key ? "bg-white" : "bg-gold/80",
                       ].join(" ")}
                       style={{ width: `${c.ratio * 100}%` }}
                     />
@@ -154,7 +154,7 @@ function CalendarPage() {
               {hydrated ? `${selectedDone}/${selectedItems.habits.length} · ${selectedPct}%` : "—"}
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/[0.06]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
             <div
               className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
               style={{ width: `${hydrated ? selectedPct : 0}%` }}
@@ -182,21 +182,21 @@ function CalendarPage() {
               disabled={isFuture}
               onClick={() => toggleHabit(h.id, selected)}
               className={[
-                "flex w-full items-center gap-3 rounded-xl bg-black/[0.02] px-3 py-2.5 text-left text-sm transition hairline",
-                isFuture ? "opacity-50" : "hover:bg-black/[0.05]",
+                "flex w-full items-center gap-3 rounded-xl bg-white/[0.03] px-3 py-2.5 text-left text-sm transition hairline",
+                isFuture ? "opacity-50" : "hover:bg-white/[0.06]",
               ].join(" ")}
             >
               <span
                 className={[
                   "grid size-5 shrink-0 place-items-center rounded-md transition",
                   done
-                    ? "bg-gold text-canvas"
-                    : "ring-1 ring-black/20",
+                    ? "bg-gold text-white"
+                    : "ring-1 ring-white/20",
                 ].join(" ")}
               >
                 {done && <Check className="size-3" strokeWidth={3} />}
               </span>
-              <span className="grid size-7 place-items-center rounded-lg bg-black/[0.03] text-gold">
+              <span className="grid size-7 place-items-center rounded-lg bg-white/[0.04] text-gold">
                 <HabitIcon name={h.emoji} className="size-3.5" strokeWidth={1.75} />
               </span>
               <span

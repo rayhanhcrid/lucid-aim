@@ -55,51 +55,52 @@
 
 :root {
   --radius: 1.25rem;
-  --canvas: oklch(0.995 0.004 200);
-  --surface: oklch(0.985 0.005 200);
-  --surface-2: oklch(0.965 0.008 200);
-  --hairline: oklch(0.2 0.02 220 / 10%);
-  --gold: oklch(0.62 0.11 195);          /* teal accent — kept name for compat */
-  --gold-soft: oklch(0.78 0.08 195);
-  --ember: oklch(0.48 0.11 205);         /* deep teal */
+  /* Dark teal gradient concept — deep near-black base with a teal cast */
+  --canvas: oklch(0.155 0.026 235);
+  --surface: oklch(0.225 0.032 215);
+  --surface-2: oklch(0.28 0.038 208);
+  --hairline: oklch(0.9 0.03 195 / 14%);
+  --gold: oklch(0.76 0.13 189);          /* bright teal accent — kept name for compat */
+  --gold-soft: oklch(0.6 0.1 195);
+  --ember: oklch(0.47 0.12 206);         /* deep teal */
 
   --background: var(--canvas);
-  --foreground: oklch(0.2 0.02 230);
+  --foreground: oklch(0.94 0.012 200);
   --card: var(--surface);
-  --card-foreground: oklch(0.2 0.02 230);
+  --card-foreground: oklch(0.94 0.012 200);
   --popover: var(--surface);
-  --popover-foreground: oklch(0.2 0.02 230);
-  --primary: oklch(0.2 0.02 230);
-  --primary-foreground: oklch(0.99 0 0);
+  --popover-foreground: oklch(0.94 0.012 200);
+  --primary: oklch(0.94 0.012 200);
+  --primary-foreground: oklch(0.155 0.026 235);
   --secondary: var(--surface-2);
-  --secondary-foreground: oklch(0.2 0.02 230);
+  --secondary-foreground: oklch(0.94 0.012 200);
   --muted: var(--surface-2);
-  --muted-foreground: oklch(0.5 0.02 230);
+  --muted-foreground: oklch(0.66 0.02 210);
   --accent: var(--surface-2);
-  --accent-foreground: oklch(0.2 0.02 230);
-  --destructive: oklch(0.62 0.2 25);
+  --accent-foreground: oklch(0.94 0.012 200);
+  --destructive: oklch(0.68 0.19 25);
   --destructive-foreground: oklch(0.99 0 0);
   --border: var(--hairline);
-  --input: oklch(0.2 0.02 220 / 10%);
+  --input: oklch(0.9 0.03 195 / 10%);
   --ring: var(--gold);
   --chart-1: var(--gold);
   --chart-2: var(--gold-soft);
   --chart-3: var(--ember);
-  --chart-4: oklch(0.7 0.09 175);
-  --chart-5: oklch(0.55 0.12 215);
+  --chart-4: oklch(0.72 0.09 175);
+  --chart-5: oklch(0.62 0.12 215);
   --sidebar: var(--surface);
-  --sidebar-foreground: oklch(0.2 0.02 230);
-  --sidebar-primary: oklch(0.2 0.02 230);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-foreground: oklch(0.94 0.012 200);
+  --sidebar-primary: oklch(0.94 0.012 200);
+  --sidebar-primary-foreground: oklch(0.155 0.026 235);
   --sidebar-accent: var(--surface-2);
-  --sidebar-accent-foreground: oklch(0.2 0.02 230);
+  --sidebar-accent-foreground: oklch(0.94 0.012 200);
   --sidebar-border: var(--hairline);
   --sidebar-ring: var(--gold);
 }
 
 @layer base {
   html {
-    color-scheme: light;
+    color-scheme: dark;
   }
   * {
     border-color: var(--color-border);
@@ -107,11 +108,6 @@
 
   body {
     background-color: var(--color-background);
-    background-image:
-      radial-gradient(1200px 800px at 8% -10%, oklch(0.85 0.09 195 / 0.35), transparent 60%),
-      radial-gradient(900px 700px at 100% 0%, oklch(0.9 0.06 220 / 0.35), transparent 55%),
-      radial-gradient(700px 900px at 50% 120%, oklch(0.92 0.05 175 / 0.4), transparent 60%);
-    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-feature-settings: "ss01", "ss02", "cv11";
@@ -125,8 +121,8 @@
     inset: 0;
     pointer-events: none;
     z-index: 1;
-    opacity: 0.035;
-    mix-blend-mode: multiply;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   }
   main, aside, nav { position: relative; z-index: 2; }
@@ -135,6 +131,64 @@
     font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 0;
     letter-spacing: -0.02em;
   }
+}
+
+/* ---------- Ambient aurora motion (fixed background, mounted once in __root) ---------- */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  will-change: transform, opacity;
+}
+.aurora-a {
+  width: 60vmax; height: 60vmax;
+  left: -18vmax; top: -22vmax;
+  background: radial-gradient(circle at 35% 35%, oklch(0.62 0.12 195 / 0.4), transparent 68%);
+  animation: aurora-drift-a 26s ease-in-out infinite;
+}
+.aurora-b {
+  width: 52vmax; height: 52vmax;
+  right: -16vmax; top: -10vmax;
+  background: radial-gradient(circle at 60% 40%, oklch(0.5 0.13 210 / 0.38), transparent 70%);
+  animation: aurora-drift-b 32s ease-in-out infinite;
+}
+.aurora-c {
+  width: 65vmax; height: 65vmax;
+  left: 10vmax; bottom: -30vmax;
+  background: radial-gradient(circle at 50% 50%, oklch(0.4 0.1 200 / 0.42), transparent 68%);
+  animation: aurora-drift-c 38s ease-in-out infinite;
+}
+.aurora-d {
+  width: 34vmax; height: 34vmax;
+  right: 6vmax; bottom: -8vmax;
+  background: radial-gradient(circle at 50% 50%, oklch(0.7 0.1 175 / 0.26), transparent 70%);
+  animation: aurora-drift-d 22s ease-in-out infinite;
+}
+@keyframes aurora-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(6vmax, 5vmax) scale(1.12); }
+}
+@keyframes aurora-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-7vmax, 6vmax) scale(1.08); }
+}
+@keyframes aurora-drift-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(4vmax, -6vmax) scale(1.15); }
+}
+@keyframes aurora-drift-d {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+  50%      { transform: translate(-3vmax, -4vmax) scale(1.2); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none !important; }
 }
 
 @keyframes ring-fill {
@@ -160,8 +214,8 @@
   50%      { transform: translateY(-3px); }
 }
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(var(--gold) / 0), inset 0 0 0 1px oklch(1 0 0 / 0.08); }
-  50%      { box-shadow: 0 0 32px -4px oklch(0.82 0.12 75 / 0.28), inset 0 0 0 1px oklch(0.82 0.12 75 / 0.35); }
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.76 0.13 189 / 0), inset 0 0 0 1px oklch(1 0 0 / 0.06); }
+  50%      { box-shadow: 0 0 32px -4px oklch(0.76 0.13 189 / 0.4), inset 0 0 0 1px oklch(0.76 0.13 189 / 0.4); }
 }
 @keyframes marquee-dot {
   0%   { transform: translateX(-4px); opacity: 0.4; }
@@ -189,8 +243,8 @@
 
 @utility hairline-gold {
   box-shadow:
-    inset 0 0 0 1px oklch(0.62 0.11 195 / 0.35),
-    0 8px 28px -12px oklch(0.62 0.11 195 / 0.35);
+    inset 0 0 0 1px oklch(0.76 0.13 189 / 0.4),
+    0 8px 28px -12px oklch(0.76 0.13 189 / 0.45);
 }
 
 @utility text-gold {
@@ -202,14 +256,15 @@
 
 @utility card-cinema {
   background:
-    linear-gradient(180deg, oklch(1 0 0 / 0.85), oklch(1 0 0 / 0.6) 100%),
+    linear-gradient(175deg, oklch(0.29 0.036 210 / 0.75), oklch(0.2 0.03 220 / 0.55) 100%),
     var(--surface);
   box-shadow:
-    inset 0 1px 0 0 oklch(1 0 0 / 0.9),
-    inset 0 0 0 1px oklch(0.2 0.02 220 / 0.06),
-    0 1px 2px 0 oklch(0.2 0.05 220 / 0.04),
-    0 20px 40px -24px oklch(0.35 0.08 220 / 0.25);
+    inset 0 1px 0 0 oklch(1 0 0 / 0.06),
+    inset 0 0 0 1px var(--hairline),
+    0 1px 2px 0 oklch(0 0 0 / 0.2),
+    0 24px 48px -24px oklch(0 0 0 / 0.55);
   border-radius: 24px;
+  backdrop-filter: blur(18px);
 }
 
 @utility shimmer-text {

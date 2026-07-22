@@ -53,13 +53,13 @@ function AchievementsPage() {
             key={b.title}
             className={[
               "rounded-[20px] p-5 transition",
-              b.unlocked ? "card-cinema" : "bg-black/[0.02] hairline opacity-70",
+              b.unlocked ? "card-cinema" : "bg-white/[0.03] hairline opacity-70",
             ].join(" ")}
           >
             <div
               className={[
                 "mb-4 grid size-11 place-items-center rounded-full font-serif text-lg",
-                b.unlocked ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)]" : "bg-black/[0.05] text-muted-foreground",
+                b.unlocked ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)]" : "bg-white/[0.06] text-muted-foreground",
               ].join(" ")}
             >
               ✦
@@ -67,7 +67,7 @@ function AchievementsPage() {
             <p className="font-serif text-lg leading-tight">{b.title}</p>
             <p className="mt-1 text-xs text-muted-foreground">{b.hint}</p>
             {typeof b.progress === "number" && !b.unlocked && (
-              <div className="mt-3 h-1 overflow-hidden rounded-full bg-black/[0.06]">
+              <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/[0.08]">
                 <div
                   className="h-full rounded-full bg-gold/70"
                   style={{ width: `${Math.round(b.progress * 100)}%` }}

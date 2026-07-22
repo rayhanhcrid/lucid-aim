@@ -102,7 +102,7 @@ function JournalPage() {
               setSaved(true);
               setTimeout(() => setSaved(false), 2400);
             }}
-            className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-5 py-2 text-sm font-medium text-canvas shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+            className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-5 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
           >
             Save
           </button>
@@ -188,7 +188,7 @@ function Scale({
             onClick={() => onChange(n)}
             className={[
               "h-8 flex-1 rounded-lg transition",
-              n <= value ? "bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)]" : "bg-black/[0.06] hover:bg-black/[0.1]",
+              n <= value ? "bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)]" : "bg-white/[0.06] hover:bg-white/[0.1]",
             ].join(" ")}
             aria-label={`${label} ${n}`}
           />
@@ -223,7 +223,7 @@ function TomorrowFocus({
           {items.map((f) => (
             <li
               key={f.id}
-              className="flex items-center gap-3 rounded-xl bg-black/[0.03] px-3 py-2 text-sm hairline"
+              className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2 text-sm hairline"
             >
               <span className="flex-1">{f.label}</span>
               <button
@@ -248,7 +248,7 @@ function TomorrowFocus({
           onAdd(text.trim());
           setText("");
         }}
-        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+        className="flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-2 hairline"
       >
         <input
           value={text}
@@ -292,7 +292,7 @@ function TomorrowSchedule({
           {items.map((s) => (
             <li
               key={s.id}
-              className="flex items-center gap-3 rounded-xl bg-black/[0.03] px-3 py-2 text-sm hairline"
+              className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2 text-sm hairline"
             >
               <span className="w-12 font-serif text-base tabular-nums text-gold">{s.time}</span>
               <span className="flex-1">{s.label}</span>
@@ -318,7 +318,7 @@ function TomorrowSchedule({
           onAdd(time, text.trim());
           setText("");
         }}
-        className="flex items-center gap-2 rounded-full bg-black/[0.03] px-3 py-2 hairline"
+        className="flex items-center gap-2 rounded-full bg-white/[0.04] px-3 py-2 hairline"
       >
         <input
           type="time"

@@ -100,7 +100,7 @@ function AnalyticsPage() {
                 <div
                   key={d.key}
                   className="size-3 rounded-[3px]"
-                  style={{ backgroundColor: `oklch(0.62_0.11_195 / ${0.06 + d.ratio * 0.85})` }}
+                  style={{ backgroundColor: `oklch(0.62 0.11 195 / ${0.12 + d.ratio * 0.8})` }}
                   title={`${d.key} · ${Math.round(d.ratio * 100)}%`}
                 />
               ))}

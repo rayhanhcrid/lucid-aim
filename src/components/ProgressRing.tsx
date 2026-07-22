@@ -29,7 +29,7 @@ export function ProgressRing({ value, size = 176, stroke = 6, label, sub }: Prop
           r={r}
           fill="none"
           strokeWidth={stroke}
-          className="stroke-black/[0.08]"
+          className="stroke-white/[0.1]"
         />
         <circle
           cx={size / 2}

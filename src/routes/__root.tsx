@@ -132,6 +132,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {/* Ambient dark-teal motion background — mounted once here (not per-route) so the
+          drift animation never restarts on navigation. */}
+      <div className="aurora" aria-hidden="true">
+        <div className="aurora-blob aurora-a" />
+        <div className="aurora-blob aurora-b" />
+        <div className="aurora-blob aurora-c" />
+        <div className="aurora-blob aurora-d" />
+      </div>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster />
