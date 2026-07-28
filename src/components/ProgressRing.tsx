@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useCountUp } from "@/lib/use-count-up";
 
 type Props = {
   value: number; // 0..100
@@ -11,7 +12,8 @@ type Props = {
 export function ProgressRing({ value, size = 176, stroke = 6, label, sub }: Props) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
-  const offset = c - (Math.min(100, Math.max(0, value)) / 100) * c;
+  const animated = useCountUp(Math.min(100, Math.max(0, value)), 1100);
+  const offset = c - (animated / 100) * c;
   const gradientId = useId();
 
   return (

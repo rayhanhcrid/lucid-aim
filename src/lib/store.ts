@@ -37,6 +37,12 @@ export type Identity = { id: string; label: string };
 export type VisionItem = { id: string; label: string };
 export type FocusItem = { id: string; label: string; done: boolean };
 
+export type Reminders = {
+  enabled: boolean;
+  habitTime: string; // HH:mm
+  journalTime: string; // HH:mm
+};
+
 export type State = {
   name: string;
   becoming: Identity[];
@@ -48,8 +54,10 @@ export type State = {
   completions: Record<string, string[]>; // habitId -> [yyyy-mm-dd]
   goals: Goal[];
   journal: JournalEntry[];
+  reminders: Reminders;
 
   setName: (n: string) => void;
+  setReminders: (patch: Partial<Reminders>) => void;
   addFocusItem: (date: string, label: string) => void;
   removeFocusItem: (date: string, id: string) => void;
   toggleFocusItem: (date: string, id: string) => void;
@@ -95,6 +103,7 @@ export const SYNCED_KEYS = [
   "completions",
   "goals",
   "journal",
+  "reminders",
 ] as const;
 
 const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
@@ -227,6 +236,7 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
     },
   ],
   journal: [],
+  reminders: { enabled: false, habitTime: "08:00", journalTime: "21:00" },
 };
 
 export const useStore = create<State>()(
@@ -234,6 +244,7 @@ export const useStore = create<State>()(
     (set) => ({
       ...seed,
       setName: (name) => set({ name }),
+      setReminders: (patch) => set((s) => ({ reminders: { ...s.reminders, ...patch } })),
       addFocusItem: (date, label) =>
         set((s) => ({
           focusItems: {
@@ -369,9 +380,12 @@ export const useStore = create<State>()(
     }),
     {
       name: "aura-life-os",
-      version: 5,
+      version: 6,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
+        if (!persisted.reminders) {
+          persisted.reminders = { enabled: false, habitTime: "08:00", journalTime: "21:00" };
+        }
         if (!persisted.schedules) persisted.schedules = {};
         if (persisted.todaysSchedule && Object.keys(persisted.schedules).length === 0) {
           persisted.schedules[todayKey()] = persisted.todaysSchedule;
