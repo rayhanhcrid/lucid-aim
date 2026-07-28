@@ -10,6 +10,7 @@ import {
   BookOpen,
   Award,
   LayoutGrid,
+  Sparkles,
   X,
 } from "lucide-react";
 import { useUIStore } from "@/lib/ui-store";
@@ -23,6 +24,7 @@ const primary = [
 ] as const;
 
 const extras = [
+  { to: "/review",       label: "Rekap",      icon: Sparkles,  desc: "Rekap mingguan + saran fokus otomatis." },
   { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat mood, gratitude, & refleksi hari ini." },
   { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, consistency, dan angka bulan ini." },
   { to: "/achievements", label: "Pencapaian", icon: Award,     desc: "Small milestones yang udah kamu kumpulin." },
