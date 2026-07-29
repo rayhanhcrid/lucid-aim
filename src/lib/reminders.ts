@@ -40,10 +40,35 @@ export async function requestNotificationPermission() {
   return Notification.requestPermission();
 }
 
-export function showReminder(title: string, body: string) {
+/**
+ * Menampilkan notifikasi lokal.
+ *
+ * Chrome di Android dan PWA yang sudah di-install melarang konstruktor
+ * `new Notification()` ("Illegal constructor") — di sana notifikasi wajib lewat
+ * ServiceWorkerRegistration. Jadi service worker didahulukan, konstruktor cuma
+ * cadangan untuk browser desktop tanpa SW aktif.
+ */
+export async function showReminder(title: string, body: string) {
   if (!notificationsSupported() || Notification.permission !== "granted") return false;
+  const options: NotificationOptions = {
+    body,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    tag: title,
+  };
+
   try {
-    new Notification(title, { body, icon: "/icon-192.png", badge: "/icon-192.png", tag: title });
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg) {
+      await reg.showNotification(title, options);
+      return true;
+    }
+  } catch {
+    /* jatuh ke konstruktor di bawah */
+  }
+
+  try {
+    new Notification(title, options);
     return true;
   } catch {
     return false;
@@ -91,7 +116,9 @@ export function useReminderScheduler() {
         if (hhmm !== c.time) continue;
         const stamp = todayStamp(c.kind, c.time);
         if (alreadyFired(stamp)) continue;
-        if (showReminder(c.title, c.body)) markFired(stamp);
+        void showReminder(c.title, c.body).then((ok) => {
+          if (ok) markFired(stamp);
+        });
       }
 
       // Pengingat berkala untuk fokus hari ini yang belum beres.
@@ -110,11 +137,12 @@ export function useReminderScheduler() {
             if (!alreadyFired(stamp)) {
               const pending = (useStore.getState().focusItems[todayKey()] || []).filter((f) => !f.done);
               if (pending.length > 0) {
-                const ok = showReminder(
+                void showReminder(
                   `${pending.length} fokus belum beres`,
                   pending.slice(0, 3).map((f) => `• ${f.label}`).join("\n"),
-                );
-                if (ok) markFired(stamp);
+                ).then((ok) => {
+                  if (ok) markFired(stamp);
+                });
               } else {
                 markFired(stamp);
               }

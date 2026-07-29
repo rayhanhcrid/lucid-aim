@@ -190,9 +190,21 @@ function ReminderSettings() {
               if (perm !== "granted") {
                 const res = await requestNotificationPermission();
                 setPerm(res);
+                if (res === "denied") {
+                  toast.error("Izin notifikasi ditolak. Aktifkan lewat setelan situs di HP kamu.");
+                  return;
+                }
                 if (res !== "granted") return;
               }
-              showReminder("Contoh pengingat", "Masih ada fokus yang menunggu diselesaikan.");
+              const ok = await showReminder(
+                "Contoh pengingat",
+                "Masih ada fokus yang menunggu diselesaikan.",
+              );
+              if (!ok) {
+                toast.error(
+                  "Notifikasi lokal diblokir browser ini. Pakai toggle push di atas — itu jalur yang dipakai pengingat sungguhan.",
+                );
+              }
             }}
             className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-xs hover:bg-white/[0.1]"
           >
