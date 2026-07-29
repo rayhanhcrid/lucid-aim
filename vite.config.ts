@@ -19,10 +19,16 @@ export default defineConfig({
         registerType: "autoUpdate",
         injectRegister: null,
         filename: "sw.js",
+        // Nitro menyajikan aset statis dari .output/public, bukan dist/ — tanpa ini
+        // sw.js ikut ter-generate ke folder yang tidak pernah ter-deploy.
+        outDir: ".output/public",
         devOptions: { enabled: false },
         manifest: false,
         workbox: {
+          // Handler push/notificationclick disuntik ke sw.js hasil generate Workbox.
+          importScripts: ["/push-sw.js"],
           globPatterns: ["**/*.{js,css,woff2,png,svg,ico}"],
+          globIgnores: ["**/push-sw.js"],
           navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/_serverFn\//],
           runtimeCaching: [
             {

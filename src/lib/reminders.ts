@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { getPushState } from "./push";
 import { todayKey, useStore } from "./store";
 
 const FIRED_KEY = "rayhan-reminders-fired";
@@ -50,9 +51,9 @@ export function showReminder(title: string, body: string) {
 }
 
 /**
- * Penjadwal pengingat sisi-browser. Hanya berjalan selama aplikasi terbuka
- * (atau tab masih hidup di latar). Untuk pengingat yang tetap sampai saat
- * aplikasi tertutup, dibutuhkan web push + backend.
+ * Penjadwal pengingat sisi-browser: cadangan yang hanya berjalan selama
+ * aplikasi terbuka. Begitu web push aktif (lihat `lib/push.ts`), penjadwal ini
+ * mundur supaya notifikasi tidak dobel — server yang mengirim semuanya.
  */
 export function useReminderScheduler() {
   const reminders = useStore((s) => s.reminders);
@@ -60,7 +61,12 @@ export function useReminderScheduler() {
   useEffect(() => {
     if (!reminders?.enabled || !notificationsSupported()) return;
 
+    // Kalau perangkat ini sudah berlangganan push, server yang menangani.
+    // Tick pertama menunggu status ini supaya tidak sempat mengirim dobel.
+    let pushActive = true;
+
     const tick = () => {
+      if (pushActive) return;
       if (Notification.permission !== "granted") return;
       const now = new Date();
       const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -118,9 +124,18 @@ export function useReminderScheduler() {
       }
     };
 
-    tick();
+    let cancelled = false;
+    void getPushState().then((s) => {
+      if (cancelled) return;
+      pushActive = s === "on";
+      tick();
+    });
+
     const id = setInterval(tick, 30_000);
-    return () => clearInterval(id);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [
     reminders?.enabled,
     reminders?.habitTime,

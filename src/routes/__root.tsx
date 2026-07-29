@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useCloudSync } from "../lib/cloud-sync";
 import { useReminderScheduler } from "../lib/reminders";
 import { registerServiceWorker } from "../lib/pwa";
+import { syncPushSubscription } from "../lib/push";
 import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
@@ -133,7 +134,7 @@ function RootComponent() {
   useCloudSync();
   useReminderScheduler();
   useEffect(() => {
-    void registerServiceWorker();
+    void registerServiceWorker().then(() => syncPushSubscription());
   }, []);
 
   return (

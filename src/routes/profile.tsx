@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, X, Bell } from "lucide-react";
+import { Plus, X, Bell, Smartphone } from "lucide-react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { todayKey, useStore } from "@/lib/store";
 import {
@@ -8,6 +9,14 @@ import {
   requestNotificationPermission,
   showReminder,
 } from "@/lib/reminders";
+import {
+  disablePush,
+  enablePush,
+  getPushState,
+  needsInstallForPush,
+  sendTestPush,
+  type PushState,
+} from "@/lib/push";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -174,6 +183,8 @@ function ReminderSettings() {
             </div>
           </div>
 
+          <PushSettings onPermissionChange={setPerm} />
+
           <button
             onClick={async () => {
               if (perm !== "granted") {
@@ -186,14 +197,100 @@ function ReminderSettings() {
             className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-xs hover:bg-white/[0.1]"
           >
             <Bell className="size-3.5" />
-            {perm === "granted" ? "Coba notifikasi" : "Izinkan notifikasi"}
+            {perm === "granted" ? "Coba notifikasi lokal" : "Izinkan notifikasi"}
           </button>
-
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Pengingat berjalan selama aplikasi masih terbuka di browser/tab. Untuk pengingat yang
-            tetap sampai saat aplikasi tertutup, dibutuhkan web push + backend.
-          </p>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Web push: pengingat dikirim dari server, jadi tetap muncul di HP walau
+ * aplikasinya sudah ditutup.
+ */
+function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) => void }) {
+  const [state, setState] = useState<PushState | "loading">("loading");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    void getPushState().then(setState);
+  }, []);
+
+  const toggle = async (on: boolean) => {
+    setBusy(true);
+    try {
+      const next = on ? await enablePush() : await disablePush();
+      setState(next);
+      onPermissionChange(typeof Notification !== "undefined" ? Notification.permission : "default");
+      if (on && next === "on") toast.success("Notifikasi HP aktif — walau app ditutup.");
+      if (on && next === "denied") toast.error("Izin notifikasi ditolak di setelan browser.");
+      if (on && next === "no-sw")
+        toast.error("Buka lewat aplikasi yang sudah di-install, bukan preview.");
+      if (!on) toast.success("Notifikasi HP dimatikan.");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Gagal mengubah langganan notifikasi.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (state === "unsupported") {
+    return (
+      <p className="rounded-xl bg-white/[0.04] p-3 text-[11px] leading-relaxed text-muted-foreground">
+        Browser ini belum mendukung push. Di iPhone, install dulu aplikasinya lewat Safari → Share →
+        Add to Home Screen.
+      </p>
+    );
+  }
+
+  return (
+    <div className="rounded-xl bg-white/[0.04] p-3">
+      <label className="flex items-center justify-between gap-3 text-sm">
+        <span className="flex items-center gap-2">
+          <Smartphone className="size-4 shrink-0 text-muted-foreground" />
+          Kirim ke HP walau app ditutup
+        </span>
+        <input
+          type="checkbox"
+          disabled={busy || state === "loading"}
+          checked={state === "on"}
+          onChange={(e) => toggle(e.target.checked)}
+          className="size-4 disabled:opacity-40"
+        />
+      </label>
+
+      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+        {state === "on"
+          ? "Aktif. Pengingat dikirim dari server sesuai jadwal di atas, sesuai zona waktu perangkat ini."
+          : state === "denied"
+            ? "Izin notifikasi ditolak. Aktifkan lagi lewat setelan situs/aplikasi di HP kamu."
+            : state === "no-sw"
+              ? "Belum tersedia di sesi ini — buka aplikasi yang sudah di-install ke Home Screen."
+              : needsInstallForPush()
+                ? "Di iPhone, install dulu ke Home Screen (Safari → Share → Add to Home Screen) baru push bisa aktif."
+                : "Tanpa ini, pengingat hanya jalan selama aplikasi masih terbuka."}
+      </p>
+
+      {state === "on" && (
+        <button
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              const res = await sendTestPush();
+              toast.success(`Push uji dikirim ke ${res.sent} perangkat.`);
+            } catch (e) {
+              toast.error(e instanceof Error ? e.message : "Gagal mengirim push uji.");
+            } finally {
+              setBusy(false);
+            }
+          }}
+          className="mt-3 inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-xs hover:bg-white/[0.1] disabled:opacity-40"
+        >
+          <Bell className="size-3.5" />
+          Tes push dari server
+        </button>
       )}
     </div>
   );
