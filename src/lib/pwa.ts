@@ -4,18 +4,26 @@
  */
 const SW_URL = "/sw.js";
 
-function isBlockedContext() {
-  if (typeof window === "undefined") return true;
-  if (!import.meta.env.PROD) return true;
-  if (window.self !== window.top) return true;
-  if (new URL(window.location.href).searchParams.get("sw") === "off") return true;
+/** Alasan service worker dimatikan — `null` berarti boleh jalan. */
+export type SwBlockReason = "unsupported" | "dev" | "iframe" | "disabled" | "preview" | null;
+
+export function serviceWorkerBlockReason(): SwBlockReason {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return "unsupported";
+  if (!import.meta.env.PROD) return "dev";
+  if (window.self !== window.top) return "iframe";
+  if (new URL(window.location.href).searchParams.get("sw") === "off") return "disabled";
 
   const host = window.location.hostname;
-  if (host.startsWith("id-preview--") || host.startsWith("preview--")) return true;
-  if (host === "lovableproject.com" || host.endsWith(".lovableproject.com")) return true;
-  if (host === "lovableproject-dev.com" || host.endsWith(".lovableproject-dev.com")) return true;
-  if (host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev")) return true;
-  return false;
+  if (host.startsWith("id-preview--") || host.startsWith("preview--")) return "preview";
+  if (host === "lovableproject.com" || host.endsWith(".lovableproject.com")) return "preview";
+  if (host === "lovableproject-dev.com" || host.endsWith(".lovableproject-dev.com"))
+    return "preview";
+  if (host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev")) return "preview";
+  return null;
+}
+
+function isBlockedContext() {
+  return serviceWorkerBlockReason() !== null;
 }
 
 async function unregisterAppWorker() {

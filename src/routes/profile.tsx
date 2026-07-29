@@ -14,6 +14,7 @@ import {
   enablePush,
   getPushState,
   needsInstallForPush,
+  pushBlockReason,
   sendTestPush,
   type PushState,
 } from "@/lib/push";
@@ -221,6 +222,24 @@ function ReminderSettings() {
  * Web push: pengingat dikirim dari server, jadi tetap muncul di HP walau
  * aplikasinya sudah ditutup.
  */
+/** Penjelasan spesifik kenapa service worker (dan karenanya push) mati. */
+function noSwMessage() {
+  switch (pushBlockReason()) {
+    case "preview":
+      return `Domain ini (${typeof window !== "undefined" ? window.location.hostname : ""}) adalah preview — service worker sengaja dimatikan di sini. Install ulang dari domain hasil publish.`;
+    case "iframe":
+      return "Halaman ini jalan di dalam iframe. Buka aplikasinya langsung di tab/HP, bukan lewat editor.";
+    case "dev":
+      return "Ini build development. Push hanya aktif di build produksi.";
+    case "disabled":
+      return "Service worker dimatikan lewat ?sw=off di URL. Hapus parameter itu lalu muat ulang.";
+    case "unsupported":
+      return "Browser ini tidak mendukung service worker.";
+    default:
+      return "Service worker belum aktif. Muat ulang halaman, tunggu sebentar, lalu coba lagi.";
+  }
+}
+
 function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) => void }) {
   const [state, setState] = useState<PushState | "loading">("loading");
   const [busy, setBusy] = useState(false);
@@ -237,8 +256,7 @@ function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) 
       onPermissionChange(typeof Notification !== "undefined" ? Notification.permission : "default");
       if (on && next === "on") toast.success("Notifikasi HP aktif — walau app ditutup.");
       if (on && next === "denied") toast.error("Izin notifikasi ditolak di setelan browser.");
-      if (on && next === "no-sw")
-        toast.error("Buka lewat aplikasi yang sudah di-install, bukan preview.");
+      if (on && next === "no-sw") toast.error(noSwMessage());
       if (!on) toast.success("Notifikasi HP dimatikan.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Gagal mengubah langganan notifikasi.");
@@ -278,7 +296,7 @@ function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) 
           : state === "denied"
             ? "Izin notifikasi ditolak. Aktifkan lagi lewat setelan situs/aplikasi di HP kamu."
             : state === "no-sw"
-              ? "Belum tersedia di sesi ini — buka aplikasi yang sudah di-install ke Home Screen."
+              ? noSwMessage()
               : needsInstallForPush()
                 ? "Di iPhone, install dulu ke Home Screen (Safari → Share → Add to Home Screen) baru push bisa aktif."
                 : "Tanpa ini, pengingat hanya jalan selama aplikasi masih terbuka."}

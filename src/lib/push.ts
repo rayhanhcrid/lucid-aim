@@ -6,6 +6,7 @@
  * → Edge Function `send-reminders` (dipanggil pg_cron tiap menit) yang kirim
  * notifikasinya sesuai jadwal di halaman Profil.
  */
+import { registerServiceWorker, serviceWorkerBlockReason } from "./pwa";
 import { supabase } from "./supabase";
 
 /** Kunci publik VAPID — memang dirancang untuk terekspos di klien. */
@@ -61,13 +62,24 @@ export function needsInstallForPush() {
 
 async function getRegistration() {
   if (!pushSupported()) return null;
+  // Kalau konteksnya diblokir (dev/iframe/preview), sw.js memang tidak pernah
+  // didaftarkan — jangan buang waktu menunggu `ready` yang takkan resolve.
+  if (serviceWorkerBlockReason()) return null;
+
   const existing = await navigator.serviceWorker.getRegistration();
-  if (existing) return existing;
-  // Baru selesai register: tunggu sebentar, jangan sampai menggantung.
+  if (existing?.active) return existing;
+
+  // Belum aktif: pastikan sudah didaftarkan, lalu tunggu sampai aktif.
+  await registerServiceWorker();
   return Promise.race([
     navigator.serviceWorker.ready,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 10_000)),
   ]);
+}
+
+/** Kenapa push tidak tersedia di sesi ini — untuk pesan yang spesifik di UI. */
+export function pushBlockReason() {
+  return serviceWorkerBlockReason();
 }
 
 export async function getPushState(): Promise<PushState> {
