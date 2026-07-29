@@ -240,7 +240,7 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
     },
   ],
   journal: [],
-  reminders: { enabled: false, habitTime: "08:00", journalTime: "21:00" },
+  reminders: { enabled: false, habitTime: "08:00", journalTime: "21:00", focusEnabled: true, focusEveryHours: 3, focusStart: "08:00", focusEnd: "22:00" },
 };
 
 export const useStore = create<State>()(
@@ -387,9 +387,7 @@ export const useStore = create<State>()(
       version: 6,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
-        if (!persisted.reminders) {
-          persisted.reminders = { enabled: false, habitTime: "08:00", journalTime: "21:00" };
-        }
+        persisted.reminders = { ...({ enabled: false, habitTime: "08:00", journalTime: "21:00", focusEnabled: true, focusEveryHours: 3, focusStart: "08:00", focusEnd: "22:00" }), ...(persisted.reminders || {}) };
         if (!persisted.schedules) persisted.schedules = {};
         if (persisted.todaysSchedule && Object.keys(persisted.schedules).length === 0) {
           persisted.schedules[todayKey()] = persisted.todaysSchedule;
