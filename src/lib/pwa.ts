@@ -36,6 +36,13 @@ async function unregisterAppWorker() {
   );
 }
 
+/** Pesan error registrasi terakhir — dipakai untuk diagnosa di halaman Profil. */
+let lastRegistrationError: string | null = null;
+
+export function serviceWorkerError() {
+  return lastRegistrationError;
+}
+
 export async function registerServiceWorker() {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
   if (isBlockedContext()) {
@@ -45,7 +52,11 @@ export async function registerServiceWorker() {
   try {
     const { registerSW } = await import("virtual:pwa-register");
     registerSW({ immediate: true });
+    // registerSW tidak melempar kalau sw.js gagal dimuat, jadi cek langsung.
+    await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    lastRegistrationError = null;
   } catch (error) {
-    console.warn("service worker registration skipped:", error);
+    lastRegistrationError = error instanceof Error ? error.message : String(error);
+    console.warn("service worker registration failed:", error);
   }
 }

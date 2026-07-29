@@ -10,6 +10,7 @@ import {
   showReminder,
 } from "@/lib/reminders";
 import {
+  diagnosePush,
   disablePush,
   enablePush,
   getPushState,
@@ -243,9 +244,13 @@ function noSwMessage() {
 function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) => void }) {
   const [state, setState] = useState<PushState | "loading">("loading");
   const [busy, setBusy] = useState(false);
+  const [detail, setDetail] = useState("");
 
   useEffect(() => {
-    void getPushState().then(setState);
+    void getPushState().then(async (s) => {
+      setState(s);
+      if (s === "no-sw") setDetail(await diagnosePush());
+    });
   }, []);
 
   const toggle = async (on: boolean) => {
@@ -256,7 +261,11 @@ function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) 
       onPermissionChange(typeof Notification !== "undefined" ? Notification.permission : "default");
       if (on && next === "on") toast.success("Notifikasi HP aktif — walau app ditutup.");
       if (on && next === "denied") toast.error("Izin notifikasi ditolak di setelan browser.");
-      if (on && next === "no-sw") toast.error(noSwMessage());
+      if (on && next === "no-sw") {
+        const why = await diagnosePush();
+        setDetail(why);
+        toast.error(why);
+      }
       if (!on) toast.success("Notifikasi HP dimatikan.");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Gagal mengubah langganan notifikasi.");
@@ -296,7 +305,7 @@ function PushSettings({ onPermissionChange }: { onPermissionChange: (p: string) 
           : state === "denied"
             ? "Izin notifikasi ditolak. Aktifkan lagi lewat setelan situs/aplikasi di HP kamu."
             : state === "no-sw"
-              ? noSwMessage()
+              ? detail || noSwMessage()
               : needsInstallForPush()
                 ? "Di iPhone, install dulu ke Home Screen (Safari → Share → Add to Home Screen) baru push bisa aktif."
                 : "Tanpa ini, pengingat hanya jalan selama aplikasi masih terbuka."}

@@ -6,7 +6,7 @@
  * → Edge Function `send-reminders` (dipanggil pg_cron tiap menit) yang kirim
  * notifikasinya sesuai jadwal di halaman Profil.
  */
-import { registerServiceWorker, serviceWorkerBlockReason } from "./pwa";
+import { registerServiceWorker, serviceWorkerBlockReason, serviceWorkerError } from "./pwa";
 import { supabase } from "./supabase";
 
 /** Kunci publik VAPID — memang dirancang untuk terekspos di klien. */
@@ -80,6 +80,39 @@ async function getRegistration() {
 /** Kenapa push tidak tersedia di sesi ini — untuk pesan yang spesifik di UI. */
 export function pushBlockReason() {
   return serviceWorkerBlockReason();
+}
+
+/**
+ * Cari tahu kenapa service worker tidak aktif padahal konteksnya sah.
+ * Penyebab paling umum: /sw.js kena catch-all SSR (dibalas HTML) atau hilang
+ * dari hasil deploy — dua-duanya bikin registrasi gagal tanpa suara.
+ */
+export async function diagnosePush(): Promise<string> {
+  const blocked = serviceWorkerBlockReason();
+  if (blocked) return `Service worker diblokir di konteks ini (${blocked}).`;
+
+  const regError = serviceWorkerError();
+
+  // sw.js meng-importScripts push-sw.js. Kalau salah satunya hilang atau
+  // dibalas HTML, instalasi SW dibatalkan total — jadi keduanya diperiksa.
+  for (const file of ["/sw.js", "/push-sw.js"]) {
+    try {
+      const res = await fetch(file, { cache: "no-store" });
+      const type = res.headers.get("content-type") ?? "(tanpa content-type)";
+      if (!res.ok) {
+        return `${file} tidak tersedia di server — HTTP ${res.status}. File itu belum ikut ter-deploy, dan tanpanya service worker gagal dipasang.`;
+      }
+      if (!/javascript|ecmascript/i.test(type)) {
+        const head = (await res.text()).slice(0, 40).replace(/\s+/g, " ");
+        return `${file} dilayani sebagai "${type}" (diawali "${head}…"), bukan JavaScript — kemungkinan tertangkap catch-all SSR.`;
+      }
+    } catch (e) {
+      return `Tidak bisa mengambil ${file}: ${e instanceof Error ? e.message : String(e)}`;
+    }
+  }
+
+  if (regError) return `Registrasi service worker ditolak browser: ${regError}`;
+  return "/sw.js sehat tapi worker belum sempat aktif. Muat ulang halaman lalu coba lagi.";
 }
 
 export async function getPushState(): Promise<PushState> {
