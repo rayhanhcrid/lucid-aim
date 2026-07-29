@@ -50,10 +50,9 @@ export async function registerServiceWorker() {
     return;
   }
   try {
-    const { registerSW } = await import("virtual:pwa-register");
-    registerSW({ immediate: true });
-    // registerSW tidak melempar kalau sw.js gagal dimuat, jadi cek langsung.
-    await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    const reg = await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+    // Ambil versi terbaru kalau ada rilis baru sejak kunjungan sebelumnya.
+    void reg.update();
     lastRegistrationError = null;
   } catch (error) {
     lastRegistrationError = error instanceof Error ? error.message : String(error);
