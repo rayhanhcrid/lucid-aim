@@ -7,6 +7,23 @@ import { HabitIcon } from "@/components/HabitIcon";
 import { currentStreak, todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Beranda · Rayhan Life OS" },
+      {
+        name: "description",
+        content:
+          "Satu layar tenang untuk fokus hari ini, jadwal, kebiasaan, dan tujuan mingguan kamu.",
+      },
+      { property: "og:title", content: "Beranda · Rayhan Life OS" },
+      {
+        property: "og:description",
+        content: "Mulai harimu dengan satu fokus yang jelas — kebiasaan, jadwal, dan tujuan dalam satu tempat.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
@@ -584,7 +601,7 @@ function ScheduleSection({
         </ol>
       )}
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Isi jadwal buat besok dari <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok otomatis muncul di sini dan tetap bisa kamu ubah.
+        Isi jadwal untuk besok lewat <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok otomatis muncul di sini dan tetap bisa kamu ubah.
       </p>
       <span className="sr-only">{date}</span>
     </section>

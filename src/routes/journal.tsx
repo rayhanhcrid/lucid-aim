@@ -104,7 +104,7 @@ function JournalPage() {
             }}
             className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-5 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
           >
-            Save
+            Simpan
           </button>
         </div>
 
