@@ -41,6 +41,10 @@ export type Reminders = {
   enabled: boolean;
   habitTime: string; // HH:mm
   journalTime: string; // HH:mm
+  focusEnabled: boolean;
+  focusEveryHours: number; // interval jam untuk pengingat fokus
+  focusStart: string; // HH:mm mulai jendela pengingat
+  focusEnd: string; // HH:mm akhir jendela pengingat
 };
 
 export type State = {
