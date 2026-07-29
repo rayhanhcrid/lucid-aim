@@ -62,7 +62,7 @@ function CalendarPage() {
     <AppShell>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          This Month
+          Bulan ini
         </p>
         <div className="flex items-center justify-between">
           <h1 className="font-serif text-4xl leading-tight capitalize md:text-5xl">{monthLabel}</h1>
@@ -149,7 +149,7 @@ function CalendarPage() {
         {/* Progress bar with percentage */}
         <div className="mt-4">
           <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span>Habit Progress</span>
+            <span>Progres kebiasaan</span>
             <span className="tabular-nums text-foreground">
               {hydrated ? `${selectedDone}/${selectedItems.habits.length} · ${selectedPct}%` : "—"}
             </span>
@@ -174,7 +174,7 @@ function CalendarPage() {
           ))}
 
           <p className="pt-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Habit Checklist
+            Daftar kebiasaan
           </p>
           {selectedItems.habits.map(({ h, done }) => (
             <button

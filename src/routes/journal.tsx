@@ -8,7 +8,7 @@ export const Route = createFileRoute("/journal")({
   head: () => ({
     meta: [
       { title: "Jurnal · Rayhan" },
-      { name: "description", content: "Catat mood, rasa grateful, dan satu fokus buat besok." },
+      { name: "description", content: "Catat suasana hati, rasa syukur, dan satu fokus untuk besok." },
     ],
   }),
   component: JournalPage,
@@ -54,9 +54,9 @@ function JournalPage() {
     <AppShell>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Today's Catatan
+          Catatan hari ini
         </p>
-        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Today's Jurnal</h1>
+        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Jurnal Hari Ini</h1>
         <p className="mt-2 text-muted-foreground">
           {new Date().toLocaleDateString("id-ID", {
             weekday: "long",
@@ -68,14 +68,14 @@ function JournalPage() {
 
       <div className="animate-rise space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <Scale label="Mood" value={form.mood} onChange={(v) => setForm({ ...form, mood: v })} />
-          <Scale label="Energy" value={form.energy} onChange={(v) => setForm({ ...form, energy: v })} />
+          <Scale label="Suasana hati" value={form.mood} onChange={(v) => setForm({ ...form, mood: v })} />
+          <Scale label="Energi" value={form.energy} onChange={(v) => setForm({ ...form, energy: v })} />
         </div>
 
-        <JournalField label="Gratitude" placeholder="What am I grateful for today?" value={form.gratitude} onChange={(v) => setForm({ ...form, gratitude: v })} />
-        <JournalField label="Reflection" placeholder="Today aku realized…" value={form.reflection} onChange={(v) => setForm({ ...form, reflection: v })} />
-        <JournalField label="Today's Win" placeholder="One small win." value={form.winToday} onChange={(v) => setForm({ ...form, winToday: v })} />
-        <JournalField label="Tomorrow's Fokus" placeholder="The one thing that matters most for tomorrow." value={form.tomorrowFocus} onChange={(v) => setForm({ ...form, tomorrowFocus: v })} />
+        <JournalField label="Rasa syukur" placeholder="Hal apa yang kamu syukuri hari ini?" value={form.gratitude} onChange={(v) => setForm({ ...form, gratitude: v })} />
+        <JournalField label="Refleksi" placeholder="Hari ini aku menyadari…" value={form.reflection} onChange={(v) => setForm({ ...form, reflection: v })} />
+        <JournalField label="Kemenangan hari ini" placeholder="Satu hal kecil yang berhasil kamu lakukan." value={form.winToday} onChange={(v) => setForm({ ...form, winToday: v })} />
+        <JournalField label="Fokus besok" placeholder="Satu hal paling penting untuk besok." value={form.tomorrowFocus} onChange={(v) => setForm({ ...form, tomorrowFocus: v })} />
 
         <TomorrowFocus
           label={tomorrowLabel}
@@ -94,7 +94,7 @@ function JournalPage() {
 
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">
-            {saved ? "Saved · thanks for showing up" : "Auto-saved ke cloud — bisa dibuka dari device manapun, tanpa login."}
+            {saved ? "Tersimpan · terima kasih sudah hadir hari ini" : "Tersimpan otomatis ke cloud — bisa dibuka dari perangkat mana pun, tanpa login."}
           </span>
           <button
             onClick={() => {
@@ -111,7 +111,7 @@ function JournalPage() {
         {hydrated && journal.length > 0 && (
           <div className="mt-10">
             <p className="mb-3 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              Previous Catatan
+              Catatan sebelumnya
             </p>
             <div className="space-y-2">
               {[...journal]
@@ -238,7 +238,7 @@ function TomorrowFocus({
         </ul>
       ) : (
         <p className="mb-3 text-sm italic text-muted-foreground">
-          Add satu atau beberapa fokus for tomorrow — bakal langsung muncul di beranda pas hari berganti.
+          Tulis satu atau beberapa fokus untuk besok — otomatis muncul di beranda saat harinya tiba.
         </p>
       )}
       <form
@@ -253,7 +253,7 @@ function TomorrowFocus({
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Fokus for tomorrow…"
+          placeholder="Fokus untuk besok…"
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
         <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
@@ -308,7 +308,7 @@ function TomorrowSchedule({
         </ul>
       ) : (
         <p className="mb-3 text-sm italic text-muted-foreground">
-          Tulis rencana for tomorrow — bakal langsung muncul di beranda pas hari berganti.
+          Tulis rencana untuk besok — otomatis muncul di beranda saat harinya tiba.
         </p>
       )}
       <form
@@ -329,7 +329,7 @@ function TomorrowSchedule({
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Agenda for tomorrow…"
+          placeholder="Agenda untuk besok…"
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
         <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">

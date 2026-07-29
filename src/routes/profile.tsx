@@ -24,7 +24,7 @@ export const Route = createFileRoute("/profile")({
   head: () => ({
     meta: [
       { title: "Profil · Rayhan" },
-      { name: "description", content: "Atur identitas dan visi yang jadi arah hidup kamu." },
+      { name: "description", content: "Atur identitas, visi, dan pengingat yang menemani harimu." },
     ],
   }),
   component: ProfilePage,
@@ -50,14 +50,14 @@ function ProfilePage() {
   return (
     <AppShell>
       <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">You</p>
+        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Tentang kamu</p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Profil</h1>
       </header>
 
       <div className="animate-rise space-y-4">
         <label className="block rounded-2xl card-cinema p-4">
           <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Your Name
+            Nama kamu
           </span>
           <input
             value={name}
@@ -77,9 +77,9 @@ function ProfilePage() {
           />
         </label>
 
-        <TagList title="Who I'm Becoming" items={becoming} onAdd={addBecoming} onRemove={removeBecoming} placeholder="Add identity" />
+        <TagList title="Sosok yang sedang kubentuk" items={becoming} onAdd={addBecoming} onRemove={removeBecoming} placeholder="Tambah sifat atau peran" />
 
-        <TagList title={`Vision ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Add vision item" />
+        <TagList title={`Visi ${visionYear}`} items={vision} onAdd={addVision} onRemove={removeVision} placeholder="Tambah butir visi" />
 
         <FocusList
           items={todaysFocus}
@@ -444,7 +444,7 @@ function FocusList({
         <input
           value={v}
           onChange={(e) => setV(e.target.value)}
-          placeholder="Add fokus for today"
+          placeholder="Tambah fokus untuk hari ini"
           className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
       </form>
