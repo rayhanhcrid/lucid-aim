@@ -9,7 +9,7 @@ export const Route = createFileRoute("/goals")({
   head: () => ({
     meta: [
       { title: "Tujuan · Rayhan" },
-      { name: "description", content: "Break down visi kamu jadi weekly, monthly, dan langkah-langkah yang tenang." },
+      { name: "description", content: "Pecah visi kamu jadi tujuan mingguan, bulanan, dan langkah-langkah kecil yang jelas." },
     ],
   }),
   component: GoalsPage,
@@ -17,12 +17,12 @@ export const Route = createFileRoute("/goals")({
 
 const horizons = ["weekly", "monthly", "quarterly", "yearly", "lifetime"] as const;
 const horizonLabel: Record<(typeof horizons)[number] | "all", string> = {
-  all: "all",
-  weekly: "weekly",
-  monthly: "monthly",
-  quarterly: "quarterly",
-  yearly: "yearly",
-  lifetime: "lifetime",
+  all: "semua",
+  weekly: "mingguan",
+  monthly: "bulanan",
+  quarterly: "kuartal",
+  yearly: "tahunan",
+  lifetime: "seumur hidup",
 };
 
 function GoalsPage() {
@@ -56,7 +56,7 @@ function GoalsPage() {
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Jalan yang Kutempuh, step by step
+            Langkah demi langkah
           </p>
           <h1 className="font-serif text-4xl leading-tight md:text-5xl">Tujuan</h1>
         </div>
@@ -64,7 +64,7 @@ function GoalsPage() {
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
         >
-          <Plus className="size-4" strokeWidth={2.5} /> New Tujuan
+          <Plus className="size-4" strokeWidth={2.5} /> Tujuan Baru
         </button>
       </header>
 
@@ -109,7 +109,7 @@ function GoalsPage() {
 
             <div className="mt-4">
               <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-                <span>Progress</span>
+                <span>Progres</span>
                 <span>{g.progress}%</span>
               </div>
               <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
@@ -162,7 +162,7 @@ function GoalsPage() {
             className="max-h-[85vh] w-full max-w-md space-y-4 overflow-y-auto rounded-[28px] card-cinema p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-serif text-2xl">New Tujuan</h2>
+            <h2 className="font-serif text-2xl">Tujuan Baru</h2>
             <label className="block rounded-2xl bg-white/[0.04] px-4 py-3">
               <span className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 Title
@@ -252,7 +252,7 @@ function GoalsPage() {
                 }}
                 className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white"
               >
-                Save Tujuan
+                Simpan Tujuan
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ function MilestoneAdd({ onAdd }: { onAdd: (t: string) => void }) {
       <input
         value={v}
         onChange={(e) => setV(e.target.value)}
-        placeholder="Add milestone"
+        placeholder="Tambah milestone"
         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
     </form>

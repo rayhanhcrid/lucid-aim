@@ -10,7 +10,7 @@ export const Route = createFileRoute("/habits")({
   head: () => ({
     meta: [
       { title: "Kebiasaan · Rayhan" },
-      { name: "description", content: "Ritual harian kamu — tenang, consistent, dan berkembang perlahan." },
+      { name: "description", content: "Ritual harian kamu — tenang, konsisten, dan tumbuh perlahan." },
     ],
   }),
   component: HabitsPage,
@@ -48,15 +48,15 @@ function HabitsPage() {
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Your Rutinitas
+            Rutinitas kamu
           </p>
-          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Daily Ritual</h1>
+          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Ritual Harian</h1>
         </div>
         <button
           onClick={() => setOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] transition-transform active:scale-95"
         >
-          <Plus className="size-4" strokeWidth={2.5} /> New
+          <Plus className="size-4" strokeWidth={2.5} /> Tambah
         </button>
       </header>
 
@@ -131,7 +131,7 @@ function HabitsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <p className="mb-1 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              New Kebiasaan
+              Kebiasaan Baru
             </p>
             <h2 className="font-serif text-2xl">Design your kebiasaan</h2>
 

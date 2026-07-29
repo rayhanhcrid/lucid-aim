@@ -7,17 +7,34 @@ import { HabitIcon } from "@/components/HabitIcon";
 import { currentStreak, todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Beranda · Rayhan Life OS" },
+      {
+        name: "description",
+        content:
+          "Satu layar tenang untuk fokus hari ini, jadwal, kebiasaan, dan tujuan mingguan kamu.",
+      },
+      { property: "og:title", content: "Beranda · Rayhan Life OS" },
+      {
+        property: "og:description",
+        content: "Mulai harimu dengan satu fokus yang jelas — kebiasaan, jadwal, dan tujuan dalam satu tempat.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
 function greeting() {
   const h = new Date().getHours();
-  if (h < 5)  return "Still up";
-  if (h < 11) return "Morning";
-  if (h < 15) return "Afternoon";
-  if (h < 18) return "Evening";
-  if (h < 22) return "Night";
-  return "So late";
+  if (h < 5)  return "Belum tidur";
+  if (h < 11) return "Selamat pagi";
+  if (h < 15) return "Selamat siang";
+  if (h < 18) return "Selamat sore";
+  if (h < 22) return "Selamat malam";
+  return "Masih terjaga";
 }
 
 function DigitalClock() {
@@ -109,7 +126,7 @@ function Index() {
             <span className="shimmer-text italic">{name}.</span>
           </h1>
           <p className="mt-4 max-w-[52ch] text-pretty text-muted-foreground">
-            Hari ini masih blank sih — satu niat aja udah cukup buat mulai.
+            Hari ini masih kosong. Satu langkah kecil aja udah cukup buat memulainya.
           </p>
         </div>
         <DigitalClock />
@@ -144,11 +161,11 @@ function Index() {
           <div className="mb-4 flex items-end justify-between">
             <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
               <Target className="size-3" />
-              This Week's Tujuan
+              Tujuan minggu ini
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className="font-serif text-base text-foreground tabular-nums">{weeklyPct}%</span>
-              <span>on average</span>
+              <span>rata-rata</span>
             </div>
           </div>
           <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
@@ -191,9 +208,9 @@ function Index() {
 
       {/* Vision cards */}
       <section className="animate-rise mb-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <VisionCard title="Who I'm Becoming" items={becoming.map((b) => b.label)} />
+        <VisionCard title="Sosok yang sedang kubentuk" items={becoming.map((b) => b.label)} />
         <VisionCard
-          title={`Vision ${visionYear}`}
+          title={`Visi ${visionYear}`}
           items={vision.map((v) => v.label)}
           dashed
         />
@@ -203,19 +220,19 @@ function Index() {
       <section className="animate-rise">
         <div className="mb-4 flex items-end justify-between">
           <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Daily Ritual
+            Ritual harian
           </p>
           <Link
             to="/habits"
             className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
-            See all <ArrowUpRight className="size-3" />
+            Lihat semua <ArrowUpRight className="size-3" />
           </Link>
         </div>
 
         <div className="mb-4">
           <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span>Today's Progress</span>
+            <span>Progres hari ini</span>
             <span className="tabular-nums text-foreground">
               {hydrated ? `${doneToday}/${habits.length} · ${pct}%` : "—"}
             </span>
@@ -353,13 +370,13 @@ function FocusSection({
         <div className="mb-4 flex items-center justify-between gap-2">
           <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
             <Sparkles className="size-3 text-gold animate-breathe" />
-            Today's Fokus
+            Fokus hari ini
           </p>
           <button
             onClick={() => setOpen((v) => !v)}
             className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
           >
-            {open ? "Close" : (<><Plus className="size-3" /> Add</>)}
+            {open ? "Tutup" : (<><Plus className="size-3" /> Tambah</>)}
           </button>
         </div>
 
@@ -376,11 +393,11 @@ function FocusSection({
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              placeholder="One thing yang mau kamu fokusin hari ini"
+              placeholder="Satu hal yang mau kamu selesaikan hari ini"
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               autoFocus
             />
-            <button type="submit" className="text-gold hover:opacity-80" aria-label="Add">
+            <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
               <Plus className="size-4" />
             </button>
           </form>
@@ -388,11 +405,11 @@ function FocusSection({
 
         {items.length === 0 ? (
           <p className="rounded-2xl bg-white/[0.04] p-4 text-sm text-muted-foreground hairline">
-            Belum ada fokus for today. Tulis{" "}
+            Belum ada fokus hari ini. Tulis{" "}
             <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
               di jurnal malam ini
             </Link>{" "}
-            buat besok, or tambah langsung di sini.
+            untuk besok, atau tambahkan langsung di sini.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -438,18 +455,18 @@ function FocusSection({
         )}
 
         <p className="mt-3 text-[11px] text-muted-foreground">
-          Isi fokus buat besok dari{" "}
+          Isi fokus untuk besok lewat{" "}
           <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
             jurnal malam ini
           </Link>{" "}
-          — besok bakal muncul di sini and tetap bisa disesuaikan kok.
+          — besok otomatis muncul di sini dan tetap bisa kamu ubah.
         </p>
 
         {overallStreak > 0 && (
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 hairline-gold">
             <Flame className="size-3.5 text-gold" />
             <span className="text-xs text-muted-foreground">
-              {overallStreak}-day streak · keep it up!
+              Runtutan {overallStreak} hari · terus jaga ritmenya
             </span>
           </div>
         )}
@@ -458,7 +475,7 @@ function FocusSection({
         <ProgressRing
           value={hydrated ? focusPct : 0}
           label={`${hydrated ? focusPct : 0}%`}
-          sub={`${doneFocus} dari ${items.length}`}
+          sub={`${doneFocus} dari ${items.length} selesai`}
         />
       </div>
     </section>
@@ -492,13 +509,13 @@ function ScheduleSection({
       <div className="mb-4 flex items-end justify-between">
         <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           <Clock className="size-3" />
-          Today's Jadwal
+          Jadwal hari ini
         </p>
         <button
           onClick={() => setOpen((v) => !v)}
           className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
         >
-          {open ? "Close" : (<><Plus className="size-3" /> Add</>)}
+          {open ? "Tutup" : (<><Plus className="size-3" /> Tambah</>)}
         </button>
       </div>
 
@@ -521,11 +538,11 @@ function ScheduleSection({
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder="Agenda buat hari ini"
+            placeholder="Agenda untuk hari ini"
             className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             autoFocus
           />
-          <button type="submit" className="text-gold hover:opacity-80" aria-label="Add">
+          <button type="submit" className="text-gold hover:opacity-80" aria-label="Tambah">
             <Plus className="size-4" />
           </button>
         </form>
@@ -533,7 +550,7 @@ function ScheduleSection({
 
       {items.length === 0 ? (
         <p className="rounded-2xl bg-white/[0.04] p-4 text-sm text-muted-foreground hairline">
-          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> buat besok, or tambah langsung di sini.
+          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> untuk besok, atau tambahkan langsung di sini.
         </p>
       ) : (
         <ol className="relative space-y-2 pl-4">
@@ -567,7 +584,7 @@ function ScheduleSection({
                   <span className={passed ? "flex-1 line-through" : "flex-1"}>{s.label}</span>
                   {isNext && (
                     <span className="text-[10px] uppercase tracking-widest text-gold">
-                      up next
+                      berikutnya
                     </span>
                   )}
                   <button
@@ -584,7 +601,7 @@ function ScheduleSection({
         </ol>
       )}
       <p className="mt-3 text-[11px] text-muted-foreground">
-        Isi jadwal buat besok dari <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok bakal muncul di sini and tetap bisa disesuaikan kok.
+        Isi jadwal untuk besok lewat <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok otomatis muncul di sini dan tetap bisa kamu ubah.
       </p>
       <span className="sr-only">{date}</span>
     </section>

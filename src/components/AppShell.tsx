@@ -24,10 +24,10 @@ const primary = [
 ] as const;
 
 const extras = [
-  { to: "/review",       label: "Rekap",      icon: Sparkles,  desc: "Rekap mingguan + saran fokus otomatis." },
-  { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat mood, gratitude, & refleksi hari ini." },
-  { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, consistency, dan angka bulan ini." },
-  { to: "/achievements", label: "Pencapaian", icon: Award,     desc: "Small milestones yang udah kamu kumpulin." },
+  { to: "/review",       label: "Rekap",      icon: Sparkles,  desc: "Rekap mingguan dan saran fokus untuk minggu depan." },
+  { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat suasana hati, syukur, dan refleksi hari ini." },
+  { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, konsistensi, dan angka bulan ini." },
+  { to: "/achievements", label: "Pencapaian", icon: Award,     desc: "Pencapaian kecil yang sudah kamu kumpulkan." },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -77,7 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="p-4">
           <div className="card-cinema p-4">
             <p className="font-serif text-lg italic leading-snug text-foreground/90">
-              "Small steps yang tenang, perlahan ngebentuk hidup yang kamu mau."
+              "Langkah kecil yang tenang, pelan-pelan membentuk hidup yang kamu inginkan."
             </p>
           </div>
         </div>
@@ -123,7 +123,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">Semua fitur</p>
-                <h3 className="font-serif text-2xl">Explore Rayhan</h3>
+                <h3 className="font-serif text-2xl">Jelajahi Rayhan</h3>
               </div>
               <button
                 onClick={() => setMenu(false)}
