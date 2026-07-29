@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useStore } from "./store";
+import { todayKey, useStore } from "./store";
 
 const FIRED_KEY = "rayhan-reminders-fired";
 
@@ -87,10 +87,52 @@ export function useReminderScheduler() {
         if (alreadyFired(stamp)) continue;
         if (showReminder(c.title, c.body)) markFired(stamp);
       }
+
+      // Pengingat berkala untuk fokus hari ini yang belum beres.
+      if (reminders.focusEnabled !== false) {
+        const every = Math.max(1, Number(reminders.focusEveryHours) || 3);
+        const start = toMinutes(reminders.focusStart || "08:00");
+        const end = toMinutes(reminders.focusEnd || "22:00");
+        const nowMin = now.getHours() * 60 + now.getMinutes();
+        if (nowMin >= start && nowMin <= end) {
+          const sinceStart = nowMin - start;
+          const slot = Math.floor(sinceStart / (every * 60));
+          const slotMin = start + slot * every * 60;
+          // hanya picu dalam 5 menit pertama tiap slot
+          if (nowMin - slotMin < 5) {
+            const stamp = todayStamp("focus", String(slotMin));
+            if (!alreadyFired(stamp)) {
+              const pending = (useStore.getState().focusItems[todayKey()] || []).filter((f) => !f.done);
+              if (pending.length > 0) {
+                const ok = showReminder(
+                  `${pending.length} fokus belum beres`,
+                  pending.slice(0, 3).map((f) => `• ${f.label}`).join("\n"),
+                );
+                if (ok) markFired(stamp);
+              } else {
+                markFired(stamp);
+              }
+            }
+          }
+        }
+      }
     };
 
     tick();
     const id = setInterval(tick, 30_000);
     return () => clearInterval(id);
-  }, [reminders?.enabled, reminders?.habitTime, reminders?.journalTime]);
+  }, [
+    reminders?.enabled,
+    reminders?.habitTime,
+    reminders?.journalTime,
+    reminders?.focusEnabled,
+    reminders?.focusEveryHours,
+    reminders?.focusStart,
+    reminders?.focusEnd,
+  ]);
+}
+
+function toMinutes(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
 }

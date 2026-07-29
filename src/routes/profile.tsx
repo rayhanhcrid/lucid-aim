@@ -1,8 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, X, Bell } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { todayKey, useStore } from "@/lib/store";
+import {
+  notificationPermission,
+  requestNotificationPermission,
+  showReminder,
+} from "@/lib/reminders";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -73,8 +78,146 @@ function ProfilePage() {
         <p className="rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-muted-foreground hairline">
           Jadwal for tomorrow is now set directly di halaman <span className="text-foreground">Jurnal</span>, and bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
         </p>
+
+        <ReminderSettings />
       </div>
     </AppShell>
+  );
+}
+
+function ReminderSettings() {
+  const reminders = useStore((s) => s.reminders);
+  const setReminders = useStore((s) => s.setReminders);
+  const [perm, setPerm] = useState<string>("default");
+
+  useEffect(() => {
+    setPerm(notificationPermission());
+  }, []);
+
+  const unsupported = perm === "unsupported";
+
+  return (
+    <div className="rounded-2xl card-cinema p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Pengingat</p>
+        <label className="flex items-center gap-2 text-xs">
+          <input
+            type="checkbox"
+            checked={reminders.enabled}
+            onChange={async (e) => {
+              const on = e.target.checked;
+              if (on && perm !== "granted") {
+                const res = await requestNotificationPermission();
+                setPerm(res);
+                if (res !== "granted") return;
+              }
+              setReminders({ enabled: on });
+            }}
+            className="size-4 accent-[var(--color-primary,teal)]"
+          />
+          Aktifkan
+        </label>
+      </div>
+
+      {unsupported ? (
+        <p className="text-xs text-muted-foreground">
+          Browser ini belum mendukung notifikasi. Coba install aplikasi ke Home Screen.
+        </p>
+      ) : (
+        <div className="space-y-3 text-sm">
+          <TimeRow
+            label="Ritual pagi"
+            value={reminders.habitTime}
+            onChange={(v) => setReminders({ habitTime: v })}
+          />
+          <TimeRow
+            label="Refleksi malam"
+            value={reminders.journalTime}
+            onChange={(v) => setReminders({ journalTime: v })}
+          />
+
+          <div className="rounded-xl bg-white/[0.04] p-3">
+            <label className="mb-3 flex items-center justify-between gap-3 text-sm">
+              <span>Ingatkan fokus yang belum beres</span>
+              <input
+                type="checkbox"
+                checked={reminders.focusEnabled}
+                onChange={(e) => setReminders({ focusEnabled: e.target.checked })}
+                className="size-4"
+              />
+            </label>
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span className="text-muted-foreground">Setiap</span>
+              <select
+                value={reminders.focusEveryHours}
+                onChange={(e) => setReminders({ focusEveryHours: Number(e.target.value) })}
+                className="rounded-lg bg-white/[0.06] px-2 py-1 text-sm outline-none"
+              >
+                {[1, 2, 3, 4, 6].map((h) => (
+                  <option key={h} value={h}>
+                    {h} jam
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <TimeRow
+                label="Mulai"
+                value={reminders.focusStart}
+                onChange={(v) => setReminders({ focusStart: v })}
+              />
+              <TimeRow
+                label="Sampai"
+                value={reminders.focusEnd}
+                onChange={(v) => setReminders({ focusEnd: v })}
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={async () => {
+              if (perm !== "granted") {
+                const res = await requestNotificationPermission();
+                setPerm(res);
+                if (res !== "granted") return;
+              }
+              showReminder("Contoh pengingat", "Masih ada fokus yang menunggu diselesaikan.");
+            }}
+            className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-xs hover:bg-white/[0.1]"
+          >
+            <Bell className="size-3.5" />
+            {perm === "granted" ? "Coba notifikasi" : "Izinkan notifikasi"}
+          </button>
+
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            Pengingat berjalan selama aplikasi masih terbuka di browser/tab. Untuk pengingat yang
+            tetap sampai saat aplikasi tertutup, dibutuhkan web push + backend.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TimeRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="flex flex-1 items-center justify-between gap-3">
+      <span className="text-muted-foreground">{label}</span>
+      <input
+        type="time"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-lg bg-white/[0.06] px-2 py-1 text-sm outline-none"
+      />
+    </label>
   );
 }
 
