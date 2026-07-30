@@ -147,7 +147,7 @@ function HabitsPage() {
               </Field>
 
               <Field label="Icon">
-                <div className="grid grid-cols-8 gap-1.5">
+                <div className="grid max-h-44 grid-cols-8 gap-1.5 overflow-y-auto pr-1">
                   {ICON_KEYS.map((k) => (
                     <button
                       key={k}
