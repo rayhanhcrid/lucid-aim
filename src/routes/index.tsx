@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Check, ArrowUpRight, Flame, Clock, Sparkles, Plus, X, Target } from "lucide-react";
+import { Check, ArrowUpRight, Flame, Clock, Sparkles, Plus, X, Target, Maximize2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
@@ -122,7 +122,7 @@ function Index() {
             {dateLabel}
           </p>
           <h1 className="font-serif text-5xl leading-[1.05] text-balance md:text-6xl">
-            {greeting()},{" "}
+            {hydrated ? greeting() : "Halo"},{" "}
             <span className="shimmer-text italic">{name}.</span>
           </h1>
           <p className="mt-4 max-w-[52ch] text-pretty text-muted-foreground">
@@ -372,6 +372,12 @@ function FocusSection({
             <Sparkles className="size-3 text-gold animate-breathe" />
             Fokus hari ini
           </p>
+          <Link
+            to="/focus"
+            className="ml-auto inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
+          >
+            <Maximize2 className="size-3" /> Mode fokus
+          </Link>
           <button
             onClick={() => setOpen((v) => !v)}
             className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-muted-foreground hairline hover:text-foreground"
