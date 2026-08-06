@@ -51,6 +51,15 @@ function FocusMode() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-16">
+      {/* Halo tenang di belakang jam */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-[30%] -z-10 size-[min(78vw,34rem)] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl animate-breathe"
+        style={{
+          background:
+            "radial-gradient(circle, oklch(0.62 0.11 195 / 0.22) 0%, oklch(0.62 0.11 195 / 0.06) 45%, transparent 70%)",
+        }}
+      />
       <Link
         to="/"
         className="absolute right-5 top-5 grid size-10 place-items-center rounded-full bg-surface/80 text-muted-foreground backdrop-blur hairline transition hover:text-foreground"
@@ -59,10 +68,13 @@ function FocusMode() {
         <X className="size-4" />
       </Link>
 
-      <div className="mb-10 flex flex-col items-center gap-2 text-center">
+      <div className="animate-rise mb-10 flex flex-col items-center gap-2 text-center">
         <span className="font-sans text-[clamp(3.5rem,16vw,9rem)] font-medium leading-none tabular-nums tracking-tight">
           {hydrated ? `${hh}:${mm}` : "--:--"}
-          <span className="ml-2 align-top text-[0.28em] text-muted-foreground tabular-nums">
+          <span
+            key={ss}
+            className="ml-2 inline-block align-top text-[0.28em] text-muted-foreground tabular-nums animate-check-pop"
+          >
             {hydrated ? ss : "--"}
           </span>
         </span>
@@ -78,7 +90,7 @@ function FocusMode() {
         </p>
 
         {items.length === 0 ? (
-          <p className="rounded-2xl bg-white/[0.04] p-5 text-center text-sm text-muted-foreground hairline">
+          <p className="animate-rise rounded-2xl bg-white/[0.04] p-5 text-center text-sm text-muted-foreground hairline">
             Belum ada fokus untuk hari ini. Tambahkan dulu di{" "}
             <Link to="/" className="text-gold underline-offset-2 hover:underline">
               beranda
@@ -88,27 +100,41 @@ function FocusMode() {
         ) : (
           <ul className="space-y-3">
             {items.map((f, i) => (
-              <li key={f.id}>
+              <li
+                key={f.id}
+                className="animate-rise"
+                style={{ animationDelay: `${0.08 + i * 0.07}s` }}
+              >
                 <button
                   onClick={() => {
                     toggleFocusItem(today, f.id);
                     haptic();
                     if (!f.done) celebrate("small");
                   }}
-                  className="group flex w-full min-w-0 items-center gap-3 rounded-2xl bg-surface/60 px-4 py-3.5 text-left text-base hairline transition hover:bg-surface animate-float-y"
-                  style={{ animationDelay: `${i * 0.25}s` }}
+                  className={[
+                    "group flex w-full min-w-0 items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-base backdrop-blur hairline",
+                    "transition-all duration-500 ease-out hover:-translate-y-0.5 hover:bg-surface hover:shadow-[0_18px_38px_-24px_oklch(0.62_0.11_195/0.7)] active:scale-[0.985]",
+                    f.done ? "bg-surface/35 opacity-70" : "bg-surface/60 animate-float-y",
+                  ].join(" ")}
+                  style={{
+                    animationDelay: `${i * 0.45}s`,
+                    animationDuration: `${4.2 + (i % 3) * 0.9}s`,
+                  }}
                 >
                   <span
+                    key={f.done ? "on" : "off"}
                     className={[
                       "grid size-6 shrink-0 place-items-center rounded-full transition-all",
-                      f.done ? "bg-gold text-white" : "ring-2 ring-white/15 group-hover:ring-gold/60",
+                      f.done
+                        ? "bg-gold text-white animate-check-pop"
+                        : "ring-2 ring-white/15 transition-transform group-hover:scale-110 group-hover:ring-gold/60",
                     ].join(" ")}
                   >
                     {f.done && <Check className="size-3.5" strokeWidth={3} />}
                   </span>
                   <span
                     className={[
-                      "min-w-0 flex-1",
+                      "min-w-0 flex-1 transition-colors duration-500",
                       f.done ? "text-muted-foreground line-through" : "text-foreground/90",
                     ].join(" ")}
                   >
@@ -121,10 +147,10 @@ function FocusMode() {
         )}
 
         {items.length > 0 && (
-          <div className="mt-8">
+          <div className="animate-rise mt-8" style={{ animationDelay: "0.3s" }}>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700 ease-out"
                 style={{ width: `${pct}%` }}
               />
             </div>
