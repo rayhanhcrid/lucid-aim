@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Plus, X, Clock, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { VoiceInput } from "@/components/VoiceInput";
 import { todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/journal")({
@@ -152,10 +153,16 @@ function JournalField({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="block rounded-2xl card-cinema p-4">
-      <span className="mb-2 block text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-        {label}
-      </span>
+    <div className="rounded-2xl card-cinema p-4">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          {label}
+        </span>
+        <VoiceInput
+          label={`Rekam suara untuk ${label.toLowerCase()}`}
+          onText={(t) => onChange(value ? `${value.trim()} ${t}` : t)}
+        />
+      </div>
       <textarea
         rows={2}
         value={value}
@@ -163,7 +170,7 @@ function JournalField({
         placeholder={placeholder}
         className="w-full resize-none bg-transparent font-serif text-xl italic leading-snug outline-none placeholder:not-italic placeholder:font-sans placeholder:text-base placeholder:text-muted-foreground/50"
       />
-    </label>
+    </div>
   );
 }
 
