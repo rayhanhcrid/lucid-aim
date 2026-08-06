@@ -119,7 +119,7 @@ function Index() {
         <div>
           <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
             <span className="inline-block size-1 rounded-full bg-gold animate-breathe" />
-            {dateLabel}
+            {hydrated ? dateLabel : "—"}
           </p>
           <h1 className="font-serif text-5xl leading-[1.05] text-balance md:text-6xl">
             {hydrated ? greeting() : "Halo"},{" "}
