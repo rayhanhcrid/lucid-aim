@@ -7,13 +7,23 @@ import {
   CandlestickChart,
   TrendingUp,
   TrendingDown,
+  Minus,
+  Pencil,
   ArrowDownRight,
   ArrowUpRight,
   Wallet,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
-import { useHydrated, useStore, todayKey, type Trade } from "@/lib/store";
+import { TrendChart } from "@/components/TrendChart";
+import {
+  useHydrated,
+  useStore,
+  todayKey,
+  tradePnl,
+  tradeReturn,
+  type Trade,
+} from "@/lib/store";
 import { useUIStore } from "@/lib/ui-store";
 import { celebrate } from "@/lib/celebrate";
 
@@ -88,12 +98,15 @@ function FinancePage() {
 function Savings({ hydrated }: { hydrated: boolean }) {
   const pots = useStore((s) => s.pots);
   const txs = useStore((s) => s.savingTx);
+  const monthly = useStore((s) => s.monthlySavings);
   const addPot = useStore((s) => s.addPot);
+  const updatePot = useStore((s) => s.updatePot);
   const removePot = useStore((s) => s.removePot);
   const addTx = useStore((s) => s.addSavingTx);
   const setDialogOpen = useUIStore((s) => s.setDialogOpen);
 
   const [open, setOpen] = useState(false);
+  const [editingPot, setEditingPot] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", target: "", note: "" });
   const [moveFor, setMoveFor] = useState<string | null>(null);
   const [move, setMove] = useState({ amount: "", note: "", dir: "in" as "in" | "out" });
@@ -109,7 +122,17 @@ function Savings({ hydrated }: { hydrated: boolean }) {
     return m;
   }, [txs]);
 
-  const total = hydrated ? Object.values(saldoPer).reduce((a, b) => a + b, 0) : 0;
+  // Angka utama mengikuti setoran akhir bulan terakhir yang kamu catat; kalau
+  // belum ada satu pun, jatuh ke penjumlahan saldo kantong.
+  const latestMonthly = useMemo(
+    () =>
+      hydrated
+        ? [...monthly].sort((a, b) => a.month.localeCompare(b.month)).pop()
+        : undefined,
+    [monthly, hydrated],
+  );
+  const potTotal = hydrated ? Object.values(saldoPer).reduce((a, b) => a + b, 0) : 0;
+  const total = latestMonthly ? latestMonthly.amount : potTotal;
   const totalTarget = hydrated ? pots.reduce((a, p) => a + (p.target || 0), 0) : 0;
   const pct = totalTarget ? Math.min(100, Math.round((total / totalTarget) * 100)) : 0;
 
@@ -128,6 +151,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
             </p>
             <p className="mt-1 font-serif text-4xl">{hydrated ? rupiah(total) : "Rp —"}</p>
             <p className="mt-1 text-xs text-muted-foreground">
+              {latestMonthly ? `per ${monthLabel(latestMonthly.month)} · ` : ""}
               dari target {hydrated ? rupiah(totalTarget) : "—"}
             </p>
           </div>
@@ -147,7 +171,11 @@ function Savings({ hydrated }: { hydrated: boolean }) {
       <div className="animate-rise mb-4 flex items-center justify-between">
         <h2 className="font-serif text-2xl">Kantong tabungan</h2>
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setEditingPot(null);
+            setForm({ name: "", target: "", note: "" });
+            setOpen(true);
+          }}
           className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> Kantong Baru
@@ -173,13 +201,30 @@ function Savings({ hydrated }: { hydrated: boolean }) {
                       <p className="mt-0.5 text-[11px] text-muted-foreground">{p.note}</p>
                     )}
                   </div>
-                  <button
-                    onClick={() => removePot(p.id)}
-                    className="text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-red-400"
-                    aria-label={`Hapus ${p.name}`}
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setEditingPot(p.id);
+                        setForm({
+                          name: p.name,
+                          target: String(p.target ?? ""),
+                          note: p.note ?? "",
+                        });
+                        setOpen(true);
+                      }}
+                      className="text-muted-foreground transition hover:text-foreground"
+                      aria-label={`Ubah ${p.name}`}
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      onClick={() => removePot(p.id)}
+                      className="text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-red-400"
+                      aria-label={`Hapus ${p.name}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <p className="mt-4 font-serif text-2xl">{hydrated ? rupiah(saldo) : "Rp —"}</p>
@@ -220,6 +265,8 @@ function Savings({ hydrated }: { hydrated: boolean }) {
         </div>
       )}
 
+      <MonthlyLog hydrated={hydrated} />
+
       {hydrated && recent.length > 0 && (
         <section className="mt-8">
           <h2 className="mb-3 font-serif text-2xl">Riwayat terakhir</h2>
@@ -250,9 +297,9 @@ function Savings({ hydrated }: { hydrated: boolean }) {
         </section>
       )}
 
-      {/* Dialog kantong baru */}
+      {/* Dialog kantong — dipakai untuk membuat maupun mengubah */}
       {open && (
-        <Dialog title="Kantong baru" onClose={() => setOpen(false)}>
+        <Dialog title={editingPot ? "Ubah kantong" : "Kantong baru"} onClose={() => setOpen(false)}>
           <Field label="Nama kantong">
             <input
               className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
@@ -282,15 +329,18 @@ function Savings({ hydrated }: { hydrated: boolean }) {
             onCancel={() => setOpen(false)}
             onSubmit={() => {
               if (!form.name.trim()) return;
-              addPot({
+              const payload = {
                 name: form.name.trim(),
                 target: Number(form.target || 0),
                 note: form.note.trim() || undefined,
-              });
+              };
+              if (editingPot) updatePot(editingPot, payload);
+              else addPot(payload);
               setForm({ name: "", target: "", note: "" });
+              setEditingPot(null);
               setOpen(false);
             }}
-            submitLabel="Simpan kantong"
+            submitLabel={editingPot ? "Simpan perubahan" : "Simpan kantong"}
           />
         </Dialog>
       )}
@@ -341,30 +391,231 @@ function Savings({ hydrated }: { hydrated: boolean }) {
   );
 }
 
+/* ----------------------------- Tabungan bulanan ----------------------------- */
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+const monthKey = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+
+const monthLabel = (m: string) => {
+  const [y, mm] = m.split("-");
+  return `${MONTH_NAMES[Number(mm) - 1] ?? mm} ${y?.slice(2) ?? ""}`;
+};
+
+/** Catatan total tabungan di akhir tiap bulan, plus grafik pertumbuhannya. */
+function MonthlyLog({ hydrated }: { hydrated: boolean }) {
+  const rows = useStore((s) => s.monthlySavings);
+  const upsert = useStore((s) => s.upsertMonthlySaving);
+  const remove = useStore((s) => s.removeMonthlySaving);
+  const setDialogOpen = useUIStore((s) => s.setDialogOpen);
+
+  const [open, setOpen] = useState(false);
+  /** Bulan asal saat mengedit — dipakai untuk membuang baris lama kalau bulannya diganti. */
+  const [editingMonth, setEditingMonth] = useState<string | null>(null);
+  const [form, setForm] = useState({ month: monthKey(), amount: "", note: "" });
+
+  useEffect(() => {
+    setDialogOpen(open);
+    return () => setDialogOpen(false);
+  }, [open, setDialogOpen]);
+
+  const sorted = useMemo(
+    () => (hydrated ? [...rows].sort((a, b) => a.month.localeCompare(b.month)) : []),
+    [rows, hydrated],
+  );
+  const points = sorted.map((r) => ({ label: monthLabel(r.month), value: r.amount }));
+  const latest = sorted[sorted.length - 1];
+  const prev = sorted[sorted.length - 2];
+  const growth = latest && prev ? latest.amount - prev.amount : null;
+
+  return (
+    <section className="mt-8">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="font-serif text-2xl">Setoran akhir bulan</h2>
+        <button
+          onClick={() => {
+            const current = monthKey();
+            const existing = rows.find((r) => r.month === current);
+            setEditingMonth(existing ? current : null);
+            setForm({
+              month: current,
+              amount: existing ? String(existing.amount) : "",
+              note: existing?.note ?? "",
+            });
+            setOpen(true);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+        >
+          <Plus className="size-4" strokeWidth={2.5} /> Catat bulan ini
+        </button>
+      </div>
+
+      {sorted.length === 0 ? (
+        <EmptyState icon={Wallet} title="Belum ada setoran akhir bulan" />
+      ) : (
+        <>
+          {points.length >= 2 && (
+            <div className="card-cinema animate-rise mb-4 p-5">
+              <TrendChart points={points} format={rupiah} />
+            </div>
+          )}
+
+          {latest && (
+            <div className="card-cinema animate-rise mb-4 p-5">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                {monthLabel(latest.month)}
+              </p>
+              <p className="mt-1 font-serif text-3xl">{rupiah(latest.amount)}</p>
+              {growth !== null && (
+                <p
+                  className={[
+                    "mt-1 text-xs tabular-nums",
+                    growth < 0 ? "text-red-400" : "text-gold",
+                  ].join(" ")}
+                >
+                  {growth < 0 ? "−" : "+"}
+                  {rupiah(Math.abs(growth))} dari {monthLabel(prev!.month)}
+                </p>
+              )}
+            </div>
+          )}
+
+          <ul className="card-cinema divide-y divide-white/[0.06] p-2">
+            {[...sorted].reverse().map((r, i, arr) => {
+              const before = arr[i + 1];
+              const delta = before ? r.amount - before.amount : null;
+              return (
+                <li key={r.id} className="group flex items-center justify-between gap-3 px-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm">{monthLabel(r.month)}</p>
+                    {r.note && (
+                      <p className="truncate text-[11px] text-muted-foreground">{r.note}</p>
+                    )}
+                  </div>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-sm tabular-nums">{rupiah(r.amount)}</p>
+                      {delta !== null && (
+                        <p
+                          className={[
+                            "text-[11px] tabular-nums",
+                            delta < 0 ? "text-red-400" : "text-muted-foreground",
+                          ].join(" ")}
+                        >
+                          {delta < 0 ? "−" : "+"}
+                          {rupiah(Math.abs(delta))}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingMonth(r.month);
+                        setForm({
+                          month: r.month,
+                          amount: String(r.amount),
+                          note: r.note ?? "",
+                        });
+                        setOpen(true);
+                      }}
+                      className="text-muted-foreground transition hover:text-foreground"
+                      aria-label={`Ubah setoran ${monthLabel(r.month)}`}
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      onClick={() => remove(r.id)}
+                      className="text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-red-400"
+                      aria-label={`Hapus setoran ${monthLabel(r.month)}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+
+      {open && (
+        <Dialog
+          title={editingMonth ? "Ubah setoran akhir bulan" : "Catat setoran akhir bulan"}
+          onClose={() => setOpen(false)}
+        >
+          <Field label="Bulan">
+            <input
+              type="month"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline"
+              value={form.month}
+              onChange={(e) => setForm({ ...form, month: e.target.value })}
+            />
+          </Field>
+
+          <Field label="Total tabungan (Rp)">
+            <input
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
+              inputMode="numeric"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value.replace(/\D/g, "") })}
+              placeholder="12500000"
+            />
+          </Field>
+
+          <Field label="Catatan">
+            <input
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
+              value={form.note}
+              onChange={(e) => setForm({ ...form, note: e.target.value })}
+              placeholder="Opsional"
+            />
+          </Field>
+
+          <DialogActions
+            onCancel={() => setOpen(false)}
+            onSubmit={() => {
+              const amount = Number(form.amount || 0);
+              if (!form.month || !amount) return;
+              // Bulan diganti saat mengedit — buang baris lamanya dulu.
+              if (editingMonth && editingMonth !== form.month) {
+                const old = rows.find((r) => r.month === editingMonth);
+                if (old) remove(old.id);
+              }
+              upsert(form.month, amount, form.note.trim() || undefined);
+              setOpen(false);
+            }}
+            submitLabel="Simpan"
+          />
+        </Dialog>
+      )}
+    </section>
+  );
+}
+
 /* ------------------------------- Jurnal trading ------------------------------ */
 
 const emptyTrade = {
   date: todayKey(),
-  pair: "",
-  side: "long" as "long" | "short",
-  entry: "",
-  exit: "",
-  size: "",
-  pnl: "",
-  rr: "",
-  setup: "",
+  ticker: "",
+  style: "swing" as "scalping" | "swing",
+  amount: "",
+  buy: "",
+  sell: "",
+  reason: "",
   emotion: "tenang" as (typeof emotions)[number],
+  status: "sold" as "hold" | "sold",
   notes: "",
-  status: "closed" as "open" | "closed",
 };
 
 function Trading({ hydrated }: { hydrated: boolean }) {
   const trades = useStore((s) => s.trades);
   const addTrade = useStore((s) => s.addTrade);
+  const updateTrade = useStore((s) => s.updateTrade);
   const removeTrade = useStore((s) => s.removeTrade);
   const setDialogOpen = useUIStore((s) => s.setDialogOpen);
 
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyTrade });
 
   useEffect(() => {
@@ -372,15 +623,33 @@ function Trading({ hydrated }: { hydrated: boolean }) {
     return () => setDialogOpen(false);
   }, [open, setDialogOpen]);
 
-  const closed = hydrated ? trades.filter((t) => t.status === "closed") : [];
-  const wins = closed.filter((t) => t.pnl > 0);
-  const losses = closed.filter((t) => t.pnl < 0);
-  const net = closed.reduce((a, t) => a + t.pnl, 0);
-  const winrate = closed.length ? Math.round((wins.length / closed.length) * 100) : 0;
-  const avgWin = wins.length ? wins.reduce((a, t) => a + t.pnl, 0) / wins.length : 0;
-  const avgLoss = losses.length
-    ? Math.abs(losses.reduce((a, t) => a + t.pnl, 0) / losses.length)
+  // Winrate dihitung dari semua posisi yang sudah dijual; nilai rupiah hanya
+  // dari posisi yang modalnya ikut dicatat.
+  const returns = hydrated ? trades.map(tradeReturn).filter((r): r is number => r !== null) : [];
+  const winrate = returns.length
+    ? Math.round((returns.filter((r) => r > 0).length / returns.length) * 100)
     : 0;
+  const holding = hydrated ? trades.filter((t) => t.status === "hold").length : 0;
+
+  const pnls = hydrated ? trades.map(tradePnl).filter((p): p is number => p !== null) : [];
+  const wins = pnls.filter((p) => p > 0);
+  const losses = pnls.filter((p) => p < 0);
+  const net = pnls.reduce((a, p) => a + p, 0);
+  const avgWin = wins.length ? wins.reduce((a, p) => a + p, 0) / wins.length : 0;
+  const avgLoss = losses.length ? Math.abs(losses.reduce((a, p) => a + p, 0) / losses.length) : 0;
+
+  // Kurva akumulasi cuan, diurutkan dari trade terlama.
+  const equity = useMemo(() => {
+    const closed = trades
+      .filter((t) => tradePnl(t) !== null)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    let running = 0;
+    const series = closed.map((t) => {
+      running += tradePnl(t)!;
+      return { label: t.date.slice(5), value: running };
+    });
+    return series.length >= 2 ? [{ label: "mulai", value: 0 }, ...series] : [];
+  }, [trades]);
 
   const sorted = useMemo(
     () => [...trades].sort((a, b) => b.date.localeCompare(a.date)),
@@ -392,18 +661,33 @@ function Trading({ hydrated }: { hydrated: boolean }) {
       <section className="animate-rise mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat
           label="P/L bersih"
-          value={hydrated ? (net < 0 ? "−" : "+") + rupiah(net) : "—"}
+          value={hydrated ? (net < 0 ? "−" : "+") + rupiah(Math.abs(net)) : "—"}
           tone={net < 0 ? "down" : "up"}
+          sub={holding > 0 ? `${holding} masih hold` : undefined}
         />
-        <Stat label="Winrate" value={`${winrate}%`} sub={`${wins.length}W · ${losses.length}L`} />
-        <Stat label="Rata-rata profit" value={hydrated ? rupiah(avgWin) : "—"} tone="up" />
+        <Stat
+          label="Winrate"
+          value={`${winrate}%`}
+          sub={`${returns.filter((r) => r > 0).length}W · ${returns.filter((r) => r < 0).length}L`}
+        />
+        <Stat label="Rata-rata untung" value={hydrated ? rupiah(avgWin) : "—"} tone="up" />
         <Stat label="Rata-rata rugi" value={hydrated ? rupiah(avgLoss) : "—"} tone="down" />
       </section>
+
+      {hydrated && equity.length >= 2 && (
+        <section className="card-cinema animate-rise mb-6 p-5">
+          <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Akumulasi cuan
+          </p>
+          <TrendChart points={equity} format={(n) => (n < 0 ? "−" : "+") + rupiah(Math.abs(n))} />
+        </section>
+      )}
 
       <div className="animate-rise mb-4 flex items-center justify-between">
         <h2 className="font-serif text-2xl">Catatan posisi</h2>
         <button
           onClick={() => {
+            setEditingId(null);
             setForm({ ...emptyTrade, date: todayKey() });
             setOpen(true);
           }}
@@ -421,13 +705,33 @@ function Trading({ hydrated }: { hydrated: boolean }) {
       ) : (
         <ul className="space-y-3">
           {sorted.map((t) => (
-            <TradeCard key={t.id} trade={t} onRemove={() => removeTrade(t.id)} />
+            <TradeCard
+              key={t.id}
+              trade={t}
+              onRemove={() => removeTrade(t.id)}
+              onEdit={() => {
+                setEditingId(t.id);
+                setForm({
+                  date: t.date,
+                  ticker: t.ticker,
+                  style: t.style,
+                  amount: t.amount !== undefined ? String(t.amount) : "",
+                  buy: String(t.buy),
+                  sell: t.sell !== undefined ? String(t.sell) : "",
+                  reason: t.reason ?? "",
+                  emotion: t.emotion,
+                  status: t.status,
+                  notes: t.notes ?? "",
+                });
+                setOpen(true);
+              }}
+            />
           ))}
         </ul>
       )}
 
       {open && (
-        <Dialog title="Catat trade" onClose={() => setOpen(false)}>
+        <Dialog title={editingId ? "Ubah trade" : "Catat trade"} onClose={() => setOpen(false)}>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Tanggal">
               <input
@@ -437,25 +741,25 @@ function Trading({ hydrated }: { hydrated: boolean }) {
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
               />
             </Field>
-            <Field label="Pair / aset">
+            <Field label="Saham">
               <input
-                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
-                value={form.pair}
-                onChange={(e) => setForm({ ...form, pair: e.target.value })}
-                placeholder="BTCUSDT"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] uppercase outline-none hairline placeholder:normal-case placeholder:text-muted-foreground"
+                value={form.ticker}
+                onChange={(e) => setForm({ ...form, ticker: e.target.value })}
+                placeholder="BBCA"
               />
             </Field>
           </div>
 
-          <Field label="Arah">
+          <Field label="Gaya">
             <div className="flex gap-2">
-              {(["long", "short"] as const).map((s) => (
+              {(["scalping", "swing"] as const).map((s) => (
                 <button
                   key={s}
-                  onClick={() => setForm({ ...form, side: s })}
+                  onClick={() => setForm({ ...form, style: s })}
                   className={[
-                    "flex-1 rounded-full px-3 py-2 text-xs uppercase tracking-widest transition",
-                    form.side === s
+                    "flex-1 rounded-full px-3 py-2 text-xs transition",
+                    form.style === s
                       ? "bg-gold text-white"
                       : "bg-white/[0.06] text-muted-foreground hairline",
                   ].join(" ")}
@@ -466,60 +770,44 @@ function Trading({ hydrated }: { hydrated: boolean }) {
             </div>
           </Field>
 
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Entry">
-              <input
-                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
-                inputMode="decimal"
-                value={form.entry}
-                onChange={(e) => setForm({ ...form, entry: e.target.value })}
-              />
-            </Field>
-            <Field label="Exit">
-              <input
-                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
-                inputMode="decimal"
-                value={form.exit}
-                onChange={(e) => setForm({ ...form, exit: e.target.value })}
-              />
-            </Field>
-            <Field label="Ukuran">
-              <input
-                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
-                value={form.size}
-                onChange={(e) => setForm({ ...form, size: e.target.value })}
-                placeholder="0.5 lot"
-              />
-            </Field>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Hasil (Rp, minus untuk rugi)">
-              <input
-                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
-                inputMode="text"
-                value={form.pnl}
-                onChange={(e) => setForm({ ...form, pnl: e.target.value.replace(/[^\d-]/g, "") })}
-                placeholder="-250000"
-              />
-            </Field>
-            <Field label="R:R">
+            <Field label="Buy">
               <input
                 className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 inputMode="decimal"
-                value={form.rr}
-                onChange={(e) => setForm({ ...form, rr: e.target.value })}
-                placeholder="2"
+                value={form.buy}
+                onChange={(e) => setForm({ ...form, buy: e.target.value })}
+                placeholder="4250"
+              />
+            </Field>
+            <Field label={form.status === "hold" ? "Sell (belum ada)" : "Sell"}>
+              <input
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground disabled:opacity-40"
+                inputMode="decimal"
+                disabled={form.status === "hold"}
+                value={form.status === "hold" ? "" : form.sell}
+                onChange={(e) => setForm({ ...form, sell: e.target.value })}
+                placeholder="4480"
               />
             </Field>
           </div>
 
-          <Field label="Setup / alasan masuk">
+          <Field label="Modal yang dipakai (Rp)">
             <input
               className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
-              value={form.setup}
-              onChange={(e) => setForm({ ...form, setup: e.target.value })}
-              placeholder="Break & retest H1"
+              inputMode="numeric"
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value.replace(/\D/g, "") })}
+              placeholder="4250000"
+            />
+          </Field>
+
+          <Field label="Alasan masuk">
+            <input
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
+              value={form.reason}
+              onChange={(e) => setForm({ ...form, reason: e.target.value })}
+              placeholder="Breakout resistance, volume naik"
             />
           </Field>
 
@@ -544,7 +832,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
 
           <Field label="Status">
             <div className="flex gap-2">
-              {(["closed", "open"] as const).map((s) => (
+              {(["sold", "hold"] as const).map((s) => (
                 <button
                   key={s}
                   onClick={() => setForm({ ...form, status: s })}
@@ -555,13 +843,13 @@ function Trading({ hydrated }: { hydrated: boolean }) {
                       : "bg-white/[0.06] text-muted-foreground hairline",
                   ].join(" ")}
                 >
-                  {s === "closed" ? "Sudah ditutup" : "Masih jalan"}
+                  {s === "sold" ? "Sudah jual" : "Masih hold"}
                 </button>
               ))}
             </div>
           </Field>
 
-          <Field label="Catatan / pelajaran">
+          <Field label="Catatan / pembelajaran">
             <textarea
               className="w-full min-h-20 resize-none rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               value={form.notes}
@@ -573,26 +861,32 @@ function Trading({ hydrated }: { hydrated: boolean }) {
           <DialogActions
             onCancel={() => setOpen(false)}
             onSubmit={() => {
-              if (!form.pair.trim()) return;
-              const pnl = Number(form.pnl || 0);
-              addTrade({
+              const ticker = form.ticker.trim().toUpperCase();
+              const buy = Number(form.buy || 0);
+              if (!ticker || !buy) return;
+              const sold = form.status === "sold";
+              const sell = sold && form.sell ? Number(form.sell) : undefined;
+              const payload = {
                 date: form.date,
-                pair: form.pair.trim().toUpperCase(),
-                side: form.side,
-                entry: form.entry ? Number(form.entry) : undefined,
-                exit: form.exit ? Number(form.exit) : undefined,
-                size: form.size.trim() || undefined,
-                pnl: form.status === "open" ? 0 : pnl,
-                rr: form.rr ? Number(form.rr) : undefined,
-                setup: form.setup.trim() || undefined,
+                ticker,
+                style: form.style,
+                amount: form.amount ? Number(form.amount) : undefined,
+                buy,
+                sell,
+                reason: form.reason.trim() || undefined,
                 emotion: form.emotion,
-                notes: form.notes.trim() || undefined,
                 status: form.status,
-              });
-              if (form.status === "closed" && pnl > 0) celebrate();
+                notes: form.notes.trim() || undefined,
+              };
+              if (editingId) {
+                updateTrade(editingId, payload);
+              } else {
+                addTrade(payload);
+                if (sell !== undefined && sell > buy) celebrate();
+              }
               setOpen(false);
             }}
-            submitLabel="Simpan trade"
+            submitLabel={editingId ? "Simpan perubahan" : "Simpan trade"}
           />
         </Dialog>
       )}
@@ -600,9 +894,19 @@ function Trading({ hydrated }: { hydrated: boolean }) {
   );
 }
 
-function TradeCard({ trade, onRemove }: { trade: Trade; onRemove: () => void }) {
-  const win = trade.pnl > 0;
-  const flat = trade.pnl === 0;
+function TradeCard({
+  trade,
+  onRemove,
+  onEdit,
+}: {
+  trade: Trade;
+  onRemove: () => void;
+  onEdit: () => void;
+}) {
+  const ret = tradeReturn(trade);
+  const pnl = tradePnl(trade);
+  const win = ret !== null && ret > 0;
+  const flat = ret === null || ret === 0;
   return (
     <li className="card-cinema group p-5">
       <div className="flex items-start justify-between gap-3">
@@ -613,7 +917,9 @@ function TradeCard({ trade, onRemove }: { trade: Trade; onRemove: () => void }) 
               win ? "bg-[oklch(0.62_0.11_195/0.12)]" : flat ? "bg-white/[0.06]" : "bg-red-500/10",
             ].join(" ")}
           >
-            {trade.side === "long" ? (
+            {flat ? (
+              <Minus className="size-4 text-muted-foreground" strokeWidth={1.75} />
+            ) : win ? (
               <TrendingUp className="size-4 text-gold" strokeWidth={1.75} />
             ) : (
               <TrendingDown className="size-4 text-red-400" strokeWidth={1.75} />
@@ -621,34 +927,48 @@ function TradeCard({ trade, onRemove }: { trade: Trade; onRemove: () => void }) 
           </span>
           <div>
             <p className="font-medium">
-              {trade.pair}{" "}
+              {trade.ticker}{" "}
               <span className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                {trade.side}
+                {trade.style}
               </span>
             </p>
             <p className="text-[11px] text-muted-foreground">
               {trade.date}
-              {trade.setup ? ` · ${trade.setup}` : ""}
+              {trade.reason ? ` · ${trade.reason}` : ""}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {trade.status === "open" ? (
+          {trade.status === "hold" ? (
             <span className="rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] text-muted-foreground hairline">
-              masih jalan
+              masih hold
             </span>
           ) : (
             <span
               className={[
-                "text-sm tabular-nums",
+                "text-right text-sm tabular-nums",
                 win ? "text-gold" : flat ? "text-muted-foreground" : "text-red-400",
               ].join(" ")}
             >
-              {win ? "+" : trade.pnl < 0 ? "−" : ""}
-              {rupiah(trade.pnl)}
+              {ret === null
+                ? "—"
+                : `${ret > 0 ? "+" : ret < 0 ? "−" : ""}${Math.abs(ret).toFixed(1)}%`}
+              {pnl !== null && (
+                <span className="block text-[11px] opacity-80">
+                  {pnl < 0 ? "−" : "+"}
+                  {rupiah(Math.abs(pnl))}
+                </span>
+              )}
             </span>
           )}
+          <button
+            onClick={onEdit}
+            className="text-muted-foreground transition hover:text-foreground"
+            aria-label={`Ubah trade ${trade.ticker}`}
+          >
+            <Pencil className="size-4" />
+          </button>
           <button
             onClick={onRemove}
             className="text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-red-400"
@@ -660,10 +980,9 @@ function TradeCard({ trade, onRemove }: { trade: Trade; onRemove: () => void }) 
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-muted-foreground">
-        {trade.entry !== undefined && <Chip>entry {trade.entry}</Chip>}
-        {trade.exit !== undefined && <Chip>exit {trade.exit}</Chip>}
-        {trade.size && <Chip>{trade.size}</Chip>}
-        {trade.rr !== undefined && <Chip>R:R {trade.rr}</Chip>}
+        <Chip>buy {trade.buy}</Chip>
+        {trade.sell !== undefined && <Chip>sell {trade.sell}</Chip>}
+        {trade.amount !== undefined && <Chip>modal {rupiah(trade.amount)}</Chip>}
         <Chip>emosi · {trade.emotion}</Chip>
       </div>
 

@@ -63,20 +63,40 @@ export type SavingTx = {
   date: string; // yyyy-mm-dd
 };
 
+/** Satu posisi saham IHSG. Hasilnya diturunkan dari harga buy & sell. */
 export type Trade = {
   id: string;
   date: string; // yyyy-mm-dd
-  pair: string;
-  side: "long" | "short";
-  entry?: number;
-  exit?: number;
-  size?: string;
-  pnl: number; // hasil bersih (bisa negatif)
-  rr?: number;
-  setup?: string;
+  ticker: string; // kode saham, mis. BBCA
+  style: "scalping" | "swing";
+  amount?: number; // modal rupiah yang dipakai
+  buy: number; // harga beli per lembar
+  sell?: number; // harga jual — kosong selama masih hold
+  reason?: string; // alasan masuk
   emotion: "tenang" | "sabar" | "serakah" | "takut" | "balas dendam";
+  status: "hold" | "sold";
   notes?: string;
-  status: "open" | "closed";
+};
+
+/** Return posisi dalam persen; null kalau belum dijual. */
+export function tradeReturn(t: Trade): number | null {
+  if (t.status !== "sold" || t.sell === undefined || !t.buy) return null;
+  return ((t.sell - t.buy) / t.buy) * 100;
+}
+
+/** Hasil dalam rupiah; null kalau belum dijual atau modalnya belum dicatat. */
+export function tradePnl(t: Trade): number | null {
+  const ret = tradeReturn(t);
+  if (ret === null || !t.amount) return null;
+  return (ret / 100) * t.amount;
+}
+
+/** Total tabungan pada akhir sebuah bulan. */
+export type MonthlySaving = {
+  id: string;
+  month: string; // yyyy-mm
+  amount: number;
+  note?: string;
 };
 
 export type State = {
@@ -93,6 +113,7 @@ export type State = {
   reminders: Reminders;
   pots: SavingPot[];
   savingTx: SavingTx[];
+  monthlySavings: MonthlySaving[];
   trades: Trade[];
 
   setName: (n: string) => void;
@@ -122,8 +143,12 @@ export type State = {
   upsertJournal: (entry: Omit<JournalEntry, "id"> & { id?: string }) => void;
 
   addPot: (p: { name: string; target: number; note?: string }) => void;
+  updatePot: (id: string, patch: { name?: string; target?: number; note?: string }) => void;
   removePot: (id: string) => void;
   addSavingTx: (tx: Omit<SavingTx, "id">) => void;
+  /** Satu catatan per bulan — mengisi bulan yang sama akan menimpanya. */
+  upsertMonthlySaving: (month: string, amount: number, note?: string) => void;
+  removeMonthlySaving: (id: string) => void;
   removeSavingTx: (id: string) => void;
 
   addTrade: (t: Omit<Trade, "id">) => void;
@@ -154,6 +179,7 @@ export const SYNCED_KEYS = [
   "reminders",
   "pots",
   "savingTx",
+  "monthlySavings",
   "trades",
 ] as const;
 
@@ -298,6 +324,7 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
     { id: uid(), potId: "p2", amount: 20000000, note: "Modal awal", date: todayKey() },
     { id: uid(), potId: "p3", amount: 4500000, note: "Nabung bulanan", date: todayKey() },
   ],
+  monthlySavings: [],
   trades: [],
 };
 
@@ -444,12 +471,27 @@ export const useStore = create<State>()(
         set((s) => ({
           pots: [...s.pots, { ...p, id: uid(), createdAt: new Date().toISOString() }],
         })),
+      updatePot: (id, patch) =>
+        set((s) => ({
+          pots: s.pots.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+        })),
       removePot: (id) =>
         set((s) => ({
           pots: s.pots.filter((p) => p.id !== id),
           savingTx: s.savingTx.filter((t) => t.potId !== id),
         })),
       addSavingTx: (tx) => set((s) => ({ savingTx: [...s.savingTx, { ...tx, id: uid() }] })),
+      upsertMonthlySaving: (month, amount, note) =>
+        set((s) => {
+          const rest = s.monthlySavings.filter((m) => m.month !== month);
+          return {
+            monthlySavings: [...rest, { id: uid(), month, amount, note }].sort((a, b) =>
+              a.month.localeCompare(b.month),
+            ),
+          };
+        }),
+      removeMonthlySaving: (id) =>
+        set((s) => ({ monthlySavings: s.monthlySavings.filter((m) => m.id !== id) })),
       removeSavingTx: (id) =>
         set((s) => ({ savingTx: s.savingTx.filter((t) => t.id !== id) })),
 
@@ -481,7 +523,24 @@ export const useStore = create<State>()(
         if (!persisted.focusItems) persisted.focusItems = {};
         if (!Array.isArray(persisted.pots)) persisted.pots = [];
         if (!Array.isArray(persisted.savingTx)) persisted.savingTx = [];
+        if (!Array.isArray(persisted.monthlySavings)) persisted.monthlySavings = [];
         if (!Array.isArray(persisted.trades)) persisted.trades = [];
+        // Jurnal trading lama (pair/side/entry/exit/pnl) → format saham IHSG.
+        persisted.trades = persisted.trades.map((t: any) => {
+          if (!t || t.ticker !== undefined) return t;
+          return {
+            id: t.id,
+            date: t.date,
+            ticker: String(t.pair ?? "").toUpperCase(),
+            style: "swing",
+            buy: Number(t.entry ?? 0),
+            sell: t.exit !== undefined ? Number(t.exit) : undefined,
+            reason: t.setup,
+            emotion: t.emotion ?? "tenang",
+            status: t.status === "open" ? "hold" : "sold",
+            notes: t.notes,
+          };
+        });
         return persisted;
       },
       merge: (persisted: any, current) => ({
