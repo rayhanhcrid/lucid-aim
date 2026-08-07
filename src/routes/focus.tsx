@@ -31,8 +31,14 @@ function FocusMode() {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
+    const id = setInterval(() => setNow(new Date()), 15000);
     return () => clearInterval(id);
+  }, []);
+
+  // Motion latar dibikin lebih lambat & organik selama di Mode Fokus.
+  useEffect(() => {
+    document.documentElement.classList.add("calm-motion");
+    return () => document.documentElement.classList.remove("calm-motion");
   }, []);
 
   const today = todayKey();
@@ -42,7 +48,6 @@ function FocusMode() {
 
   const hh = String(now.getHours()).padStart(2, "0");
   const mm = String(now.getMinutes()).padStart(2, "0");
-  const ss = String(now.getSeconds()).padStart(2, "0");
   const dayLabel = now.toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -58,10 +63,12 @@ function FocusMode() {
         style={{
           background:
             "radial-gradient(circle, oklch(0.62 0.11 195 / 0.22) 0%, oklch(0.62 0.11 195 / 0.06) 45%, transparent 70%)",
+          animationDuration: "16s",
         }}
       />
       <Link
         to="/"
+        onClick={() => haptic()}
         className="absolute right-5 top-5 grid size-10 place-items-center rounded-full bg-surface/80 text-muted-foreground backdrop-blur hairline transition hover:text-foreground"
         aria-label="Keluar dari mode fokus"
       >
@@ -71,12 +78,6 @@ function FocusMode() {
       <div className="animate-rise mb-10 flex flex-col items-center gap-2 text-center">
         <span className="font-sans text-[clamp(3.5rem,16vw,9rem)] font-medium leading-none tabular-nums tracking-tight">
           {hydrated ? `${hh}:${mm}` : "--:--"}
-          <span
-            key={ss}
-            className="ml-2 inline-block align-top text-[0.28em] text-muted-foreground tabular-nums animate-check-pop"
-          >
-            {hydrated ? ss : "--"}
-          </span>
         </span>
         <span className="text-[11px] uppercase tracking-[0.35em] text-muted-foreground">
           {hydrated ? dayLabel : "—"}
@@ -108,8 +109,12 @@ function FocusMode() {
                 <button
                   onClick={() => {
                     toggleFocusItem(today, f.id);
-                    haptic();
-                    if (!f.done) celebrate("small");
+                    if (f.done) {
+                      haptic(8);
+                    } else {
+                      haptic([10, 40, 18]);
+                      celebrate("small");
+                    }
                   }}
                   className={[
                     "group flex w-full min-w-0 items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-base backdrop-blur hairline",
