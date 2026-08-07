@@ -46,7 +46,15 @@ export type Recorder = {
   level: () => number;
 };
 
-export async function startRecording(): Promise<Recorder> {
+export type RecordOptions = {
+  /** Dipanggil sekali saat terdeteksi hening cukup lama setelah ada suara. */
+  onSilence?: () => void;
+  /** Berapa lama hening (ms) sebelum dianggap selesai bicara. */
+  silenceMs?: number;
+};
+
+export async function startRecording(options: RecordOptions = {}): Promise<Recorder> {
+  const { onSilence, silenceMs = 1800 } = options;
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true },
   });
@@ -58,13 +66,38 @@ export async function startRecording(): Promise<Recorder> {
   const node = ctx.createScriptProcessor(4096, 1, 1);
   const chunks: Float32Array[] = [];
   let level = 0;
+  let spoke = false;
+  let silenceSince: number | null = null;
+  let silenceFired = false;
 
   node.onaudioprocess = (e) => {
     const data = e.inputBuffer.getChannelData(0);
     chunks.push(new Float32Array(data));
     let sum = 0;
-    for (let i = 0; i < data.length; i += 32) sum += Math.abs(data[i] ?? 0);
-    level = Math.min(1, (sum / (data.length / 32)) * 6);
+    let peak = 0;
+    for (let i = 0; i < data.length; i += 32) {
+      const v = Math.abs(data[i] ?? 0);
+      sum += v;
+      if (v > peak) peak = v;
+    }
+    const rms = sum / (data.length / 32);
+    level = Math.min(1, rms * 6);
+
+    // Ambang hening: pakai kombinasi rata-rata & puncak supaya napas/noise
+    // pelan tidak dianggap bicara.
+    const speaking = rms > 0.012 || peak > 0.06;
+    const now = Date.now();
+    if (speaking) {
+      spoke = true;
+      silenceSince = null;
+      return;
+    }
+    if (!spoke || silenceFired) return;
+    if (silenceSince === null) silenceSince = now;
+    else if (now - silenceSince >= silenceMs) {
+      silenceFired = true;
+      onSilence?.();
+    }
   };
   source.connect(node);
   node.connect(ctx.destination);
