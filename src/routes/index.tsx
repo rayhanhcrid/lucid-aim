@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
 import { currentStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+import { haptic } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
