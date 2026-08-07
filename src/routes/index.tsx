@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
 import { currentStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+import { haptic } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -134,20 +135,24 @@ function Index() {
 
       {/* Focus + Ring */}
       <FocusSection
-        items={todaysFocus}
+        items={hydrated ? todaysFocus : []}
         hydrated={hydrated}
         doneFocus={doneFocus}
         focusPct={focusPct}
         overallStreak={overallStreak}
         onAdd={(label) => addFocusItem(today, label)}
         onRemove={(id) => removeFocusItem(today, id)}
-        onToggle={(id) => toggleFocusItem(today, id)}
+        onToggle={(id) => {
+          const item = todaysFocus.find((f) => f.id === id);
+          haptic(item?.done ? 8 : [10, 40, 18]);
+          toggleFocusItem(today, id);
+        }}
       />
 
       {/* Today's schedule */}
       <ScheduleSection
         date={today}
-        items={todaysSchedule}
+        items={hydrated ? todaysSchedule : []}
         nextIdx={nextScheduleIdx}
         nowHHmm={nowHHmm}
         hydrated={hydrated}

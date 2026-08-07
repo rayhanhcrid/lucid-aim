@@ -325,3 +325,35 @@
   color: transparent;
   animation: shimmer 6s linear infinite;
 }
+
+/* ---------- Calm ambient motion (Mode Fokus) ---------- */
+/* Slower drift + soft organic blob shapes instead of perfect circles. */
+.calm-motion .aurora-blob {
+  border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
+  filter: blur(90px);
+  animation-timing-function: ease-in-out;
+}
+.calm-motion .aurora-a { animation: calm-drift-a 96s ease-in-out infinite; }
+.calm-motion .aurora-b { animation: calm-drift-b 118s ease-in-out infinite; }
+.calm-motion .aurora-c { animation: calm-drift-c 132s ease-in-out infinite; }
+.calm-motion .aurora-d { animation: calm-drift-d 84s ease-in-out infinite; }
+
+@keyframes calm-drift-a {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%; }
+  50%      { transform: translate(2.5vmax, 2vmax) rotate(9deg) scale(1.04); border-radius: 56% 44% 40% 60% / 55% 58% 42% 45%; }
+}
+@keyframes calm-drift-b {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); border-radius: 55% 45% 48% 52% / 42% 55% 45% 58%; }
+  50%      { transform: translate(-2.5vmax, 2.5vmax) rotate(-7deg) scale(1.03); border-radius: 45% 55% 60% 40% / 58% 45% 55% 42%; }
+}
+@keyframes calm-drift-c {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%; }
+  50%      { transform: translate(1.8vmax, -2.2vmax) rotate(6deg) scale(1.05); border-radius: 58% 42% 55% 45% / 42% 58% 42% 58%; }
+}
+@keyframes calm-drift-d {
+  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.6; }
+  50%      { transform: translate(-1.4vmax, -1.6vmax) rotate(-5deg) scale(1.06); opacity: 0.85; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .calm-motion .aurora-blob { animation: none !important; }
+}
