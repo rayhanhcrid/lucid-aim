@@ -11,7 +11,6 @@ import {
   Award,
   LayoutGrid,
   Sparkles,
-  Maximize2,
   Wallet,
   X,
 } from "lucide-react";
@@ -25,13 +24,13 @@ const primary = [
   { to: "/profile",  label: "Profil",    icon: User },
 ] as const;
 
+// Mode Fokus sengaja tidak di sini — masuknya lewat kartu fokus di Beranda.
 const extras = [
-  { to: "/focus",        label: "Mode Fokus", icon: Maximize2, desc: "Satu layar penuh: jam besar dan fokus hari ini saja." },
-  { to: "/finance",      label: "Keuangan",   icon: Wallet,    desc: "Tabungan per tujuan dan jurnal trading harian." },
-  { to: "/review",       label: "Rekap",      icon: Sparkles,  desc: "Rekap mingguan dan saran fokus untuk minggu depan." },
-  { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat suasana hati, syukur, dan refleksi hari ini." },
-  { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, konsistensi, dan angka bulan ini." },
-  { to: "/achievements", label: "Pencapaian", icon: Award,     desc: "Pencapaian kecil yang sudah kamu kumpulkan." },
+  { to: "/finance",      label: "Keuangan",   icon: Wallet },
+  { to: "/review",       label: "Rekap",      icon: Sparkles },
+  { to: "/journal",      label: "Jurnal",     icon: BookOpen },
+  { to: "/analytics",    label: "Analitik",   icon: BarChart3 },
+  { to: "/achievements", label: "Pencapaian", icon: Award },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -138,7 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
-              {[...primary, ...extras].map(({ to, label, icon: Icon, ...rest }) => {
+              {[...primary, ...extras].map(({ to, label, icon: Icon }) => {
                 const active = isActive(to);
                 return (
                   <Link
@@ -159,21 +158,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                     >
                       <Icon className="size-4" strokeWidth={1.75} />
                     </span>
-                    <div>
-                      <p className={["text-sm font-medium", active ? "text-white" : ""].join(" ")}>
-                        {label}
-                      </p>
-                      {"desc" in rest && (
-                        <p
-                          className={[
-                            "mt-0.5 text-[11px] leading-snug",
-                            active ? "text-white/75" : "text-muted-foreground",
-                          ].join(" ")}
-                        >
-                          {(rest as { desc: string }).desc}
-                        </p>
-                      )}
-                    </div>
+                    <p className={["text-sm font-medium", active ? "text-white" : ""].join(" ")}>
+                      {label}
+                    </p>
                   </Link>
                 );
               })}

@@ -115,6 +115,109 @@ export async function startRecording(options: RecordOptions = {}): Promise<Recor
   };
 }
 
+// ---------------------------------------------------------------- dikte lokal
+
+type SpeechRecognitionLike = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
+  onend: (() => void) | null;
+};
+
+function speechRecognitionCtor(): (new () => SpeechRecognitionLike) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as {
+    SpeechRecognition?: new () => SpeechRecognitionLike;
+    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+/** Dikte langsung di perangkat — tidak butuh API key maupun server. */
+export function dictationSupported() {
+  return speechRecognitionCtor() !== null;
+}
+
+export type Dictation = { stop: () => void; cancel: () => void };
+
+/**
+ * Merekam sekali ucapan lalu mengembalikan teksnya. Berhenti sendiri begitu
+ * kamu diam sejenak, sama seperti perilaku perekam sebelumnya.
+ */
+export function startDictation(handlers: {
+  onText: (text: string) => void;
+  onError: (message: string) => void;
+  onEnd: () => void;
+  lang?: string;
+}): Dictation {
+  const Ctor = speechRecognitionCtor();
+  if (!Ctor) {
+    handlers.onError("Dikte tidak didukung browser ini.");
+    handlers.onEnd();
+    return { stop: () => {}, cancel: () => {} };
+  }
+
+  const rec = new Ctor();
+  rec.lang = handlers.lang ?? "id-ID";
+  rec.continuous = false; // berhenti otomatis setelah jeda bicara
+  rec.interimResults = true;
+
+  let finalText = "";
+  let failed = false;
+  let cancelled = false;
+
+  rec.onresult = (e) => {
+    finalText = "";
+    for (let i = 0; i < e.results.length; i++) {
+      const result = e.results[i];
+      if (result?.isFinal) finalText += result[0]?.transcript ?? "";
+    }
+  };
+
+  rec.onerror = (e) => {
+    failed = true;
+    const message =
+      e.error === "not-allowed" || e.error === "service-not-allowed"
+        ? "Mikrofon belum diizinkan. Aktifkan dulu di pengaturan browser ya."
+        : e.error === "no-speech"
+          ? "Belum ada suara yang terdengar. Coba rekam ulang."
+          : e.error === "network"
+            ? "Butuh koneksi internet untuk mengubah suara jadi teks."
+            : "Gagal mengubah suara jadi teks.";
+    handlers.onError(message);
+  };
+
+  rec.onend = () => {
+    if (!cancelled && !failed) {
+      const text = finalText.trim();
+      if (text) handlers.onText(text);
+      else handlers.onError("Belum ada suara yang terdengar. Coba rekam ulang.");
+    }
+    handlers.onEnd();
+  };
+
+  try {
+    rec.start();
+  } catch {
+    failed = true;
+    handlers.onError("Dikte sedang dipakai proses lain. Coba lagi sebentar.");
+    handlers.onEnd();
+  }
+
+  return {
+    stop: () => rec.stop(),
+    cancel: () => {
+      cancelled = true;
+      rec.abort();
+    },
+  };
+}
+
 export async function transcribe(blob: Blob): Promise<string> {
   const body = new FormData();
   body.append("audio", blob, "recording.wav");

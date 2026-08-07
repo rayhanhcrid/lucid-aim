@@ -54,10 +54,6 @@ function FinancePage() {
           Uang yang terarah
         </p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Keuangan</h1>
-        <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-          Simpan pelan-pelan, catat setiap posisi. Dua kebiasaan kecil yang menentukan angka besar
-          nanti.
-        </p>
       </header>
 
       <div className="animate-rise mb-6 inline-flex gap-1 rounded-full bg-surface p-1 hairline">
@@ -162,7 +158,6 @@ function Savings({ hydrated }: { hydrated: boolean }) {
         <EmptyState
           icon={PiggyBank}
           title="Belum ada kantong tabungan"
-          description="Buat satu kantong dulu — dana darurat, modal trading, atau tabungan liburan."
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
@@ -422,7 +417,6 @@ function Trading({ hydrated }: { hydrated: boolean }) {
         <EmptyState
           icon={CandlestickChart}
           title="Jurnal trading masih kosong"
-          description="Catat posisi hari ini — pair, arah, hasil, dan yang paling penting: emosi kamu saat masuk."
         />
       ) : (
         <ul className="space-y-3">

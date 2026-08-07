@@ -92,11 +92,7 @@ function FocusMode() {
 
         {items.length === 0 ? (
           <p className="animate-rise rounded-2xl bg-white/[0.04] p-5 text-center text-sm text-muted-foreground hairline">
-            Belum ada fokus untuk hari ini. Tambahkan dulu di{" "}
-            <Link to="/" className="text-gold underline-offset-2 hover:underline">
-              beranda
-            </Link>
-            .
+            Belum ada fokus untuk hari ini.
           </p>
         ) : (
           <ul className="space-y-3">

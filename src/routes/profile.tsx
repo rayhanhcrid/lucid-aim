@@ -86,10 +86,6 @@ function ProfilePage() {
           onAdd={(label) => addFocusItem(today, label)}
           onRemove={(id) => removeFocusItem(today, id)}
         />
-        <p className="rounded-2xl bg-white/[0.04] px-4 py-3 text-xs text-muted-foreground hairline">
-          Jadwal for tomorrow is now set directly di halaman <span className="text-foreground">Jurnal</span>, and bisa disesuaikan lagi dari halaman <span className="text-foreground">Beranda</span>.
-        </p>
-
         <ReminderSettings />
       </div>
     </AppShell>

@@ -109,9 +109,6 @@ function ReviewPage() {
           7 hari terakhir · {review.rangeLabel}
         </p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Rekap Mingguan</h1>
-        <p className="mt-3 max-w-[52ch] text-pretty text-muted-foreground">
-          Satu halaman buat lihat ritme kamu apa adanya — lalu tentukan satu fokus buat minggu depan.
-        </p>
       </header>
 
       {!hydrated ? (
@@ -120,7 +117,6 @@ function ReviewPage() {
         <EmptyState
           icon={Sparkles}
           title="Belum ada yang bisa direkap"
-          description="Tambahkan minimal satu kebiasaan, lalu balik ke sini akhir minggu untuk melihat ritmemu."
         />
       ) : (
         <div className="space-y-4">
@@ -232,9 +228,7 @@ function ReviewPage() {
               <BookOpen className="size-3.5" /> Mood & energi
             </p>
             {review.journalCount === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Belum ada jurnal minggu ini. Isi beberapa malam supaya polanya kelihatan.
-              </p>
+              <p className="text-sm text-muted-foreground">Belum ada jurnal minggu ini.</p>
             ) : (
               <>
                 <div className="flex gap-8">

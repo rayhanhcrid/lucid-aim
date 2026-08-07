@@ -416,11 +416,7 @@ function FocusSection({
 
         {items.length === 0 ? (
           <p className="rounded-2xl bg-white/[0.04] p-4 text-sm text-muted-foreground hairline">
-            Belum ada fokus hari ini. Tulis{" "}
-            <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
-              di jurnal malam ini
-            </Link>{" "}
-            untuk besok, atau tambahkan langsung di sini.
+            Belum ada fokus hari ini.
           </p>
         ) : (
           <ul className="space-y-2">
@@ -464,14 +460,6 @@ function FocusSection({
             })}
           </ul>
         )}
-
-        <p className="mt-3 text-[11px] text-muted-foreground">
-          Isi fokus untuk besok lewat{" "}
-          <Link to="/journal" className="text-gold underline-offset-2 hover:underline">
-            jurnal malam ini
-          </Link>{" "}
-          — besok otomatis muncul di sini dan tetap bisa kamu ubah.
-        </p>
 
         {hydrated && overallStreak > 0 && (
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 hairline-gold">
@@ -561,7 +549,7 @@ function ScheduleSection({
 
       {items.length === 0 ? (
         <p className="rounded-2xl bg-white/[0.04] p-4 text-sm text-muted-foreground hairline">
-          Belum ada jadwal. Tulis <Link to="/journal" className="text-gold underline-offset-2 hover:underline">di jurnal malam ini</Link> untuk besok, atau tambahkan langsung di sini.
+          Belum ada jadwal.
         </p>
       ) : (
         <ol className="relative space-y-2 pl-4">
@@ -611,9 +599,6 @@ function ScheduleSection({
           })}
         </ol>
       )}
-      <p className="mt-3 text-[11px] text-muted-foreground">
-        Isi jadwal untuk besok lewat <Link to="/journal" className="text-gold underline-offset-2 hover:underline">jurnal malam ini</Link> — besok otomatis muncul di sini dan tetap bisa kamu ubah.
-      </p>
       <span className="sr-only">{date}</span>
     </section>
   );

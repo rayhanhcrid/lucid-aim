@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, Loader2 } from "lucide-react";
-import { startRecording, transcribe, type Recorder } from "@/lib/voice";
+import {
+  dictationSupported,
+  startDictation,
+  startRecording,
+  transcribe,
+  type Dictation,
+  type Recorder,
+} from "@/lib/voice";
 import { haptic } from "@/lib/celebrate";
 
 type Status = "idle" | "recording" | "working";
@@ -17,12 +24,14 @@ export function VoiceInput({
   const [error, setError] = useState<string | null>(null);
   const [level, setLevel] = useState(0);
   const recorder = useRef<Recorder | null>(null);
+  const dictation = useRef<Dictation | null>(null);
   const raf = useRef<number | null>(null);
   const finishing = useRef(false);
 
   useEffect(() => {
     return () => {
       if (raf.current) cancelAnimationFrame(raf.current);
+      dictation.current?.cancel();
       void recorder.current?.stop();
     };
   }, []);
@@ -34,6 +43,23 @@ export function VoiceInput({
 
   async function begin() {
     setError(null);
+
+    // Dikte di perangkat lebih dulu: tidak butuh API key di server, jadi tetap
+    // jalan walau transkripsi server tidak tersedia.
+    if (dictationSupported()) {
+      dictation.current = startDictation({
+        onText: (text) => onText(text),
+        onError: (message) => setError(message),
+        onEnd: () => {
+          dictation.current = null;
+          setStatus("idle");
+        },
+      });
+      setStatus("recording");
+      haptic(12);
+      return;
+    }
+
     try {
       finishing.current = false;
       recorder.current = await startRecording({
@@ -52,6 +78,11 @@ export function VoiceInput({
   }
 
   async function finish() {
+    if (dictation.current) {
+      haptic([8, 30, 8]);
+      dictation.current.stop();
+      return;
+    }
     if (!recorder.current || finishing.current) return;
     finishing.current = true;
     if (raf.current) cancelAnimationFrame(raf.current);
@@ -82,7 +113,7 @@ export function VoiceInput({
   return (
     <div className="flex items-center gap-2">
       {error && <span className="text-[11px] text-muted-foreground">{error}</span>}
-      {recording && (
+      {recording && level > 0 && (
         <span className="flex items-end gap-0.5" aria-hidden="true">
           {[0, 1, 2].map((i) => (
             <span

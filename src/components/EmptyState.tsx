@@ -8,7 +8,7 @@ export function EmptyState({
 }: {
   icon: LucideIcon;
   title: string;
-  description: string;
+  description?: string;
   action?: React.ReactNode;
 }) {
   return (
@@ -18,7 +18,9 @@ export function EmptyState({
         <Icon className="relative size-7" strokeWidth={1.5} />
       </span>
       <h3 className="font-serif text-2xl leading-tight">{title}</h3>
-      <p className="max-w-[36ch] text-pretty text-sm text-muted-foreground">{description}</p>
+      {description && (
+        <p className="max-w-[36ch] text-pretty text-sm text-muted-foreground">{description}</p>
+      )}
       {action && <div className="mt-1">{action}</div>}
     </div>
   );
