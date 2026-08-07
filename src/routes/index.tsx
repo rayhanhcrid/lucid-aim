@@ -134,7 +134,7 @@ function Index() {
 
       {/* Focus + Ring */}
       <FocusSection
-        items={todaysFocus}
+        items={hydrated ? todaysFocus : []}
         hydrated={hydrated}
         doneFocus={doneFocus}
         focusPct={focusPct}
@@ -147,7 +147,7 @@ function Index() {
       {/* Today's schedule */}
       <ScheduleSection
         date={today}
-        items={todaysSchedule}
+        items={hydrated ? todaysSchedule : []}
         nextIdx={nextScheduleIdx}
         nowHHmm={nowHHmm}
         hydrated={hydrated}
