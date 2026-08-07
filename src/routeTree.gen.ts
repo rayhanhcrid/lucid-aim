@@ -16,6 +16,7 @@ import { Route as JournalRouteImport } from './routes/journal'
 import { Route as HabitsRouteImport } from './routes/habits'
 import { Route as GoalsRouteImport } from './routes/goals'
 import { Route as FocusRouteImport } from './routes/focus'
+import { Route as FinanceRouteImport } from './routes/finance'
 import { Route as CalendarRouteImport } from './routes/calendar'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AchievementsRouteImport } from './routes/achievements'
@@ -57,6 +58,11 @@ const FocusRoute = FocusRouteImport.update({
   path: '/focus',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FinanceRoute = FinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CalendarRoute = CalendarRouteImport.update({
   id: '/calendar',
   path: '/calendar',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/achievements': typeof AchievementsRoute
   '/analytics': typeof AnalyticsRoute
   '/calendar': typeof CalendarRoute
+  '/finance': typeof FinanceRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
   '/habits': typeof HabitsRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/achievements': typeof AchievementsRoute
   '/analytics': typeof AnalyticsRoute
   '/calendar': typeof CalendarRoute
+  '/finance': typeof FinanceRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
   '/habits': typeof HabitsRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/achievements': typeof AchievementsRoute
   '/analytics': typeof AnalyticsRoute
   '/calendar': typeof CalendarRoute
+  '/finance': typeof FinanceRoute
   '/focus': typeof FocusRoute
   '/goals': typeof GoalsRoute
   '/habits': typeof HabitsRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/analytics'
     | '/calendar'
+    | '/finance'
     | '/focus'
     | '/goals'
     | '/habits'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/analytics'
     | '/calendar'
+    | '/finance'
     | '/focus'
     | '/goals'
     | '/habits'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/achievements'
     | '/analytics'
     | '/calendar'
+    | '/finance'
     | '/focus'
     | '/goals'
     | '/habits'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   AchievementsRoute: typeof AchievementsRoute
   AnalyticsRoute: typeof AnalyticsRoute
   CalendarRoute: typeof CalendarRoute
+  FinanceRoute: typeof FinanceRoute
   FocusRoute: typeof FocusRoute
   GoalsRoute: typeof GoalsRoute
   HabitsRoute: typeof HabitsRoute
@@ -237,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FocusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/finance': {
+      id: '/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof FinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/calendar': {
       id: '/calendar'
       path: '/calendar'
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   AchievementsRoute: AchievementsRoute,
   AnalyticsRoute: AnalyticsRoute,
   CalendarRoute: CalendarRoute,
+  FinanceRoute: FinanceRoute,
   FocusRoute: FocusRoute,
   GoalsRoute: GoalsRoute,
   HabitsRoute: HabitsRoute,
