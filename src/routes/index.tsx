@@ -473,7 +473,7 @@ function FocusSection({
           — besok otomatis muncul di sini dan tetap bisa kamu ubah.
         </p>
 
-        {overallStreak > 0 && (
+        {hydrated && overallStreak > 0 && (
           <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-surface/70 px-3 py-1.5 hairline-gold">
             <Flame className="size-3.5 text-gold" />
             <span className="text-xs text-muted-foreground">

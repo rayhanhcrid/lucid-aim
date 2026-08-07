@@ -47,6 +47,38 @@ export type Reminders = {
   focusEnd: string; // HH:mm akhir jendela pengingat
 };
 
+export type SavingPot = {
+  id: string;
+  name: string;
+  target: number;
+  note?: string;
+  createdAt: string;
+};
+
+export type SavingTx = {
+  id: string;
+  potId: string;
+  amount: number; // positif = setor, negatif = tarik
+  note?: string;
+  date: string; // yyyy-mm-dd
+};
+
+export type Trade = {
+  id: string;
+  date: string; // yyyy-mm-dd
+  pair: string;
+  side: "long" | "short";
+  entry?: number;
+  exit?: number;
+  size?: string;
+  pnl: number; // hasil bersih (bisa negatif)
+  rr?: number;
+  setup?: string;
+  emotion: "tenang" | "sabar" | "serakah" | "takut" | "balas dendam";
+  notes?: string;
+  status: "open" | "closed";
+};
+
 export type State = {
   name: string;
   becoming: Identity[];
@@ -59,6 +91,9 @@ export type State = {
   goals: Goal[];
   journal: JournalEntry[];
   reminders: Reminders;
+  pots: SavingPot[];
+  savingTx: SavingTx[];
+  trades: Trade[];
 
   setName: (n: string) => void;
   setReminders: (patch: Partial<Reminders>) => void;
@@ -85,6 +120,15 @@ export type State = {
   addMilestone: (goalId: string, title: string) => void;
 
   upsertJournal: (entry: Omit<JournalEntry, "id"> & { id?: string }) => void;
+
+  addPot: (p: { name: string; target: number; note?: string }) => void;
+  removePot: (id: string) => void;
+  addSavingTx: (tx: Omit<SavingTx, "id">) => void;
+  removeSavingTx: (id: string) => void;
+
+  addTrade: (t: Omit<Trade, "id">) => void;
+  updateTrade: (id: string, patch: Partial<Omit<Trade, "id">>) => void;
+  removeTrade: (id: string) => void;
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -108,6 +152,9 @@ export const SYNCED_KEYS = [
   "goals",
   "journal",
   "reminders",
+  "pots",
+  "savingTx",
+  "trades",
 ] as const;
 
 const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
@@ -241,6 +288,17 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
   ],
   journal: [],
   reminders: { enabled: false, habitTime: "08:00", journalTime: "21:00", focusEnabled: true, focusEveryHours: 3, focusStart: "08:00", focusEnd: "22:00" },
+  pots: [
+    { id: "p1", name: "Dana darurat", target: 30000000, note: "6 bulan biaya hidup", createdAt: new Date().toISOString() },
+    { id: "p2", name: "Modal trading", target: 50000000, note: "Modal yang siap dirisikokan", createdAt: new Date().toISOString() },
+    { id: "p3", name: "Liburan Jepang", target: 25000000, createdAt: new Date().toISOString() },
+  ],
+  savingTx: [
+    { id: uid(), potId: "p1", amount: 12000000, note: "Setoran awal", date: todayKey() },
+    { id: uid(), potId: "p2", amount: 20000000, note: "Modal awal", date: todayKey() },
+    { id: uid(), potId: "p3", amount: 4500000, note: "Nabung bulanan", date: todayKey() },
+  ],
+  trades: [],
 };
 
 export const useStore = create<State>()(
@@ -381,10 +439,30 @@ export const useStore = create<State>()(
           }
           return { journal: [...s.journal, { ...entry, id: entry.id || uid() }] };
         }),
+
+      addPot: (p) =>
+        set((s) => ({
+          pots: [...s.pots, { ...p, id: uid(), createdAt: new Date().toISOString() }],
+        })),
+      removePot: (id) =>
+        set((s) => ({
+          pots: s.pots.filter((p) => p.id !== id),
+          savingTx: s.savingTx.filter((t) => t.potId !== id),
+        })),
+      addSavingTx: (tx) => set((s) => ({ savingTx: [...s.savingTx, { ...tx, id: uid() }] })),
+      removeSavingTx: (id) =>
+        set((s) => ({ savingTx: s.savingTx.filter((t) => t.id !== id) })),
+
+      addTrade: (t) => set((s) => ({ trades: [...s.trades, { ...t, id: uid() }] })),
+      updateTrade: (id, patch) =>
+        set((s) => ({
+          trades: s.trades.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        })),
+      removeTrade: (id) => set((s) => ({ trades: s.trades.filter((t) => t.id !== id) })),
     }),
     {
       name: "aura-life-os",
-      version: 6,
+      version: 7,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
         persisted.reminders = { ...({ enabled: false, habitTime: "08:00", journalTime: "21:00", focusEnabled: true, focusEveryHours: 3, focusStart: "08:00", focusEnd: "22:00" }), ...(persisted.reminders || {}) };
@@ -401,6 +479,9 @@ export const useStore = create<State>()(
         }
         delete persisted.todaysFocus;
         if (!persisted.focusItems) persisted.focusItems = {};
+        if (!Array.isArray(persisted.pots)) persisted.pots = [];
+        if (!Array.isArray(persisted.savingTx)) persisted.savingTx = [];
+        if (!Array.isArray(persisted.trades)) persisted.trades = [];
         return persisted;
       },
       merge: (persisted: any, current) => ({
