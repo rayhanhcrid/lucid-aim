@@ -141,7 +141,11 @@ function Index() {
         overallStreak={overallStreak}
         onAdd={(label) => addFocusItem(today, label)}
         onRemove={(id) => removeFocusItem(today, id)}
-        onToggle={(id) => toggleFocusItem(today, id)}
+        onToggle={(id) => {
+          const item = todaysFocus.find((f) => f.id === id);
+          haptic(item?.done ? 8 : [10, 40, 18]);
+          toggleFocusItem(today, id);
+        }}
       />
 
       {/* Today's schedule */}
