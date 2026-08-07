@@ -12,6 +12,7 @@ import {
   LayoutGrid,
   Sparkles,
   Maximize2,
+  Wallet,
   X,
 } from "lucide-react";
 import { useUIStore } from "@/lib/ui-store";
@@ -26,6 +27,7 @@ const primary = [
 
 const extras = [
   { to: "/focus",        label: "Mode Fokus", icon: Maximize2, desc: "Satu layar penuh: jam besar dan fokus hari ini saja." },
+  { to: "/finance",      label: "Keuangan",   icon: Wallet,    desc: "Tabungan per tujuan dan jurnal trading harian." },
   { to: "/review",       label: "Rekap",      icon: Sparkles,  desc: "Rekap mingguan dan saran fokus untuk minggu depan." },
   { to: "/journal",      label: "Jurnal",     icon: BookOpen,  desc: "Catat suasana hati, syukur, dan refleksi hari ini." },
   { to: "/analytics",    label: "Analitik",   icon: BarChart3, desc: "Ritme, konsistensi, dan angka bulan ini." },
