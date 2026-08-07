@@ -18,6 +18,7 @@ export function VoiceInput({
   const [level, setLevel] = useState(0);
   const recorder = useRef<Recorder | null>(null);
   const raf = useRef<number | null>(null);
+  const finishing = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -34,9 +35,16 @@ export function VoiceInput({
   async function begin() {
     setError(null);
     try {
-      recorder.current = await startRecording();
+      finishing.current = false;
+      recorder.current = await startRecording({
+        silenceMs: 1800,
+        onSilence: () => {
+          // Berhenti otomatis saat kamu sudah selesai bicara.
+          void finish();
+        },
+      });
       setStatus("recording");
-      haptic();
+      haptic(12);
       raf.current = requestAnimationFrame(tick);
     } catch {
       setError("Mikrofon belum diizinkan. Aktifkan dulu di pengaturan browser ya.");
@@ -44,10 +52,11 @@ export function VoiceInput({
   }
 
   async function finish() {
-    if (!recorder.current) return;
+    if (!recorder.current || finishing.current) return;
+    finishing.current = true;
     if (raf.current) cancelAnimationFrame(raf.current);
     setStatus("working");
-    haptic();
+    haptic([8, 30, 8]);
     try {
       const blob = await recorder.current.stop();
       recorder.current = null;
@@ -64,6 +73,7 @@ export function VoiceInput({
     } finally {
       setStatus("idle");
       setLevel(0);
+      finishing.current = false;
     }
   }
 
