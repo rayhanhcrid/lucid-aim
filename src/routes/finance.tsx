@@ -40,7 +40,6 @@ export const Route = createFileRoute("/finance")({
 
 const rupiah = (n: number) =>
   "Rp " + Math.round(Math.abs(n)).toLocaleString("id-ID") ;
-const signed = (n: number) => (n < 0 ? "−" : "+") + rupiah(n).slice(3).trim().padStart(0);
 
 const emotions = ["tenang", "sabar", "serakah", "takut", "balas dendam"] as const;
 
@@ -161,6 +160,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
 
       {hydrated && pots.length === 0 ? (
         <EmptyState
+          icon={PiggyBank}
           title="Belum ada kantong tabungan"
           description="Buat satu kantong dulu — dana darurat, modal trading, atau tabungan liburan."
         />
@@ -260,7 +260,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
         <Dialog title="Kantong baru" onClose={() => setOpen(false)}>
           <Field label="Nama kantong">
             <input
-              className="input-cinema"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Dana darurat"
@@ -268,7 +268,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
           </Field>
           <Field label="Target (Rp)">
             <input
-              className="input-cinema"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               inputMode="numeric"
               value={form.target}
               onChange={(e) => setForm({ ...form, target: e.target.value.replace(/\D/g, "") })}
@@ -277,7 +277,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
           </Field>
           <Field label="Catatan (opsional)">
             <input
-              className="input-cinema"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               value={form.note}
               onChange={(e) => setForm({ ...form, note: e.target.value })}
               placeholder="6 bulan biaya hidup"
@@ -308,7 +308,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
         >
           <Field label="Jumlah (Rp)">
             <input
-              className="input-cinema"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               inputMode="numeric"
               autoFocus
               value={move.amount}
@@ -318,7 +318,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
           </Field>
           <Field label="Catatan (opsional)">
             <input
-              className="input-cinema"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               value={move.note}
               onChange={(e) => setMove({ ...move, note: e.target.value })}
               placeholder="Nabung bulanan"
@@ -420,6 +420,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
 
       {hydrated && sorted.length === 0 ? (
         <EmptyState
+          icon={CandlestickChart}
           title="Jurnal trading masih kosong"
           description="Catat posisi hari ini — pair, arah, hasil, dan yang paling penting: emosi kamu saat masuk."
         />
@@ -437,14 +438,14 @@ function Trading({ hydrated }: { hydrated: boolean }) {
             <Field label="Tanggal">
               <input
                 type="date"
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
               />
             </Field>
             <Field label="Pair / aset">
               <input
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 value={form.pair}
                 onChange={(e) => setForm({ ...form, pair: e.target.value })}
                 placeholder="BTCUSDT"
@@ -474,7 +475,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
           <div className="grid grid-cols-3 gap-3">
             <Field label="Entry">
               <input
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 inputMode="decimal"
                 value={form.entry}
                 onChange={(e) => setForm({ ...form, entry: e.target.value })}
@@ -482,7 +483,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
             </Field>
             <Field label="Exit">
               <input
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 inputMode="decimal"
                 value={form.exit}
                 onChange={(e) => setForm({ ...form, exit: e.target.value })}
@@ -490,7 +491,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
             </Field>
             <Field label="Ukuran">
               <input
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 value={form.size}
                 onChange={(e) => setForm({ ...form, size: e.target.value })}
                 placeholder="0.5 lot"
@@ -501,7 +502,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Hasil (Rp, minus untuk rugi)">
               <input
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 inputMode="text"
                 value={form.pnl}
                 onChange={(e) => setForm({ ...form, pnl: e.target.value.replace(/[^\d-]/g, "") })}
@@ -510,7 +511,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
             </Field>
             <Field label="R:R">
               <input
-                className="input-cinema"
+                className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
                 inputMode="decimal"
                 value={form.rr}
                 onChange={(e) => setForm({ ...form, rr: e.target.value })}
@@ -521,7 +522,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
 
           <Field label="Setup / alasan masuk">
             <input
-              className="input-cinema"
+              className="w-full rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               value={form.setup}
               onChange={(e) => setForm({ ...form, setup: e.target.value })}
               placeholder="Break & retest H1"
@@ -568,7 +569,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
 
           <Field label="Catatan / pelajaran">
             <textarea
-              className="input-cinema min-h-20 resize-none"
+              className="w-full min-h-20 resize-none rounded-2xl bg-white/[0.04] px-4 py-3 text-[15px] outline-none hairline placeholder:text-muted-foreground"
               value={form.notes}
               onChange={(e) => setForm({ ...form, notes: e.target.value })}
               placeholder="Apa yang berjalan baik, apa yang mau diperbaiki besok?"
