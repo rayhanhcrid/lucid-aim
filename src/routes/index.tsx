@@ -82,6 +82,9 @@ function Index() {
   const addScheduleItem = useStore((s) => s.addScheduleItem);
   const removeScheduleItem = useStore((s) => s.removeScheduleItem);
   const goals = useStore((s) => s.goals);
+  const toggleMilestone = useStore((s) => s.toggleMilestone);
+  const addMilestone = useStore((s) => s.addMilestone);
+  const [openGoal, setOpenGoal] = useState<string | null>(null);
   const becoming = useStore((s) => s.becoming);
   const vision = useStore((s) => s.vision);
   const visionYear = useStore((s) => s.visionYear);
@@ -182,29 +185,86 @@ function Index() {
           <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
             {weeklyGoals.map((g, i) => {
               const done = g.milestones.filter((m) => m.done).length;
+              const expanded = openGoal === g.id;
               return (
-                <Link
+                <div
                   key={g.id}
-                  to="/goals"
-                  className="card-cinema group animate-float-y block p-4 transition hover:-translate-y-0.5"
-                  style={{ animationDelay: `${i * 0.28}s` }}
+                  className={[
+                    "card-cinema p-4 transition",
+                    expanded ? "md:col-span-2" : "animate-float-y hover:-translate-y-0.5",
+                  ].join(" ")}
+                  style={expanded ? undefined : { animationDelay: `${i * 0.28}s` }}
                 >
-                  <div className="mb-2 flex items-start justify-between gap-3">
-                    <p className="font-serif text-lg leading-tight">{g.title}</p>
-                    <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                      {g.progress}%
-                    </span>
-                  </div>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
-                      style={{ width: `${hydrated ? g.progress : 0}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    {done} / {g.milestones.length} milestone
-                  </p>
-                </Link>
+                  <button
+                    onClick={() => {
+                      haptic(8);
+                      setOpenGoal(expanded ? null : g.id);
+                    }}
+                    className="block w-full text-left"
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <p className="font-serif text-lg leading-tight">{g.title}</p>
+                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                        {g.progress}%
+                      </span>
+                    </div>
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                        style={{ width: `${hydrated ? g.progress : 0}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                      <span>
+                        {done} / {g.milestones.length} milestone
+                      </span>
+                      <span>{expanded ? "tutup" : "ketuk untuk centang"}</span>
+                    </p>
+                  </button>
+
+                  {expanded && (
+                    <div className="animate-rise mt-4 space-y-1.5 border-t border-white/[0.08] pt-3">
+                      {g.milestones.map((m) => (
+                        <button
+                          key={m.id}
+                          onClick={() => {
+                            haptic(m.done ? 8 : [10, 40, 18]);
+                            toggleMilestone(g.id, m.id);
+                          }}
+                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-white/[0.05]"
+                        >
+                          <span
+                            className={[
+                              "grid size-5 shrink-0 place-items-center rounded-full transition",
+                              m.done
+                                ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white animate-check-pop"
+                                : "ring-1 ring-white/20 group-hover:ring-[oklch(0.62_0.11_195)]",
+                            ].join(" ")}
+                          >
+                            {m.done && <Check className="size-3" strokeWidth={3} />}
+                          </span>
+                          <span
+                            className={[
+                              "text-sm",
+                              m.done ? "text-muted-foreground line-through" : "text-foreground",
+                            ].join(" ")}
+                          >
+                            {m.title}
+                          </span>
+                        </button>
+                      ))}
+                      <QuickMilestone onAdd={(t) => addMilestone(g.id, t)} />
+                      <div className="pt-1">
+                        <Link
+                          to="/goals"
+                          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                        >
+                          Buka halaman tujuan <ArrowUpRight className="size-3" />
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
