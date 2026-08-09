@@ -28,11 +28,15 @@ function JournalPage() {
 
   const today = todayKey();
   const tomorrow = (() => {
-    const d = new Date();
+    const d = nowDay();
     d.setDate(d.getDate() + 1);
     return todayKey(d);
   })();
-  const tomorrowLabel = new Date(Date.now() + 86400000).toLocaleDateString("id-ID", {
+  const tomorrowLabel = (() => {
+    const d = nowDay();
+    d.setDate(d.getDate() + 1);
+    return d;
+  })().toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
     month: "long",
