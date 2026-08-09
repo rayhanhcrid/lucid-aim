@@ -663,3 +663,29 @@ function ScheduleSection({
     </section>
   );
 }
+
+function QuickMilestone({ onAdd }: { onAdd: (t: string) => void }) {
+  const [v, setV] = useState("");
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!v.trim()) return;
+        onAdd(v.trim());
+        setV("");
+        haptic(8);
+      }}
+      className="flex items-center gap-3 rounded-xl px-2 py-1.5 opacity-60 transition focus-within:opacity-100"
+    >
+      <span className="grid size-5 shrink-0 place-items-center rounded-full ring-1 ring-dashed ring-white/25">
+        <Plus className="size-3" />
+      </span>
+      <input
+        value={v}
+        onChange={(e) => setV(e.target.value)}
+        placeholder="Tambah langkah kecil"
+        className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+      />
+    </form>
+  );
+}
