@@ -26,7 +26,7 @@ function CalendarPage() {
   const toggleFocusItem = useStore((s) => s.toggleFocusItem);
 
   const [cursor, setCursor] = useState(() => {
-    const d = new Date();
+    const d = nowDay();
     return { y: d.getFullYear(), m: d.getMonth() };
   });
   const [selected, setSelected] = useState<string>(todayKey());
@@ -65,7 +65,7 @@ function CalendarPage() {
 
   // Jejak 14 hari terakhir untuk "fokus hari ini"
   const trail = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date();
+    const d = nowDay();
     d.setDate(d.getDate() - (13 - i));
     const key = todayKey(d);
     const list = focusItems[key] || [];
