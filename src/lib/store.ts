@@ -158,7 +158,20 @@ export type State = {
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-export const todayKey = (d: Date = new Date()) => {
+/**
+ * Hari "berganti" jam 3 pagi, bukan tengah malam — biar sesi begadang
+ * masih dihitung sebagai hari yang sama.
+ */
+export const DAY_START_HOUR = 3;
+
+export const nowDay = () => {
+  const d = new Date();
+  if (d.getHours() < DAY_START_HOUR) d.setDate(d.getDate() - 1);
+  d.setHours(12, 0, 0, 0);
+  return d;
+};
+
+export const todayKey = (d: Date = nowDay()) => {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
