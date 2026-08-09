@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Plus, X, Clock, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { VoiceInput } from "@/components/VoiceInput";
-import { todayKey, useHydrated, useStore } from "@/lib/store";
+import { nowDay, todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/journal")({
   head: () => ({

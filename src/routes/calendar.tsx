@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { HabitIcon } from "@/components/HabitIcon";
-import { todayKey, useHydrated, useStore } from "@/lib/store";
+import { nowDay, todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/calendar")({
   head: () => ({
