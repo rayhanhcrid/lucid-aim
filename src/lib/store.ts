@@ -577,7 +577,7 @@ export function currentStreak(dates: string[]): number {
   if (!dates.length) return 0;
   const set = new Set(dates);
   let streak = 0;
-  const d = new Date();
+  const d = nowDay();
   while (set.has(todayKey(d))) {
     streak++;
     d.setDate(d.getDate() - 1);
