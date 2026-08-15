@@ -19,6 +19,7 @@ import { TrendChart } from "@/components/TrendChart";
 import {
   useHydrated,
   useStore,
+  nowDay,
   todayKey,
   tradePnl,
   tradeReturn,
@@ -395,7 +396,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
-const monthKey = (d = new Date()) =>
+const monthKey = (d = nowDay()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 
 const monthLabel = (m: string) => {

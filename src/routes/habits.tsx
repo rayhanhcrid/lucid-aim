@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Check, Plus, Trash2, Flame } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { HabitIcon, ICON_KEYS } from "@/components/HabitIcon";
-import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+import { currentStreak, longestStreak, nowDay, todayKey, useHydrated, useStore, useToday } from "@/lib/store";
 import { useUIStore } from "@/lib/ui-store";
 
 export const Route = createFileRoute("/habits")({
@@ -41,7 +41,7 @@ function HabitsPage() {
     return () => setDialogOpen(false);
   }, [open, setDialogOpen]);
 
-  const today = todayKey();
+  const today = useToday();
 
   return (
     <AppShell>
@@ -250,7 +250,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function MiniHeatmap({ dates }: { dates: string[] }) {
   const days: { key: string; done: boolean }[] = [];
   for (let i = 27; i >= 0; i--) {
-    const d = new Date();
+    const d = nowDay();
     d.setDate(d.getDate() - i);
     const k = todayKey(d);
     days.push({ key: k, done: dates.includes(k) });

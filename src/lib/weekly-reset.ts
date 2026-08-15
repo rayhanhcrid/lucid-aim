@@ -1,16 +1,17 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { useStore } from "./store";
+import { DAY_START_HOUR, useStore } from "./store";
 
 /**
- * Batas minggu terakhir yang sudah lewat: Senin 03:00 waktu perangkat.
- * Senin jam 01:00 masih dianggap "minggu lalu" — resetnya baru jam 3 pagi.
+ * Batas minggu terakhir yang sudah lewat: Senin jam `DAY_START_HOUR` (03:00)
+ * waktu perangkat — sama persis dengan pergantian hari di `nowDay()`, jadi
+ * Senin jam 01:00 masih dihitung minggu lalu.
  */
 export function lastWeeklyBoundary(now: Date = new Date()): Date {
   const d = new Date(now);
   const daysSinceMonday = (d.getDay() + 6) % 7; // Minggu=6, Senin=0, Selasa=1, ...
   d.setDate(d.getDate() - daysSinceMonday);
-  d.setHours(3, 0, 0, 0);
+  d.setHours(DAY_START_HOUR, 0, 0, 0);
   if (d.getTime() > now.getTime()) d.setDate(d.getDate() - 7);
   return d;
 }

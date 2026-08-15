@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Check, X, Sparkles } from "lucide-react";
-import { todayKey, useHydrated, useStore } from "@/lib/store";
+import { useHydrated, useStore, useToday } from "@/lib/store";
 import { celebrate, haptic } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/focus")({
@@ -41,7 +41,7 @@ function FocusMode() {
     return () => document.documentElement.classList.remove("calm-motion");
   }, []);
 
-  const today = todayKey();
+  const today = useToday();
   const items = hydrated ? focusItems[today] || [] : [];
   const done = items.filter((f) => f.done).length;
   const pct = items.length ? Math.round((done / items.length) * 100) : 0;

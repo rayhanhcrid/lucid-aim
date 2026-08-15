@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Plus, X, Bell, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
-import { todayKey, useStore } from "@/lib/store";
+import { useStore, useToday } from "@/lib/store";
 import {
   notificationPermission,
   requestNotificationPermission,
@@ -44,7 +44,7 @@ function ProfilePage() {
   const focusItems = useStore((s) => s.focusItems);
   const addFocusItem = useStore((s) => s.addFocusItem);
   const removeFocusItem = useStore((s) => s.removeFocusItem);
-  const today = todayKey();
+  const today = useToday();
   const todaysFocus = focusItems[today] || [];
 
   return (

@@ -4,7 +4,7 @@ import { Check, ArrowUpRight, Flame, Clock, Sparkles, Plus, X, Target, Maximize2
 import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
-import { currentStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+import { currentStreak, nowDay, useHydrated, useStore, useToday } from "@/lib/store";
 import { haptic } from "@/lib/celebrate";
 
 export const Route = createFileRoute("/")({
@@ -89,7 +89,7 @@ function Index() {
   const vision = useStore((s) => s.vision);
   const visionYear = useStore((s) => s.visionYear);
 
-  const today = todayKey();
+  const today = useToday();
   const todaysFocus = focusItems[today] || [];
   const todaysSchedule = schedules[today] || [];
   const weeklyGoals = goals.filter((g) => g.horizon === "weekly");
@@ -109,7 +109,7 @@ function Index() {
     ...habits.map((h) => currentStreak(completions[h.id] || [])),
   );
 
-  const dateLabel = new Date().toLocaleDateString("id-ID", {
+  const dateLabel = nowDay().toLocaleDateString("id-ID", {
     weekday: "long",
     month: "long",
     day: "numeric",

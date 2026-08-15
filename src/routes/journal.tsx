@@ -63,7 +63,7 @@ function JournalPage() {
         </p>
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Jurnal Hari Ini</h1>
         <p className="mt-2 text-muted-foreground">
-          {new Date().toLocaleDateString("id-ID", {
+          {nowDay().toLocaleDateString("id-ID", {
             weekday: "long",
             month: "long",
             day: "numeric",

@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { getPushState } from "./push";
-import { todayKey, useStore } from "./store";
+import { nowDay, todayKey, useStore } from "./store";
 
 const FIRED_KEY = "rayhan-reminders-fired";
 
+// Penanda "sudah dikirim" ikut hari logis (ganti jam 3 pagi), bukan tengah malam,
+// biar pengingat dini hari nggak dianggap hari baru.
 function todayStamp(kind: string, time: string) {
-  const d = new Date();
-  return `${d.toDateString()}|${kind}|${time}`;
+  return `${nowDay().toDateString()}|${kind}|${time}`;
 }
 
 function alreadyFired(stamp: string) {

@@ -248,7 +248,7 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
     const c: Record<string, string[]> = {};
     const habits = ["h1", "h2", "h3", "h4", "h5", "h6"];
     for (let i = 30; i >= 1; i--) {
-      const d = new Date();
+      const d = nowDay();
       d.setDate(d.getDate() - i);
       const k = todayKey(d);
       habits.forEach((h) => {
@@ -630,4 +630,20 @@ export function useHydrated() {
   const [h, setH] = useState(false);
   useEffect(() => setH(true), []);
   return h;
+}
+
+/**
+ * Kunci hari yang bergeser sendiri begitu lewat jam 3 pagi, walau halamannya
+ * dibiarkan kebuka semalaman — supaya centang nggak nyasar ke hari kemarin.
+ */
+export function useToday() {
+  const [key, setKey] = useState(() => todayKey());
+  useEffect(() => {
+    const id = setInterval(() => {
+      const k = todayKey();
+      setKey((prev) => (prev === k ? prev : k));
+    }, 30_000);
+    return () => clearInterval(id);
+  }, []);
+  return key;
 }

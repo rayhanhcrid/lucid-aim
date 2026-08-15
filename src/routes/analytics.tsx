@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { currentStreak, longestStreak, todayKey, useHydrated, useStore } from "@/lib/store";
+import { currentStreak, longestStreak, nowDay, todayKey, useHydrated, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/analytics")({
   head: () => ({
@@ -24,7 +24,7 @@ function AnalyticsPage() {
 
   const trend: { day: string; ratio: number }[] = [];
   for (let i = 29; i >= 0; i--) {
-    const d = new Date();
+    const d = nowDay();
     d.setDate(d.getDate() - i);
     const k = todayKey(d);
     const done = habits.filter((h) => (completions[h.id] || []).includes(k)).length;
@@ -41,7 +41,7 @@ function AnalyticsPage() {
   const dowLabel = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
   const weeks: { key: string; ratio: number }[][] = [];
-  const startDate = new Date();
+  const startDate = nowDay();
   startDate.setDate(startDate.getDate() - 20 * 7);
   const startWd = startDate.getDay();
   startDate.setDate(startDate.getDate() - startWd);
