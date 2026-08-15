@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Check, Trash2 } from "lucide-react";
+import { Plus, Check, Trash2, RotateCcw } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useHydrated, useStore } from "@/lib/store";
 import { useUIStore } from "@/lib/ui-store";
@@ -84,6 +84,13 @@ function GoalsPage() {
           </button>
         ))}
       </div>
+
+      {(filter === "all" || filter === "weekly") && (
+        <p className="animate-rise mb-6 flex items-center gap-2 text-[11px] text-muted-foreground">
+          <RotateCcw className="size-3 shrink-0" />
+          Progres tujuan mingguan direset otomatis tiap Senin jam 03:00.
+        </p>
+      )}
 
       <div className="animate-rise space-y-4">
         {(hydrated ? filtered : []).map((g) => (

@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { useCloudSync } from "../lib/cloud-sync";
 import { useReminderScheduler } from "../lib/reminders";
+import { useWeeklyGoalReset } from "../lib/weekly-reset";
 import { registerServiceWorker } from "../lib/pwa";
 import { syncPushSubscription } from "../lib/push";
 import { Toaster } from "../components/ui/sonner";
@@ -133,6 +134,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useCloudSync();
   useReminderScheduler();
+  useWeeklyGoalReset();
   useEffect(() => {
     void registerServiceWorker().then(() => syncPushSubscription());
   }, []);

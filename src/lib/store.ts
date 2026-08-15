@@ -115,6 +115,8 @@ export type State = {
   savingTx: SavingTx[];
   monthlySavings: MonthlySaving[];
   trades: Trade[];
+  /** ISO batas reset mingguan terakhir yang sudah dijalankan (lihat lib/weekly-reset.ts). */
+  weeklyResetAt: string;
 
   setName: (n: string) => void;
   setReminders: (patch: Partial<Reminders>) => void;
@@ -139,6 +141,8 @@ export type State = {
   removeGoal: (id: string) => void;
   toggleMilestone: (goalId: string, milestoneId: string) => void;
   addMilestone: (goalId: string, title: string) => void;
+  /** Kosongkan progres semua tujuan mingguan, lalu tandai batas resetnya. */
+  resetWeeklyGoals: (at: string) => void;
 
   upsertJournal: (entry: Omit<JournalEntry, "id"> & { id?: string }) => void;
 
@@ -181,6 +185,7 @@ export const SYNCED_KEYS = [
   "savingTx",
   "monthlySavings",
   "trades",
+  "weeklyResetAt",
 ] as const;
 
 const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
@@ -326,6 +331,7 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
   ],
   monthlySavings: [],
   trades: [],
+  weeklyResetAt: new Date().toISOString(),
 };
 
 export const useStore = create<State>()(
@@ -453,6 +459,19 @@ export const useStore = create<State>()(
               : g,
           ),
         })),
+      resetWeeklyGoals: (at) =>
+        set((s) => ({
+          weeklyResetAt: at,
+          goals: s.goals.map((g) =>
+            g.horizon === "weekly"
+              ? {
+                  ...g,
+                  progress: 0,
+                  milestones: g.milestones.map((m) => ({ ...m, done: false })),
+                }
+              : g,
+          ),
+        })),
 
       upsertJournal: (entry) =>
         set((s) => {
@@ -504,7 +523,7 @@ export const useStore = create<State>()(
     }),
     {
       name: "aura-life-os",
-      version: 7,
+      version: 8,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
         persisted.reminders = { ...({ enabled: false, habitTime: "08:00", journalTime: "21:00", focusEnabled: true, focusEveryHours: 3, focusStart: "08:00", focusEnd: "22:00" }), ...(persisted.reminders || {}) };
@@ -525,6 +544,11 @@ export const useStore = create<State>()(
         if (!Array.isArray(persisted.savingTx)) persisted.savingTx = [];
         if (!Array.isArray(persisted.monthlySavings)) persisted.monthlySavings = [];
         if (!Array.isArray(persisted.trades)) persisted.trades = [];
+        // Data lama belum punya penanda ini. Isi dengan "sekarang" supaya progres
+        // mingguan yang sedang berjalan tidak langsung kereset saat versi ini dibuka.
+        if (typeof persisted.weeklyResetAt !== "string") {
+          persisted.weeklyResetAt = new Date().toISOString();
+        }
         // Jurnal trading lama (pair/side/entry/exit/pnl) → format saham IHSG.
         persisted.trades = persisted.trades.map((t: any) => {
           if (!t || t.ticker !== undefined) return t;
