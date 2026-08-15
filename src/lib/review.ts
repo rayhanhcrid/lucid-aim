@@ -1,4 +1,4 @@
-import { todayKey, type Goal, type Habit, type JournalEntry } from "./store";
+import { nowDay, todayKey, type Goal, type Habit, type JournalEntry } from "./store";
 
 export type DayStat = {
   key: string;
@@ -42,7 +42,7 @@ const DAY_LABEL = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 export function lastNDays(n: number, offset = 0): string[] {
   const out: string[] = [];
   for (let i = n - 1 + offset; i >= offset; i--) {
-    const d = new Date();
+    const d = nowDay();
     d.setDate(d.getDate() - i);
     out.push(todayKey(d));
   }
