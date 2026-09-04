@@ -5,7 +5,9 @@ import { AppShell } from "@/components/AppShell";
 import { ProgressRing } from "@/components/ProgressRing";
 import { HabitIcon } from "@/components/HabitIcon";
 import { currentStreak, nowDay, useHydrated, useStore, useToday } from "@/lib/store";
-import { haptic } from "@/lib/celebrate";
+import { celebrate, haptic } from "@/lib/celebrate";
+import { Reveal } from "@/components/Reveal";
+import { chime } from "@/lib/soundscape";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -27,6 +29,28 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
+/**
+ * Kalimat di bawah sapaan nggak lagi statis — dia baca kondisi hari ini, jadi
+ * layar depannya kerasa nanggepin kamu, bukan cuma nampilin data.
+ */
+function openingLine(doneHabits: number, totalHabits: number, focusLeft: number, hour: number) {
+  if (totalHabits === 0 && focusLeft === 0) {
+    return "Hari ini masih kosong. Satu langkah kecil aja udah cukup buat memulainya.";
+  }
+  if (totalHabits > 0 && doneHabits === totalHabits) {
+    return focusLeft > 0
+      ? "Semua ritual beres. Sisa " + focusLeft + " fokus lagi, terus hari ini punyamu."
+      : "Semua beres hari ini. Nikmatin sisanya, kamu udah nutup dengan rapi.";
+  }
+  if (focusLeft === 0 && doneHabits > 0) {
+    return "Fokusmu udah kelar. Tinggal " + (totalHabits - doneHabits) + " ritual buat nutup hari.";
+  }
+  if (hour >= 21) return "Malam udah panjang. Ambil satu yang paling gampang, sisanya boleh besok.";
+  if (hour < 10) return "Paginya masih utuh. Mulai dari yang paling kecil.";
+  if (doneHabits === 0) return "Belum ada yang dicentang. Satu aja dulu, nggak usah semuanya.";
+  return "Ritmenya udah jalan. Terusin pelan-pelan, nggak usah buru-buru.";
+}
 
 function greeting() {
   const h = new Date().getHours();
@@ -54,11 +78,16 @@ function DigitalClock() {
   return (
     <div
       className="sticky top-6 z-10 hidden shrink-0 rounded-[24px] md:block"
-      style={{ boxShadow: "0 0 48px -4px oklch(0.62 0.11 195 / 0.75), 0 0 16px -2px oklch(0.62 0.11 195 / 0.5)" }}
+      style={{ boxShadow: "0 0 48px -4px oklch(0.62 0.11 var(--acc-h1) / 0.75), 0 0 16px -2px oklch(0.62 0.11 var(--acc-h1) / 0.5)" }}
     >
-      <div className="flex flex-col items-center gap-1.5 rounded-[24px] card-cinema px-7 py-5">
-        <span className="font-sans text-4xl font-medium tabular-nums leading-none tracking-tight">
-          {hydrated ? `${hh}:${mm}` : "--:--"}
+      <div className="flex flex-col items-center gap-1.5 rounded-[24px] card-cinema spotlight px-7 py-5">
+        <span className="font-sans text-4xl font-medium tabular-live leading-none tracking-tight">
+          {hydrated ? hh : "--"}
+          {/* Titik duanya ikut berdenyut tiap detik — jam yang diam kelihatan mati. */}
+          <span className="animate-breathe mx-[1px] inline-block" style={{ animationDuration: "2s" }}>
+            :
+          </span>
+          {hydrated ? mm : "--"}
         </span>
         <span className="whitespace-nowrap text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
           {hydrated ? dayLabel : "—"}
@@ -118,8 +147,8 @@ function Index() {
   const nextScheduleIdx = todaysSchedule.findIndex((s) => s.time >= nowHHmm);
 
   return (
-    <AppShell>
-      <header className="animate-rise mb-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+    <AppShell wide>
+      <header className="animate-rise mb-8 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="mb-3 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
             <span className="inline-block size-1 rounded-full bg-gold animate-breathe" />
@@ -130,7 +159,14 @@ function Index() {
             <span className="shimmer-text italic">{name}.</span>
           </h1>
           <p className="mt-4 max-w-[52ch] text-pretty text-muted-foreground">
-            Hari ini masih kosong. Satu langkah kecil aja udah cukup buat memulainya.
+            {hydrated
+              ? openingLine(
+                  doneToday,
+                  habits.length,
+                  todaysFocus.filter((f) => !f.done).length,
+                  new Date().getHours(),
+                )
+              : "Hari ini masih kosong. Satu langkah kecil aja udah cukup buat memulainya."}
           </p>
         </div>
         <DigitalClock />
@@ -152,218 +188,270 @@ function Index() {
         }}
       />
 
-      {/* Today's schedule */}
-      <ScheduleSection
-        date={today}
-        items={hydrated ? todaysSchedule : []}
-        nextIdx={nextScheduleIdx}
-        nowHHmm={nowHHmm}
-        hydrated={hydrated}
-        onAdd={(t, l) => addScheduleItem(today, t, l)}
-        onRemove={(id) => removeScheduleItem(today, id)}
-      />
+      {/* Mulai lg isinya dipecah dua kolom — di laptop separuh layar kanan
+          tadinya kosong melompong. Di bawah lg semuanya numpuk seperti biasa. */}
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-8">
+        <div className="min-w-0">
+          {/* Today's schedule */}
+          <ScheduleSection
+            date={today}
+            items={hydrated ? todaysSchedule : []}
+            nextIdx={nextScheduleIdx}
+            nowHHmm={nowHHmm}
+            hydrated={hydrated}
+            onAdd={(t, l) => addScheduleItem(today, t, l)}
+            onRemove={(id) => removeScheduleItem(today, id)}
+          />
 
-      {/* Weekly goals */}
-      {weeklyGoals.length > 0 && (
-        <section className="animate-rise mb-10">
-          <div className="mb-4 flex items-end justify-between">
-            <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-              <Target className="size-3" />
-              Tujuan minggu ini
-            </p>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-serif text-base text-foreground tabular-nums">{weeklyPct}%</span>
-              <span>rata-rata</span>
-            </div>
-          </div>
-          <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
-              style={{ width: `${hydrated ? weeklyPct : 0}%` }}
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-            {weeklyGoals.map((g, i) => {
-              const done = g.milestones.filter((m) => m.done).length;
-              const expanded = openGoal === g.id;
-              return (
-                <div
-                  key={g.id}
-                  className={[
-                    "card-cinema p-4 transition",
-                    expanded ? "md:col-span-2" : "animate-float-y hover:-translate-y-0.5",
-                  ].join(" ")}
-                  style={expanded ? undefined : { animationDelay: `${i * 0.28}s` }}
-                >
-                  <button
-                    onClick={() => {
-                      haptic(8);
-                      setOpenGoal(expanded ? null : g.id);
-                    }}
-                    className="block w-full text-left"
-                  >
-                    <div className="mb-2 flex items-start justify-between gap-3">
-                      <p className="font-serif text-lg leading-tight">{g.title}</p>
-                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                        {g.progress}%
-                      </span>
-                    </div>
-                    <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
-                        style={{ width: `${hydrated ? g.progress : 0}%` }}
-                      />
-                    </div>
-                    <p className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                      <span>
-                        {done} / {g.milestones.length} milestone
-                      </span>
-                      <span>{expanded ? "tutup" : "ketuk untuk centang"}</span>
-                    </p>
-                  </button>
-
-                  {expanded && (
-                    <div className="animate-rise mt-4 space-y-1.5 border-t border-white/[0.08] pt-3">
-                      {g.milestones.map((m) => (
-                        <button
-                          key={m.id}
-                          onClick={() => {
-                            haptic(m.done ? 8 : [10, 40, 18]);
-                            toggleMilestone(g.id, m.id);
-                          }}
-                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-white/[0.05]"
-                        >
-                          <span
-                            className={[
-                              "grid size-5 shrink-0 place-items-center rounded-full transition",
-                              m.done
-                                ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white animate-check-pop"
-                                : "ring-1 ring-white/20 group-hover:ring-[oklch(0.62_0.11_195)]",
-                            ].join(" ")}
-                          >
-                            {m.done && <Check className="size-3" strokeWidth={3} />}
-                          </span>
-                          <span
-                            className={[
-                              "text-sm",
-                              m.done ? "text-muted-foreground line-through" : "text-foreground",
-                            ].join(" ")}
-                          >
-                            {m.title}
-                          </span>
-                        </button>
-                      ))}
-                      <QuickMilestone onAdd={(t) => addMilestone(g.id, t)} />
-                      <div className="pt-1">
-                        <Link
-                          to="/goals"
-                          className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
-                        >
-                          Buka halaman tujuan <ArrowUpRight className="size-3" />
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Vision cards */}
-      <section className="animate-rise mb-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <VisionCard title="Sosok yang sedang kubentuk" items={becoming.map((b) => b.label)} />
-        <VisionCard
-          title={`Visi ${visionYear}`}
-          items={vision.map((v) => v.label)}
-          dashed
-        />
-      </section>
-
-      {/* Habits */}
-      <section className="animate-rise">
-        <div className="mb-4 flex items-end justify-between">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Ritual harian
-          </p>
-          <Link
-            to="/habits"
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Lihat semua <ArrowUpRight className="size-3" />
-          </Link>
-        </div>
-
-        <div className="mb-4">
-          <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
-            <span>Progres hari ini</span>
-            <span className="tabular-nums text-foreground">
-              {hydrated ? `${doneToday}/${habits.length} · ${pct}%` : "—"}
-            </span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-1000"
-              style={{ width: `${hydrated ? pct : 0}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2.5">
-          {habits.map((h) => {
-            const done = hydrated && (completions[h.id] || []).includes(today);
-            return (
-              <button
-                key={h.id}
-                onClick={() => toggleHabit(h.id, today)}
-                className={[
-                  "group flex w-full items-center justify-between rounded-[20px] p-4 text-left transition-all active:scale-[0.99]",
-                  done ? "bg-surface/40 hairline" : "card-cinema hover:bg-surface/90",
-                ].join(" ")}
+          {/* Habits */}
+          <Reveal as="section" className="mb-8" delay={0.05}>
+            <div className="mb-4 flex items-end justify-between">
+              <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+                Ritual harian
+              </p>
+              <Link
+                to="/habits"
+                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
               >
-                <div className="flex min-w-0 items-center gap-3.5">
-                  <span
-                    className={[
-                      "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
-                      done
-                        ? "bg-white/[0.05] text-muted-foreground"
-                        : "bg-gradient-to-br from-white/[0.09] to-white/[0.02] text-gold",
-                    ].join(" ")}
-                  >
-                    <HabitIcon name={h.emoji} className="size-5" strokeWidth={1.75} />
-                  </span>
-                  <div className="min-w-0">
-                    <p
-                      className={[
-                        "truncate text-[15px] font-medium transition-colors",
-                        done ? "text-muted-foreground line-through" : "text-foreground",
-                      ].join(" ")}
-                    >
-                      {h.name}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {h.duration ? `${h.duration} · ` : ""}
-                      {h.category}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={[
-                    "grid size-6 shrink-0 place-items-center rounded-full transition-all",
-                    done
-                      ? "bg-gold text-white scale-100"
-                      : "ring-2 ring-white/15 group-hover:ring-gold/60",
-                  ].join(" ")}
-                >
-                  {done && <Check className="size-3.5" strokeWidth={3} />}
+                Lihat semua <ArrowUpRight className="size-3" />
+              </Link>
+            </div>
+
+            <div className="mb-4">
+              <div className="mb-2 flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground">
+                <span>Progres hari ini</span>
+                <span className="tabular-nums text-foreground">
+                  {hydrated ? `${doneToday}/${habits.length} · ${pct}%` : "—"}
                 </span>
-              </button>
-            );
-          })}
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-1000"
+                  style={{ width: `${hydrated ? pct : 0}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2.5">
+              {habits.map((h, i) => (
+                <HabitRow
+                  key={h.id}
+                  name={h.name}
+                  emoji={h.emoji}
+                  category={h.category}
+                  duration={h.duration}
+                  index={i}
+                  done={hydrated && (completions[h.id] || []).includes(today)}
+                  onToggle={() => {
+                    const wasDone = (completions[h.id] || []).includes(today);
+                    toggleHabit(h.id, today);
+                    haptic(wasDone ? 8 : [10, 40, 18]);
+                    if (wasDone) return;
+                    // Nutup semua ritual itu momen — dirayain sekali, bukan tiap centang.
+                    if (doneToday + 1 === habits.length && habits.length > 0) {
+                      celebrate("big");
+                      chime(7);
+                    } else {
+                      chime(0);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </Reveal>
         </div>
-      </section>
+
+        <div className="min-w-0">
+          {/* Weekly goals */}
+          {weeklyGoals.length > 0 && (
+            <Reveal as="section" className="mb-8">
+              <div className="mb-4 flex items-end justify-between">
+                <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+                  <Target className="size-3" />
+                  Tujuan minggu ini
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="font-serif text-base text-foreground tabular-nums">{weeklyPct}%</span>
+                  <span>rata-rata</span>
+                </div>
+              </div>
+              <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-1000"
+                  style={{ width: `${hydrated ? weeklyPct : 0}%` }}
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2 lg:grid-cols-1">
+                {weeklyGoals.map((g, i) => {
+                  const done = g.milestones.filter((m) => m.done).length;
+                  const expanded = openGoal === g.id;
+                  return (
+                    <div
+                      key={g.id}
+                      className={[
+                        "card-cinema spotlight p-4 transition",
+                        expanded ? "md:col-span-2 lg:col-span-1" : "animate-float-y hover:-translate-y-0.5",
+                      ].join(" ")}
+                      style={expanded ? undefined : { animationDelay: `${i * 0.28}s` }}
+                    >
+                      <button
+                        onClick={() => {
+                          haptic(8);
+                          setOpenGoal(expanded ? null : g.id);
+                        }}
+                        className="block w-full text-left"
+                      >
+                        <div className="mb-2 flex items-start justify-between gap-3">
+                          <p className="font-serif text-lg leading-tight">{g.title}</p>
+                          <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                            {g.progress}%
+                          </span>
+                        </div>
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-700"
+                            style={{ width: `${hydrated ? g.progress : 0}%` }}
+                          />
+                        </div>
+                        <p className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span>
+                            {done} / {g.milestones.length} milestone
+                          </span>
+                          <span>{expanded ? "tutup" : "ketuk untuk centang"}</span>
+                        </p>
+                      </button>
+
+                      {expanded && (
+                        <div className="animate-rise mt-4 space-y-1.5 border-t border-white/[0.08] pt-3">
+                          {g.milestones.map((m) => (
+                            <button
+                              key={m.id}
+                              onClick={() => {
+                                haptic(m.done ? 8 : [10, 40, 18]);
+                                toggleMilestone(g.id, m.id);
+                              }}
+                              className="group flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-white/[0.05]"
+                            >
+                              <span
+                                className={[
+                                  "grid size-5 shrink-0 place-items-center rounded-full transition",
+                                  m.done
+                                    ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white animate-check-pop"
+                                    : "ring-1 ring-white/20 group-hover:ring-[var(--accent-1)]",
+                                ].join(" ")}
+                              >
+                                {m.done && <Check className="size-3" strokeWidth={3} />}
+                              </span>
+                              <span
+                                className={[
+                                  "text-sm",
+                                  m.done ? "text-muted-foreground line-through" : "text-foreground",
+                                ].join(" ")}
+                              >
+                                {m.title}
+                              </span>
+                            </button>
+                          ))}
+                          <QuickMilestone onAdd={(t) => addMilestone(g.id, t)} />
+                          <div className="pt-1">
+                            <Link
+                              to="/goals"
+                              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+                            >
+                              Buka halaman tujuan <ArrowUpRight className="size-3" />
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </Reveal>
+          )}
+
+          {/* Vision cards */}
+          <Reveal as="section" className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-1">
+            <VisionCard title="Sosok yang sedang kubentuk" items={becoming.map((b) => b.label)} />
+            <VisionCard title={`Visi ${visionYear}`} items={vision.map((v) => v.label)} dashed />
+          </Reveal>
+        </div>
+      </div>
     </AppShell>
+  );
+}
+
+function HabitRow({
+  name,
+  emoji,
+  category,
+  duration,
+  done,
+  index,
+  onToggle,
+}: {
+  name: string;
+  emoji: string;
+  category: string;
+  duration?: string;
+  done: boolean;
+  index: number;
+  onToggle: () => void;
+}) {
+  const [ripple, setRipple] = useState(0);
+
+  return (
+    <Reveal delay={Math.min(index, 6) * 0.05}>
+      <button
+        onClick={() => {
+          if (!done) setRipple((n) => n + 1);
+          onToggle();
+        }}
+        className={[
+          "group relative flex w-full items-center justify-between overflow-hidden rounded-[20px] p-4 text-left transition-all active:scale-[0.99]",
+          done ? "bg-surface/40 hairline" : "card-cinema spotlight hover:bg-surface/90",
+        ].join(" ")}
+      >
+        {/* Riak sekali jalan tiap dicentang — konfirmasi yang kerasa, bukan cuma kelihatan. */}
+        {ripple > 0 && <span key={ripple} className="ripple" />}
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span
+            className={[
+              "grid size-10 shrink-0 place-items-center rounded-xl transition-colors",
+              done
+                ? "bg-white/[0.05] text-muted-foreground"
+                : "bg-gradient-to-br from-white/[0.09] to-white/[0.02] text-gold",
+            ].join(" ")}
+          >
+            <HabitIcon name={emoji} className="size-5" strokeWidth={1.75} />
+          </span>
+          <div className="min-w-0">
+            <p
+              className={[
+                "truncate text-[15px] font-medium transition-colors",
+                done ? "text-muted-foreground line-through" : "text-foreground",
+              ].join(" ")}
+            >
+              {name}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {duration ? `${duration} · ` : ""}
+              {category}
+            </p>
+          </div>
+        </div>
+        <span
+          className={[
+            "grid size-6 shrink-0 place-items-center rounded-full transition-all",
+            done
+              ? "bg-gold text-white scale-100 animate-check-pop"
+              : "ring-2 ring-white/15 group-hover:ring-gold/60",
+          ].join(" ")}
+        >
+          {done && <Check className="size-3.5" strokeWidth={3} />}
+        </span>
+      </button>
+    </Reveal>
   );
 }
 
@@ -380,6 +468,7 @@ function VisionCard({
     <div
       className={[
         "rounded-[28px] p-6 transition hover:translate-y-[-2px]",
+        "spotlight",
         dashed
           ? "border border-dashed border-gold/30 bg-gradient-to-br from-[oklch(0.6_0.1_190_/_0.14)] to-transparent"
           : "card-cinema",
@@ -430,7 +519,7 @@ function FocusSection({
   const [label, setLabel] = useState("");
 
   return (
-    <section className="animate-rise mb-10 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:gap-10">
+    <section className="animate-rise mb-8 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:gap-10">
       <div>
         <div className="mb-4 flex items-center justify-between gap-2">
           <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
@@ -564,7 +653,7 @@ function ScheduleSection({
   const [time, setTime] = useState("08:00");
   const [label, setLabel] = useState("");
   return (
-    <section className="animate-rise mb-10">
+    <section className="animate-rise mb-8">
       <div className="mb-4 flex items-end justify-between">
         <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           <Clock className="size-3" />
@@ -623,7 +712,7 @@ function ScheduleSection({
                   className={[
                     "absolute -left-[13px] grid size-3 place-items-center rounded-full",
                     isNext
-                      ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_195/0.55)]"
+                      ? "bg-gold shadow-[0_0_12px_2px_oklch(0.62_0.11_var(--acc-h1)/0.55)]"
                       : passed
                         ? "bg-white/20"
                         : "bg-white/40",

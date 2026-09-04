@@ -44,7 +44,7 @@ function HabitsPage() {
   const today = useToday();
 
   return (
-    <AppShell>
+    <AppShell wide>
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
@@ -54,13 +54,13 @@ function HabitsPage() {
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] transition-transform active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)] transition-transform active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> Tambah
         </button>
       </header>
 
-      <div className="animate-rise space-y-2.5">
+      <div className="animate-rise grid grid-cols-1 gap-2.5 lg:grid-cols-2 lg:items-start">
         {habits.map((h) => {
           const dates = completions[h.id] || [];
           const done = hydrated && dates.includes(today);
@@ -224,7 +224,7 @@ function HabitsPage() {
                   setForm({ name: "", emoji: "meditation", category: "Pikiran", priority: "med", duration: "" });
                   setOpen(false);
                 }}
-                className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white"
+                className="rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white"
               >
                 Add Ritual
               </button>

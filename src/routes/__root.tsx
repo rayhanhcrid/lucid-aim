@@ -17,6 +17,9 @@ import { useWeeklyGoalReset } from "../lib/weekly-reset";
 import { registerServiceWorker } from "../lib/pwa";
 import { syncPushSubscription } from "../lib/push";
 import { Toaster } from "../components/ui/sonner";
+import { Ambience } from "../components/Ambience";
+import { useSpotlight } from "../lib/ambience";
+import { useAmbientRestore } from "../lib/soundscape";
 
 function NotFoundComponent() {
   return (
@@ -121,6 +124,11 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {/* Kalau JS mati, konten yang nunggu reveal jangan ikut ilang. */}
+        <noscript>
+          {/* eslint-disable-next-line react/no-danger */}
+          <style>{".reveal{opacity:1!important;transform:none!important;filter:none!important}"}</style>
+        </noscript>
       </head>
       <body>
         {children}
@@ -133,6 +141,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   useCloudSync();
+  useSpotlight();
+  useAmbientRestore();
   useReminderScheduler();
   useWeeklyGoalReset();
   useEffect(() => {
@@ -141,14 +151,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Ambient dark-teal motion background — mounted once here (not per-route) so the
-          drift animation never restarts on navigation. */}
-      <div className="aurora" aria-hidden="true">
-        <div className="aurora-blob aurora-a" />
-        <div className="aurora-blob aurora-b" />
-        <div className="aurora-blob aurora-c" />
-        <div className="aurora-blob aurora-d" />
-      </div>
+      {/* Latar hidup: aurora + debu cahaya + vignette. Dipasang sekali di sini
+          (bukan per-route) supaya driftnya nggak pernah restart pas navigasi. */}
+      <Ambience />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster />

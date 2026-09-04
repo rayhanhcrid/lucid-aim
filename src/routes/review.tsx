@@ -152,7 +152,7 @@ function ReviewPage() {
                 <div key={d.key} className="flex flex-1 flex-col items-center gap-2">
                   <div className="flex h-24 w-full items-end justify-center rounded-xl bg-white/[0.04] p-1">
                     <div
-                      className="w-full rounded-lg bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)] transition-[height] duration-700 ease-out"
+                      className="w-full rounded-lg bg-gradient-to-t from-[var(--accent-2)] to-[var(--accent-1)] transition-[height] duration-700 ease-out"
                       style={{
                         height: `${Math.max(4, d.pct)}%`,
                         transitionDelay: `${i * 60}ms`,
@@ -278,7 +278,7 @@ function ReviewPage() {
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-[width] duration-700 ease-out"
+                        className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-[width] duration-700 ease-out"
                         style={{ width: `${g.progress}%` }}
                       />
                     </div>
@@ -305,7 +305,7 @@ function ReviewPage() {
               <button
                 onClick={generateAdvice}
                 disabled={loading}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] transition-transform active:scale-95 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)] transition-transform active:scale-95 disabled:opacity-60"
               >
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -347,7 +347,7 @@ function MoodSpark({ days }: { days: { key: string; label: string; mood: number 
         <path
           d={path}
           fill="none"
-          stroke="oklch(0.62 0.11 195)"
+          stroke="oklch(0.62 0.11 var(--acc-h1))"
           strokeWidth="2"
           vectorEffect="non-scaling-stroke"
           strokeLinecap="round"
@@ -356,7 +356,7 @@ function MoodSpark({ days }: { days: { key: string; label: string; mood: number 
         {points
           .filter((p) => p.y !== null)
           .map((p) => (
-            <circle key={p.label + p.x} cx={p.x} cy={p.y as number} r="1.6" fill="oklch(0.62 0.11 195)" />
+            <circle key={p.label + p.x} cx={p.x} cy={p.y as number} r="1.6" fill="oklch(0.62 0.11 var(--acc-h1))" />
           ))}
       </svg>
       <div className="mt-1 flex justify-between text-[10px] uppercase tracking-widest text-muted-foreground">

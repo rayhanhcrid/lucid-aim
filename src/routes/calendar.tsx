@@ -154,7 +154,7 @@ function CalendarPage() {
                 className={[
                   "relative aspect-square rounded-xl p-1.5 text-left transition",
                   selected === c.key
-                    ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)]"
+                    ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)]"
                     : "hover:bg-white/[0.06]",
                 ].join(" ")}
               >
@@ -179,7 +179,7 @@ function CalendarPage() {
                     <div
                       className={[
                         "h-full rounded-full",
-                        selected === c.key ? "bg-white/80" : "bg-[oklch(0.62_0.11_195)]",
+                        selected === c.key ? "bg-white/80" : "bg-[var(--accent-1)]",
                       ].join(" ")}
                       style={{ width: `${c.focusRatio * 100}%` }}
                     />
@@ -218,7 +218,7 @@ function CalendarPage() {
               <span className="flex h-16 w-full items-end justify-center">
                 <span className="relative h-full w-2 overflow-hidden rounded-full bg-white/[0.08]">
                   <span
-                    className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-[oklch(0.48_0.12_205)] to-[oklch(0.62_0.11_195)] transition-all duration-700"
+                    className="absolute inset-x-0 bottom-0 rounded-full bg-gradient-to-t from-[var(--accent-2)] to-[var(--accent-1)] transition-all duration-700"
                     style={{ height: `${hydrated ? (t.pct ?? 0) : 0}%` }}
                   />
                 </span>
@@ -256,7 +256,7 @@ function CalendarPage() {
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-700"
               style={{ width: `${hydrated ? selectedPct : 0}%` }}
             />
           </div>
@@ -275,7 +275,7 @@ function CalendarPage() {
               </div>
               <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-700"
                   style={{ width: `${hydrated ? selectedFocusPct : 0}%` }}
                 />
               </div>
@@ -294,7 +294,7 @@ function CalendarPage() {
                       className={[
                         "grid size-5 shrink-0 place-items-center rounded-full transition",
                         f.done
-                          ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white"
+                          ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white"
                           : "ring-1 ring-white/20",
                       ].join(" ")}
                     >

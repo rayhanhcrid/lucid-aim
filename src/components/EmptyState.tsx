@@ -13,7 +13,7 @@ export function EmptyState({
 }) {
   return (
     <div className="card-cinema animate-rise flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <span className="relative grid size-16 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195/0.18)] to-transparent text-gold">
+      <span className="relative grid size-16 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_var(--acc-h1)/0.18)] to-transparent text-gold">
         <span className="absolute inset-0 rounded-full bg-gold/10 animate-breathe" />
         <Icon className="relative size-7" strokeWidth={1.5} />
       </span>

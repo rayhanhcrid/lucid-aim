@@ -52,7 +52,7 @@ function GoalsPage() {
   const filtered = filter === "all" ? goals : goals.filter((g) => g.horizon === filter);
 
   return (
-    <AppShell>
+    <AppShell wide>
       <header className="animate-rise mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
@@ -62,7 +62,7 @@ function GoalsPage() {
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)] active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> Tujuan Baru
         </button>
@@ -92,7 +92,7 @@ function GoalsPage() {
         </p>
       )}
 
-      <div className="animate-rise space-y-4">
+      <div className="animate-rise grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
         {(hydrated ? filtered : []).map((g) => (
           <div key={g.id} className="card-cinema p-5">
             <div className="flex items-start justify-between gap-3">
@@ -121,7 +121,7 @@ function GoalsPage() {
               </div>
               <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.08]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                  className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-700"
                   style={{ width: `${g.progress}%` }}
                 />
               </div>
@@ -257,7 +257,7 @@ function GoalsPage() {
                   setForm({ title: "", description: "", horizon: "quarterly", deadline: "", milestones: "" });
                   setOpen(false);
                 }}
-                className="rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white"
+                className="rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white"
               >
                 Simpan Tujuan
               </button>

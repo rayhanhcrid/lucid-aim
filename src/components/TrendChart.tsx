@@ -52,8 +52,8 @@ export function TrendChart({
         >
           <defs>
             <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="oklch(0.62 0.11 195)" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="oklch(0.62 0.11 195)" stopOpacity="0" />
+              <stop offset="0%" stopColor="oklch(0.62 0.11 var(--acc-h1))" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="oklch(0.62 0.11 var(--acc-h1))" stopOpacity="0" />
             </linearGradient>
           </defs>
 
@@ -76,7 +76,7 @@ export function TrendChart({
           <path
             d={line}
             fill="none"
-            stroke={negative ? "oklch(0.65 0.19 25)" : "oklch(0.72 0.13 195)"}
+            stroke={negative ? "oklch(0.65 0.19 25)" : "oklch(0.72 0.13 var(--acc-h1))"}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -86,7 +86,7 @@ export function TrendChart({
             cx={x(points.length - 1)}
             cy={y(last.value)}
             r="3"
-            fill={negative ? "oklch(0.65 0.19 25)" : "oklch(0.72 0.13 195)"}
+            fill={negative ? "oklch(0.65 0.19 25)" : "oklch(0.72 0.13 var(--acc-h1))"}
             vectorEffect="non-scaling-stroke"
           />
         </svg>

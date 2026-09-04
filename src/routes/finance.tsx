@@ -75,7 +75,7 @@ function FinancePage() {
             className={[
               "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs uppercase tracking-widest transition",
               tab === t
-                ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white"
+                ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white"
                 : "text-muted-foreground hover:text-foreground",
             ].join(" ")}
           >
@@ -162,7 +162,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
         </div>
         <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/[0.08]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-700"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -177,7 +177,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
             setForm({ name: "", target: "", note: "" });
             setOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)] active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> Kantong Baru
         </button>
@@ -235,7 +235,7 @@ function Savings({ hydrated }: { hydrated: boolean }) {
 
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] transition-all duration-700"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] transition-all duration-700"
                     style={{ width: `${pp}%` }}
                   />
                 </div>
@@ -446,7 +446,7 @@ function MonthlyLog({ hydrated }: { hydrated: boolean }) {
             });
             setOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)] active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> Catat bulan ini
         </button>
@@ -639,19 +639,6 @@ function Trading({ hydrated }: { hydrated: boolean }) {
   const avgWin = wins.length ? wins.reduce((a, p) => a + p, 0) / wins.length : 0;
   const avgLoss = losses.length ? Math.abs(losses.reduce((a, p) => a + p, 0) / losses.length) : 0;
 
-  // Kurva akumulasi cuan, diurutkan dari trade terlama.
-  const equity = useMemo(() => {
-    const closed = trades
-      .filter((t) => tradePnl(t) !== null)
-      .sort((a, b) => a.date.localeCompare(b.date));
-    let running = 0;
-    const series = closed.map((t) => {
-      running += tradePnl(t)!;
-      return { label: t.date.slice(5), value: running };
-    });
-    return series.length >= 2 ? [{ label: "mulai", value: 0 }, ...series] : [];
-  }, [trades]);
-
   const sorted = useMemo(
     () => [...trades].sort((a, b) => b.date.localeCompare(a.date)),
     [trades],
@@ -675,14 +662,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
         <Stat label="Rata-rata rugi" value={hydrated ? rupiah(avgLoss) : "—"} tone="down" />
       </section>
 
-      {hydrated && equity.length >= 2 && (
-        <section className="card-cinema animate-rise mb-6 p-5">
-          <p className="mb-4 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-            Akumulasi cuan
-          </p>
-          <TrendChart points={equity} format={(n) => (n < 0 ? "−" : "+") + rupiah(Math.abs(n))} />
-        </section>
-      )}
+      <RealizedGrowth trades={hydrated ? trades : []} />
 
       <div className="animate-rise mb-4 flex items-center justify-between">
         <h2 className="font-serif text-2xl">Catatan posisi</h2>
@@ -692,7 +672,7 @@ function Trading({ hydrated }: { hydrated: boolean }) {
             setForm({ ...emptyTrade, date: todayKey() });
             setOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)] active:scale-95"
+          className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2 text-sm font-medium text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)] active:scale-95"
         >
           <Plus className="size-4" strokeWidth={2.5} /> Catat Trade
         </button>
@@ -915,7 +895,7 @@ function TradeCard({
           <span
             className={[
               "grid size-10 place-items-center rounded-2xl hairline",
-              win ? "bg-[oklch(0.62_0.11_195/0.12)]" : flat ? "bg-white/[0.06]" : "bg-red-500/10",
+              win ? "bg-[oklch(0.62_0.11_var(--acc-h1)/0.12)]" : flat ? "bg-white/[0.06]" : "bg-red-500/10",
             ].join(" ")}
           >
             {flat ? (
@@ -1004,6 +984,227 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
+const signedPct = (n: number) => (n < 0 ? "−" : "+") + Math.abs(n).toFixed(1) + "%";
+const signedRp = (n: number) => (n < 0 ? "−" : "+") + rupiah(n);
+
+/** Tanggal jadi label pendek buat sumbu grafik: "2026-03-14" → "14 Mar". */
+const shortDate = (iso: string) => {
+  const [, m, d] = iso.split("-");
+  return `${Number(d)} ${MONTH_NAMES[Number(m) - 1] ?? m}`;
+};
+
+/**
+ * Pertumbuhan realized gain — cuma dari posisi yang udah dijual.
+ *
+ * Ada dua cara baca: rupiah (butuh modal dicatat) dan persen (jalan dari harga
+ * beli-jual doang, jadi tetap kelihatan walau modalnya kosong). Yang persen
+ * digandakan berurutan, bukan dijumlah, supaya angkanya beneran "pertumbuhan".
+ */
+function RealizedGrowth({ trades }: { trades: Trade[] }) {
+  const data = useMemo(() => {
+    const closed = trades
+      .filter((t) => tradeReturn(t) !== null)
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    let running = 0;
+    let equity = 1;
+    const rp: { label: string; value: number }[] = [];
+    const pct: { label: string; value: number }[] = [];
+    const monthRp = new Map<string, number>();
+    const monthPct = new Map<string, number>();
+
+    for (const t of closed) {
+      const label = shortDate(t.date);
+      const month = t.date.slice(0, 7);
+      const ret = tradeReturn(t)!;
+      const pnl = tradePnl(t);
+
+      equity *= 1 + ret / 100;
+      pct.push({ label, value: (equity - 1) * 100 });
+      monthPct.set(month, ((monthPct.get(month) ?? 1) * (1 + ret / 100)));
+
+      if (pnl !== null) {
+        running += pnl;
+        rp.push({ label, value: running });
+        monthRp.set(month, (monthRp.get(month) ?? 0) + pnl);
+      }
+    }
+
+    // Runtutan menang/kalah yang lagi jalan sekarang.
+    let streak = 0;
+    for (let i = closed.length - 1; i >= 0; i--) {
+      const ret = tradeReturn(closed[i])!;
+      if (ret === 0) break;
+      if (streak === 0) streak = ret > 0 ? 1 : -1;
+      else if ((ret > 0 && streak > 0) || (ret < 0 && streak < 0)) streak += Math.sign(streak);
+      else break;
+    }
+
+    return {
+      rp,
+      pct,
+      streak,
+      monthRp,
+      monthPct,
+      count: closed.length,
+    };
+  }, [trades]);
+
+  const hasRupiah = data.rp.length > 0;
+  const [mode, setMode] = useState<"rp" | "pct">("rp");
+  // Kalau belum ada modal yang dicatat, rupiahnya nggak bisa dihitung — paksa ke persen.
+  const view = hasRupiah ? mode : "pct";
+
+  if (data.count === 0) return null;
+
+  const series = view === "rp" ? data.rp : data.pct;
+  if (series.length === 0) return null;
+
+  const points = [{ label: "mulai", value: 0 }, ...series];
+  const format = view === "rp" ? signedRp : signedPct;
+  const last = series[series.length - 1]!.value;
+
+  // Puncak & penurunan terdalam dari puncak itu — dihitung termasuk titik nol awal.
+  let peak = 0;
+  let maxDD = 0;
+  for (const pt of points) {
+    peak = Math.max(peak, pt.value);
+    maxDD = Math.max(maxDD, peak - pt.value);
+  }
+
+  // Bulan yang ditampilkan ikut mode: mode rupiah cuma tahu bulan yang modalnya dicatat.
+  const monthKeys = [...(view === "rp" ? data.monthRp : data.monthPct).keys()].sort().slice(-12);
+  const monthBars = monthKeys.map((m) => ({
+    month: m,
+    value: view === "rp" ? (data.monthRp.get(m) ?? 0) : ((data.monthPct.get(m) ?? 1) - 1) * 100,
+  }));
+  const barMax = Math.max(...monthBars.map((b) => Math.abs(b.value)), 1);
+
+  return (
+    <section className="card-cinema animate-rise mb-6 p-5">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Pertumbuhan realized gain
+          </p>
+          <p
+            className={[
+              "mt-1 font-serif text-3xl tabular-nums",
+              last < 0 ? "text-red-400" : "text-gold",
+            ].join(" ")}
+          >
+            {format(last)}
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            dari {series.length} posisi yang sudah dijual
+          </p>
+        </div>
+
+        {hasRupiah && (
+          <div className="flex rounded-full bg-white/[0.05] p-0.5 hairline">
+            {([
+              ["rp", "Rupiah"],
+              ["pct", "Persen"],
+            ] as const).map(([id, label]) => (
+              <button
+                key={id}
+                onClick={() => setMode(id)}
+                className={[
+                  "rounded-full px-3 py-1.5 text-xs transition",
+                  view === id
+                    ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <TrendChart points={points} format={format} height={160} />
+
+      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-white/[0.07] pt-4">
+        <MiniStat label="Puncak" value={format(peak)} tone={peak > 0 ? "up" : undefined} />
+        <MiniStat
+          label="Turun terdalam"
+          value={maxDD > 0 ? "−" + (view === "rp" ? rupiah(maxDD) : maxDD.toFixed(1) + "%") : "—"}
+          tone={maxDD > 0 ? "down" : undefined}
+        />
+        <MiniStat
+          label="Beruntun"
+          value={data.streak === 0 ? "—" : `${Math.abs(data.streak)}${data.streak > 0 ? "W" : "L"}`}
+          tone={data.streak > 0 ? "up" : data.streak < 0 ? "down" : undefined}
+        />
+      </div>
+
+      {monthBars.length >= 2 && (
+        <div className="mt-5 border-t border-white/[0.07] pt-4">
+          <p className="mb-3 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+            Hasil per bulan
+          </p>
+          {/* Batang naik-turun dari garis tengah — sekali lihat ketahuan bulan mana yang merah. */}
+          <div className="flex items-stretch gap-1.5 overflow-x-auto pb-1">
+            {monthBars.map((b) => {
+              const up = b.value >= 0;
+              const h = Math.max(3, (Math.abs(b.value) / barMax) * 34);
+              return (
+                <div key={b.month} className="flex min-w-9 flex-1 flex-col items-center gap-1">
+                  <div className="flex h-[38px] w-full items-end justify-center">
+                    {up && (
+                      <div
+                        className="w-full rounded-t-[3px] bg-gradient-to-t from-[var(--accent-2)] to-[var(--accent-1)]"
+                        style={{ height: h }}
+                        title={format(b.value)}
+                      />
+                    )}
+                  </div>
+                  <div className="h-px w-full bg-white/15" />
+                  <div className="flex h-[38px] w-full items-start justify-center">
+                    {!up && (
+                      <div
+                        className="w-full rounded-b-[3px] bg-red-400/70"
+                        style={{ height: h }}
+                        title={format(b.value)}
+                      />
+                    )}
+                  </div>
+                  <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
+                    {MONTH_NAMES[Number(b.month.slice(5)) - 1] ?? b.month}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {!hasRupiah && (
+        <p className="mt-4 text-[11px] text-muted-foreground">
+          Isi kolom modal saat mencatat posisi kalau mau lihat pertumbuhannya dalam rupiah.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function MiniStat({ label, value, tone }: { label: string; value: string; tone?: "up" | "down" }) {
+  return (
+    <div>
+      <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
+      <p
+        className={[
+          "mt-0.5 text-sm tabular-nums",
+          tone === "up" ? "text-gold" : tone === "down" ? "text-red-400" : "text-foreground",
+        ].join(" ")}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
 function Stat({
   label,
   value,
@@ -1086,7 +1287,7 @@ function DialogActions({
       </button>
       <button
         onClick={onSubmit}
-        className="flex-1 rounded-full bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] px-4 py-2.5 text-sm font-medium text-white active:scale-95"
+        className="flex-1 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2.5 text-sm font-medium text-white active:scale-95"
       >
         {submitLabel}
       </button>

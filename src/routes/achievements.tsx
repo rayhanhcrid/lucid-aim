@@ -39,7 +39,7 @@ function AchievementsPage() {
   ];
 
   return (
-    <AppShell>
+    <AppShell wide>
       <header className="animate-rise mb-8">
         <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
           Kemenangan kecil
@@ -47,7 +47,7 @@ function AchievementsPage() {
         <h1 className="font-serif text-4xl leading-tight md:text-5xl">Pencapaian</h1>
       </header>
 
-      <div className="animate-rise grid grid-cols-2 gap-3 md:grid-cols-3">
+      <div className="animate-rise grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {badges.map((b) => (
           <div
             key={b.title}
@@ -59,7 +59,7 @@ function AchievementsPage() {
             <div
               className={[
                 "mb-4 grid size-11 place-items-center rounded-full font-serif text-lg",
-                b.unlocked ? "bg-gradient-to-br from-[oklch(0.62_0.11_195)] to-[oklch(0.48_0.12_205)] text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_195/0.5)]" : "bg-white/[0.06] text-muted-foreground",
+                b.unlocked ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white shadow-[0_8px_20px_-6px_oklch(0.62_0.11_var(--acc-h1)/0.5)]" : "bg-white/[0.06] text-muted-foreground",
               ].join(" ")}
             >
               ✦
