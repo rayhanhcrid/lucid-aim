@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Plus,
   Trash2,
@@ -12,35 +12,58 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Wallet,
+  LayoutDashboard,
+  ReceiptText,
+  Landmark,
+  type LucideIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { EmptyState } from "@/components/EmptyState";
 import { TrendChart } from "@/components/TrendChart";
-import {
-  useHydrated,
-  useStore,
-  nowDay,
-  todayKey,
-  tradePnl,
-  tradeReturn,
-  type Trade,
-} from "@/lib/store";
+import { Accounts } from "@/components/finance/Accounts";
+import { FinanceDialogs } from "@/components/finance/FinanceDialogs";
+import { Overview } from "@/components/finance/Overview";
+import { Transactions } from "@/components/finance/Transactions";
+import { useFinanceActions } from "@/components/finance/context";
+import { Dialog, DialogActions, Field, Portal } from "@/components/finance/ui";
+import { useHydrated, useStore, todayKey, tradePnl, tradeReturn, type Trade } from "@/lib/store";
+import { MONTH_NAMES, monthKey, monthLabel, rupiah } from "@/lib/finance";
 import { useUIStore } from "@/lib/ui-store";
 import { celebrate } from "@/lib/celebrate";
 
+type Tab = "ringkasan" | "transaksi" | "akun" | "tabungan" | "trading";
+
+const TABS: { id: Tab; label: string; icon: LucideIcon }[] = [
+  { id: "ringkasan", label: "Ringkasan", icon: LayoutDashboard },
+  { id: "transaksi", label: "Transaksi", icon: ReceiptText },
+  { id: "akun", label: "Akun", icon: Landmark },
+  { id: "tabungan", label: "Tabungan", icon: PiggyBank },
+  { id: "trading", label: "Jurnal Trading", icon: CandlestickChart },
+];
+
+const isTab = (v: unknown): v is Tab => TABS.some((t) => t.id === v);
+
+/** Tab yang isinya arus kas — tombol "Catat" cuma muncul di sini. */
+const CASHFLOW_TABS: Tab[] = ["ringkasan", "transaksi", "akun"];
+
 export const Route = createFileRoute("/finance")({
+  // Tab & saringan akun disimpan di URL supaya bertahan saat dimuat ulang.
+  validateSearch: (search: Record<string, unknown>): { tab?: Tab; akun?: string } => ({
+    tab: isTab(search.tab) ? search.tab : undefined,
+    akun: typeof search.akun === "string" && search.akun ? search.akun : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Keuangan · Rayhan" },
       {
         name: "description",
         content:
-          "Pantau tabungan per tujuan dan catat jurnal trading harian — hasil, setup, dan emosi di balik setiap posisi.",
+          "Lacak saldo semua akun, catat pemasukan & pengeluaran, atur anggaran bulanan, pantau tabungan dan jurnal trading.",
       },
       { property: "og:title", content: "Keuangan · Rayhan" },
       {
         property: "og:description",
-        content: "Tabungan per tujuan dan jurnal trading harian dalam satu tempat yang tenang.",
+        content: "Arus kas, anggaran, tabungan, dan jurnal trading dalam satu tempat yang tenang.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -49,48 +72,104 @@ export const Route = createFileRoute("/finance")({
   component: FinancePage,
 });
 
-const rupiah = (n: number) =>
-  "Rp " + Math.round(Math.abs(n)).toLocaleString("id-ID") ;
-
 const emotions = ["tenang", "sabar", "serakah", "takut", "balas dendam"] as const;
 
 function FinancePage() {
   const hydrated = useHydrated();
-  const [tab, setTab] = useState<"tabungan" | "trading">("tabungan");
+  const { tab = "ringkasan", akun } = Route.useSearch();
+  const navigate = Route.useNavigate();
+
+  const go = useCallback(
+    (next: Tab, accountId?: string) =>
+      navigate({
+        search: { tab: next === "ringkasan" ? undefined : next, akun: accountId },
+        replace: true,
+      }),
+    [navigate],
+  );
+  const showTransactions = useCallback((id?: string) => go("transaksi", id), [go]);
+  const showAccounts = useCallback(() => go("akun"), [go]);
 
   return (
     <AppShell>
-      <header className="animate-rise mb-8">
-        <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Uang yang terarah
-        </p>
-        <h1 className="font-serif text-4xl leading-tight md:text-5xl">Keuangan</h1>
-      </header>
+      <FinanceDialogs onShowTransactions={showTransactions} onShowAccounts={showAccounts}>
+        <header className="animate-rise mb-8">
+          <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            Uang yang terarah
+          </p>
+          <h1 className="font-serif text-4xl leading-tight md:text-5xl">Keuangan</h1>
+        </header>
 
-      <div className="animate-rise mb-6 inline-flex gap-1 rounded-full bg-surface p-1 hairline">
-        {(["tabungan", "trading"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={[
-              "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs uppercase tracking-widest transition",
-              tab === t
-                ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white"
-                : "text-muted-foreground hover:text-foreground",
-            ].join(" ")}
+        {/* Lima tab tidak muat di layar HP — barisnya bisa digeser. */}
+        <div className="animate-rise -mx-5 mb-6 overflow-x-auto px-5 pb-1 [scrollbar-width:none] md:mx-0 md:px-0">
+          <div
+            role="tablist"
+            aria-label="Bagian keuangan"
+            className="inline-flex gap-1 rounded-full bg-surface p-1 hairline"
           >
-            {t === "tabungan" ? (
-              <PiggyBank className="size-3.5" />
-            ) : (
-              <CandlestickChart className="size-3.5" />
-            )}
-            {t === "tabungan" ? "Tabungan" : "Jurnal Trading"}
-          </button>
-        ))}
-      </div>
+            {TABS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={tab === id}
+                onClick={() => go(id)}
+                className={[
+                  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-xs uppercase tracking-widest transition",
+                  tab === id
+                    ? "bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white"
+                    : "text-muted-foreground hover:text-foreground",
+                ].join(" ")}
+              >
+                <Icon className="size-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      {tab === "tabungan" ? <Savings hydrated={hydrated} /> : <Trading hydrated={hydrated} />}
+        {tab === "ringkasan" && <Overview hydrated={hydrated} />}
+        {tab === "transaksi" && (
+          <Transactions
+            hydrated={hydrated}
+            accountId={akun}
+            onAccountChange={(id) => go("transaksi", id)}
+          />
+        )}
+        {tab === "akun" && <Accounts hydrated={hydrated} />}
+        {tab === "tabungan" && <Savings hydrated={hydrated} />}
+        {tab === "trading" && <Trading hydrated={hydrated} />}
+
+        {hydrated && CASHFLOW_TABS.includes(tab) && (
+          <>
+            {/* Ruang ekstra di HP supaya baris terakhir tidak tertutup tombol "Catat". */}
+            <div className="h-16 md:hidden" aria-hidden="true" />
+            <QuickAddButton />
+          </>
+        )}
+      </FinanceDialogs>
     </AppShell>
+  );
+}
+
+/**
+ * Tombol "Catat" yang selalu terjangkau: bulat & ringkas supaya tidak menutupi
+ * kolom nominal, di HP duduk di atas navigasi bawah.
+ */
+function QuickAddButton() {
+  const { addTx } = useFinanceActions();
+  const dialogOpen = useUIStore((s) => s.dialogOpen);
+  if (dialogOpen) return null;
+  return (
+    <Portal>
+      <button
+        onClick={() => addTx()}
+        aria-label="Catat transaksi"
+        title="Catat transaksi"
+        className="fixed bottom-[96px] right-5 z-40 grid size-14 place-items-center rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-white shadow-[0_14px_34px_-8px_oklch(0.62_0.11_var(--acc-h1)/0.7)] transition active:scale-95 md:bottom-8 md:right-5"
+      >
+        <Plus className="size-6" strokeWidth={2.25} />
+      </button>
+    </Portal>
   );
 }
 
@@ -104,18 +183,12 @@ function Savings({ hydrated }: { hydrated: boolean }) {
   const updatePot = useStore((s) => s.updatePot);
   const removePot = useStore((s) => s.removePot);
   const addTx = useStore((s) => s.addSavingTx);
-  const setDialogOpen = useUIStore((s) => s.setDialogOpen);
 
   const [open, setOpen] = useState(false);
   const [editingPot, setEditingPot] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", target: "", note: "" });
   const [moveFor, setMoveFor] = useState<string | null>(null);
   const [move, setMove] = useState({ amount: "", note: "", dir: "in" as "in" | "out" });
-
-  useEffect(() => {
-    setDialogOpen(open || moveFor !== null);
-    return () => setDialogOpen(false);
-  }, [open, moveFor, setDialogOpen]);
 
   const saldoPer = useMemo(() => {
     const m: Record<string, number> = {};
@@ -394,32 +467,16 @@ function Savings({ hydrated }: { hydrated: boolean }) {
 
 /* ----------------------------- Tabungan bulanan ----------------------------- */
 
-const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-
-const monthKey = (d = nowDay()) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-
-const monthLabel = (m: string) => {
-  const [y, mm] = m.split("-");
-  return `${MONTH_NAMES[Number(mm) - 1] ?? mm} ${y?.slice(2) ?? ""}`;
-};
-
 /** Catatan total tabungan di akhir tiap bulan, plus grafik pertumbuhannya. */
 function MonthlyLog({ hydrated }: { hydrated: boolean }) {
   const rows = useStore((s) => s.monthlySavings);
   const upsert = useStore((s) => s.upsertMonthlySaving);
   const remove = useStore((s) => s.removeMonthlySaving);
-  const setDialogOpen = useUIStore((s) => s.setDialogOpen);
 
   const [open, setOpen] = useState(false);
   /** Bulan asal saat mengedit — dipakai untuk membuang baris lama kalau bulannya diganti. */
   const [editingMonth, setEditingMonth] = useState<string | null>(null);
   const [form, setForm] = useState({ month: monthKey(), amount: "", note: "" });
-
-  useEffect(() => {
-    setDialogOpen(open);
-    return () => setDialogOpen(false);
-  }, [open, setDialogOpen]);
 
   const sorted = useMemo(
     () => (hydrated ? [...rows].sort((a, b) => a.month.localeCompare(b.month)) : []),
@@ -613,16 +670,10 @@ function Trading({ hydrated }: { hydrated: boolean }) {
   const addTrade = useStore((s) => s.addTrade);
   const updateTrade = useStore((s) => s.updateTrade);
   const removeTrade = useStore((s) => s.removeTrade);
-  const setDialogOpen = useUIStore((s) => s.setDialogOpen);
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...emptyTrade });
-
-  useEffect(() => {
-    setDialogOpen(open);
-    return () => setDialogOpen(false);
-  }, [open, setDialogOpen]);
 
   // Winrate dihitung dari semua posisi yang sudah dijual; nilai rupiah hanya
   // dari posisi yang modalnya ikut dicatat.
@@ -1228,69 +1279,6 @@ function Stat({
         {value}
       </p>
       {sub && <p className="text-[11px] text-muted-foreground">{sub}</p>}
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="mb-3 block">
-      <span className="mb-1.5 block text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function Dialog({
-  title,
-  onClose,
-  children,
-}: {
-  title: string;
-  onClose: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 backdrop-blur-md md:items-center md:p-6"
-      onClick={onClose}
-    >
-      <div
-        className="animate-rise max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] card-cinema p-6 md:rounded-[28px]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="mb-4 font-serif text-2xl">{title}</h3>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function DialogActions({
-  onCancel,
-  onSubmit,
-  submitLabel,
-}: {
-  onCancel: () => void;
-  onSubmit: () => void;
-  submitLabel: string;
-}) {
-  return (
-    <div className="mt-5 flex gap-2">
-      <button
-        onClick={onCancel}
-        className="flex-1 rounded-full bg-white/[0.06] px-4 py-2.5 text-sm hairline hover:bg-white/[0.1]"
-      >
-        Batal
-      </button>
-      <button
-        onClick={onSubmit}
-        className="flex-1 rounded-full bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-2.5 text-sm font-medium text-white active:scale-95"
-      >
-        {submitLabel}
-      </button>
     </div>
   );
 }

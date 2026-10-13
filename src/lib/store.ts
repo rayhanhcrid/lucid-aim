@@ -99,6 +99,62 @@ export type MonthlySaving = {
   note?: string;
 };
 
+/* ------------------------------ Arus kas (keuangan) ----------------------------- */
+
+export type FinAccountType = "bank" | "ewallet" | "cash" | "investment";
+
+/** Kantong uang / sumber dana: rekening bank, e-wallet, dompet, reksadana, … */
+export type FinAccount = {
+  id: string;
+  name: string;
+  type: FinAccountType;
+  /**
+   * Saldo saat akun mulai dicatat. Saldo berjalan tidak disimpan — selalu
+   * dihitung ulang dari ini + semua transaksi (lihat `accountBalances` di
+   * lib/finance.ts), jadi ubah/hapus transaksi otomatis membetulkan saldonya.
+   */
+  openingBalance: number;
+  createdAt: string;
+};
+
+export type FinCategoryType = "income" | "expense";
+
+export type FinCategory = {
+  id: string;
+  name: string;
+  type: FinCategoryType;
+  icon: string; // kunci di components/finance/icon-map.ts
+};
+
+export type FinTxType = "income" | "expense" | "transfer";
+
+export type FinTransaction = {
+  id: string;
+  type: FinTxType;
+  accountId: string;
+  /** Hanya untuk transfer: akun yang menerima uangnya. */
+  toAccountId?: string;
+  /** Kosong untuk transfer. Bisa menunjuk kategori yang sudah dihapus. */
+  categoryId?: string;
+  amount: number; // selalu positif; arahnya ditentukan `type`
+  description?: string;
+  date: string; // yyyy-mm-dd
+  createdAt: string;
+};
+
+/**
+ * Batas belanja satu kategori mulai `month`. Berlaku terus ke bulan-bulan
+ * berikutnya sampai ada baris lain yang lebih baru untuk kategori yang sama,
+ * jadi anggaran tidak perlu diisi ulang tiap bulan. `monthlyLimit` 0 berarti
+ * anggarannya dimatikan mulai bulan itu.
+ */
+export type FinBudget = {
+  id: string;
+  categoryId: string;
+  monthlyLimit: number;
+  month: string; // yyyy-mm
+};
+
 export type State = {
   name: string;
   becoming: Identity[];
@@ -115,6 +171,10 @@ export type State = {
   savingTx: SavingTx[];
   monthlySavings: MonthlySaving[];
   trades: Trade[];
+  finAccounts: FinAccount[];
+  finCategories: FinCategory[];
+  finTransactions: FinTransaction[];
+  finBudgets: FinBudget[];
   /** ISO batas reset mingguan terakhir yang sudah dijalankan (lihat lib/weekly-reset.ts). */
   weeklyResetAt: string;
 
@@ -158,6 +218,30 @@ export type State = {
   addTrade: (t: Omit<Trade, "id">) => void;
   updateTrade: (id: string, patch: Partial<Omit<Trade, "id">>) => void;
   removeTrade: (id: string) => void;
+
+  addFinAccount: (a: Omit<FinAccount, "id" | "createdAt">) => string;
+  updateFinAccount: (id: string, patch: Partial<Omit<FinAccount, "id" | "createdAt">>) => void;
+  /** Ikut menghapus semua transaksi yang keluar dari / masuk ke akun ini. */
+  removeFinAccount: (id: string) => void;
+  addFinCategory: (c: Omit<FinCategory, "id">) => string;
+  updateFinCategory: (id: string, patch: Partial<Omit<FinCategory, "id">>) => void;
+  /** Transaksinya tetap ada (jadi "tanpa kategori"); anggarannya ikut dibuang. */
+  removeFinCategory: (id: string) => void;
+  addFinTransaction: (t: Omit<FinTransaction, "id" | "createdAt">) => void;
+  updateFinTransaction: (
+    id: string,
+    patch: Partial<Omit<FinTransaction, "id" | "createdAt">>,
+  ) => void;
+  removeFinTransaction: (id: string) => void;
+  /** Satu baris per kategori per bulan — mengisi bulan yang sama akan menimpanya. */
+  setFinBudget: (categoryId: string, month: string, monthlyLimit: number) => void;
+  /** Mengembalikan baris yang baru dihapus (tombol "Urungkan"); id yang sudah ada dilewati. */
+  restoreFinance: (items: {
+    accounts?: FinAccount[];
+    categories?: FinCategory[];
+    transactions?: FinTransaction[];
+    budgets?: FinBudget[];
+  }) => void;
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -198,8 +282,37 @@ export const SYNCED_KEYS = [
   "savingTx",
   "monthlySavings",
   "trades",
+  "finAccounts",
+  "finCategories",
+  "finTransactions",
+  "finBudgets",
   "weeklyResetAt",
 ] as const;
+
+/**
+ * Kategori bawaan. Id-nya tetap (bukan acak) supaya perangkat mana pun yang
+ * pertama kali menyalakan fitur ini menghasilkan daftar yang sama.
+ */
+export const DEFAULT_FIN_CATEGORIES: FinCategory[] = [
+  { id: "cat-makan", name: "Makan & minum", type: "expense", icon: "utensils" },
+  { id: "cat-transport", name: "Transportasi", type: "expense", icon: "bus" },
+  { id: "cat-belanja", name: "Belanja", type: "expense", icon: "shopping-bag" },
+  { id: "cat-tagihan", name: "Tagihan", type: "expense", icon: "receipt" },
+  { id: "cat-hiburan", name: "Hiburan", type: "expense", icon: "film" },
+  { id: "cat-kesehatan", name: "Kesehatan", type: "expense", icon: "heart-pulse" },
+  { id: "cat-pendidikan", name: "Pendidikan", type: "expense", icon: "graduation-cap" },
+  { id: "cat-keluar-lain", name: "Lainnya", type: "expense", icon: "more" },
+  { id: "cat-gaji", name: "Gaji", type: "income", icon: "briefcase" },
+  { id: "cat-bonus", name: "Bonus & hadiah", type: "income", icon: "gift" },
+  { id: "cat-investasi", name: "Hasil investasi", type: "income", icon: "trending-up" },
+  { id: "cat-masuk-lain", name: "Lainnya", type: "income", icon: "more" },
+];
+
+/** Tambahkan baris yang id-nya belum ada di `list`. */
+const mergeById = <T extends { id: string }>(list: T[], extra: T[] = []) => {
+  const ids = new Set(list.map((x) => x.id));
+  return [...list, ...extra.filter((x) => !ids.has(x.id))];
+};
 
 const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
   name: "Syams",
@@ -344,6 +457,11 @@ const seed: Pick<State, (typeof SYNCED_KEYS)[number]> = {
   ],
   monthlySavings: [],
   trades: [],
+  // Akun & transaksi sengaja kosong — yang ditampilkan harus uang sungguhan.
+  finAccounts: [],
+  finCategories: DEFAULT_FIN_CATEGORIES,
+  finTransactions: [],
+  finBudgets: [],
   weeklyResetAt: new Date().toISOString(),
 };
 
@@ -533,10 +651,75 @@ export const useStore = create<State>()(
           trades: s.trades.map((t) => (t.id === id ? { ...t, ...patch } : t)),
         })),
       removeTrade: (id) => set((s) => ({ trades: s.trades.filter((t) => t.id !== id) })),
+
+      addFinAccount: (a) => {
+        const id = uid();
+        set((s) => ({
+          finAccounts: [...s.finAccounts, { ...a, id, createdAt: new Date().toISOString() }],
+        }));
+        return id;
+      },
+      updateFinAccount: (id, patch) =>
+        set((s) => ({
+          finAccounts: s.finAccounts.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+        })),
+      removeFinAccount: (id) =>
+        set((s) => ({
+          finAccounts: s.finAccounts.filter((a) => a.id !== id),
+          finTransactions: s.finTransactions.filter(
+            (t) => t.accountId !== id && t.toAccountId !== id,
+          ),
+        })),
+      addFinCategory: (c) => {
+        const id = uid();
+        set((s) => ({ finCategories: [...s.finCategories, { ...c, id }] }));
+        return id;
+      },
+      updateFinCategory: (id, patch) =>
+        set((s) => ({
+          finCategories: s.finCategories.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+        })),
+      removeFinCategory: (id) =>
+        set((s) => ({
+          finCategories: s.finCategories.filter((c) => c.id !== id),
+          finBudgets: s.finBudgets.filter((b) => b.categoryId !== id),
+        })),
+      addFinTransaction: (t) =>
+        set((s) => ({
+          finTransactions: [
+            ...s.finTransactions,
+            { ...t, id: uid(), createdAt: new Date().toISOString() },
+          ],
+        })),
+      updateFinTransaction: (id, patch) =>
+        set((s) => ({
+          finTransactions: s.finTransactions.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+        })),
+      removeFinTransaction: (id) =>
+        set((s) => ({ finTransactions: s.finTransactions.filter((t) => t.id !== id) })),
+      setFinBudget: (categoryId, month, monthlyLimit) =>
+        set((s) => {
+          const rest = s.finBudgets.filter(
+            (b) => !(b.categoryId === categoryId && b.month === month),
+          );
+          // Mematikan anggaran yang memang belum pernah ada tidak perlu dicatat.
+          const hadEarlier = rest.some((b) => b.categoryId === categoryId && b.month < month);
+          if (monthlyLimit <= 0 && !hadEarlier) return { finBudgets: rest };
+          return {
+            finBudgets: [...rest, { id: uid(), categoryId, month, monthlyLimit }],
+          };
+        }),
+      restoreFinance: (items) =>
+        set((s) => ({
+          finAccounts: mergeById(s.finAccounts, items.accounts),
+          finCategories: mergeById(s.finCategories, items.categories),
+          finTransactions: mergeById(s.finTransactions, items.transactions),
+          finBudgets: mergeById(s.finBudgets, items.budgets),
+        })),
     }),
     {
       name: "aura-life-os",
-      version: 8,
+      version: 9,
       migrate: (persisted: any, _version) => {
         if (!persisted) return persisted;
         persisted.reminders = { ...({ enabled: false, habitTime: "08:00", journalTime: "21:00", focusEnabled: true, focusEveryHours: 3, focusStart: "08:00", focusEnd: "22:00" }), ...(persisted.reminders || {}) };
@@ -557,6 +740,12 @@ export const useStore = create<State>()(
         if (!Array.isArray(persisted.savingTx)) persisted.savingTx = [];
         if (!Array.isArray(persisted.monthlySavings)) persisted.monthlySavings = [];
         if (!Array.isArray(persisted.trades)) persisted.trades = [];
+        if (!Array.isArray(persisted.finAccounts)) persisted.finAccounts = [];
+        if (!Array.isArray(persisted.finCategories)) {
+          persisted.finCategories = DEFAULT_FIN_CATEGORIES;
+        }
+        if (!Array.isArray(persisted.finTransactions)) persisted.finTransactions = [];
+        if (!Array.isArray(persisted.finBudgets)) persisted.finBudgets = [];
         // Data lama belum punya penanda ini. Isi dengan "sekarang" supaya progres
         // mingguan yang sedang berjalan tidak langsung kereset saat versi ini dibuka.
         if (typeof persisted.weeklyResetAt !== "string") {
