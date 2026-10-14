@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "createdAt": "2026-10-14T03:35:31.283Z",
+        "reason": "Existing app design system: Fraunces is --font-serif in src/styles.css and the Google Fonts link in __root.tsx predates this session; user asked new finance UI to stay consistent with the existing theme"
+      }
+    ]
+  }
+}

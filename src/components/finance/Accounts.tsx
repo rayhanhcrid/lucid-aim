@@ -15,6 +15,7 @@ import {
 import { useFinanceActions } from "./context";
 import { AccountIcon } from "./icons";
 import { Eyebrow, btnPrimary } from "./ui";
+import { WidgetSetup } from "./WidgetSetup";
 
 /** Tab Akun: total kekayaan, rincian per jenis, dan kartu tiap akun. */
 export function Accounts({ hydrated }: { hydrated: boolean }) {
@@ -133,6 +134,8 @@ export function Accounts({ hydrated }: { hydrated: boolean }) {
           />
         ))}
       </div>
+
+      <WidgetSetup />
     </div>
   );
 }
